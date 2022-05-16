@@ -1,0 +1,76 @@
+# Main configuration for REP 3
+
+[storage]
+
+  # Storage type (fs)
+  type: fs
+
+  # Path to directory with packages
+  data: /opt/rep
+
+  # Path to directory for data caching
+  cache: /var/cache/rep
+
+  # Split files to separate directories
+  split-files: false
+
+[index]
+
+  # Checksum used in repomd.xml and for packages in
+  # the metadata (md5/sha1/sha224/sha256/sha384/sha512)
+  checksum: sha256
+
+  # Make sure all xml generated is formatted
+  pretty: false
+
+  # Use the existing repodata to speed up creation of new repository
+  update: true
+
+  # Generate split media
+  split: false
+
+  # Ignore symlinks of packages
+  skip-symlinks: false
+
+  # Only import the last N changelog entries
+  changelog-limit:
+
+  # Include the file's checksum in the filename, helps with proxies (unique/simple)
+  md-filenames: simple
+
+  # Distro tag and optional cpeid
+  distro:
+
+  # Tags for the content in the repository
+  content:
+
+  # User-specified revision for repository
+  revision:
+
+  # Create delta RPMs and metadata
+  deltas: false
+
+  # The number of older versions to make deltas against
+  num-deltas:
+
+  # Number of workers to spawn to read RPMs
+  workers:
+
+  # Which compression type to use (gz/bz2/xz)
+  compression-type: bz2
+
+[log]
+
+  # Default directory permissions
+  dir-perms: 755
+
+  # Defaul log file permissions
+  file-perms: 644
+
+  # Path to main directory with logs
+  dir: /var/log/rep
+
+[temp]
+
+  # Path to directory with temporary data
+  dir: /var/tmp
