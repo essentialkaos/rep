@@ -1,4 +1,4 @@
-<p align="center"><a href="#readme"><<img src="https://gh.kaos.st/rep.svg"/></a></p>
+<p align="center"><a href="#readme"><img src="https://gh.kaos.st/rep.svg"/></a></p>
 
 <p align="center">
   <a href="https://kaos.sh/w/rep/ci"><img src="https://kaos.sh/w/rep/ci.svg" alt="GitHub Actions CI Status" /></a>
