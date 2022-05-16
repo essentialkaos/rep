@@ -1,2 +1,1 @@
-# rep
-YUM repository management utility
+<p align="center"><img src="https://gh.kaos.st/rep.svg"/></p>
