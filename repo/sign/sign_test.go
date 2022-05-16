@@ -58,9 +58,6 @@ func (s *SignSuite) TestSigning(c *C) {
 	// Private key is encrypted
 	c.Assert(Sign(srcPkg, trgPkg, privKey), NotNil)
 
-	_, err = IsSigned(srcPkg, privKey)
-	c.Assert(err, NotNil)
-
 	password, _ := secstr.NewSecureString("test1234TEST")
 	privKey, err = key.Get(password)
 
