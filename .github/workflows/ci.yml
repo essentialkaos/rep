@@ -59,7 +59,7 @@ jobs:
           cp src/createrepo_c "$HOME/.local/bin/"
 
       - name: Update PATH
-        run: echo "$HOME/.cache/bin" >> $GITHUB_PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Print createrepo_c version info
         run: createrepo_c --version
@@ -68,7 +68,8 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: createrepo_c
-          path: $HOME/.local/bin/createrepo_c
+          path: ${{env.HOME}}/.local/bin/createrepo_c
+          if-no-files-found: error
           retention-days: 3
 
   Go:
