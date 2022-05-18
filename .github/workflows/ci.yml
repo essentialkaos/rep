@@ -106,6 +106,9 @@ jobs:
             sudo useradd -g nobody -s /sbin/nologin nobody
           fi
 
+          ls -lah ${{github.workspace}}/.local/bin/createrepo_c
+          which createrepo_c
+
       - name: Print createrepo_c version info
         run: createrepo_c --version
 
