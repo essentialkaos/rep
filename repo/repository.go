@@ -150,6 +150,7 @@ type packageStackBuilder struct {
 var (
 	ErrNotInitialized = fmt.Errorf("Repository is not initialized")
 	ErrEmptyRepo      = fmt.Errorf("Repository is empty")
+	ErrNilStorage     = fmt.Errorf("Storage is nil")
 	ErrEmptyPath      = fmt.Errorf("Path to file is empty")
 )
 
@@ -164,6 +165,10 @@ var repoNameValidationRegex = regexp.MustCompile(`[0-9a-zA-Z_\-]+`)
 func NewRepository(name string, repoStorage storage.Storage) (*Repository, error) {
 	if !repoNameValidationRegex.MatchString(name) {
 		return nil, fmt.Errorf("Name %q is invalid", name)
+	}
+
+	if repoStorage == nil {
+		return nil, ErrNilStorage
 	}
 
 	repo := &Repository{Name: name}
@@ -287,12 +292,12 @@ func (r *Repository) Info(name, arch string) (*Package, time.Time, error) {
 
 	arch = strutil.Q(arch, r.DefaultArch)
 
-	if r.Release.IsEmpty(arch) && r.Testing.IsEmpty(arch) {
-		return nil, time.Time{}, ErrEmptyRepo
-	}
-
 	if !r.HasArch(arch) {
 		return nil, time.Time{}, fmt.Errorf("Unknown or unsupported architecture %q", arch)
+	}
+
+	if r.Release.IsEmpty(arch) && r.Testing.IsEmpty(arch) {
+		return nil, time.Time{}, ErrEmptyRepo
 	}
 
 	pkg, err := r.Testing.getPackageInfo(name, arch)
