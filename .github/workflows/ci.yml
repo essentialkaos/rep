@@ -90,7 +90,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: createrepo_c
-          path: ${{github.workspace}}/.local/bin/createrepo_c
+          path: ${{github.workspace}}/.local/bin
 
       - name: Configure environment
         run: |
@@ -107,12 +107,7 @@ jobs:
           fi
 
       - name: Print createrepo_c version info
-        run: |
-          ls -lah ${{github.workspace}}/.local/bin/createrepo_c
-          ls -lah ${{github.workspace}}/.local/bin
-          stat ${{github.workspace}}/.local/bin/createrepo_c
-          which createrepo_c
-          createrepo_c --version
+        run: createrepo_c --version
 
       - name: Set up Go
         uses: actions/setup-go@v3
