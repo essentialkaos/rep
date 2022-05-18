@@ -107,8 +107,10 @@ jobs:
 
       - name: Print createrepo_c version info
         run: |
-          which createrepo_c
           ls -lah ${{github.workspace}}/.local/bin/createrepo_c
+          ls -lah ${{github.workspace}}/.local/bin
+          stat ${{github.workspace}}/.local/bin/createrepo_c
+          which createrepo_c
           createrepo_c --version
 
       - name: Set up Go
