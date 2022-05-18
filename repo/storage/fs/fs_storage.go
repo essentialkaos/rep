@@ -721,7 +721,10 @@ func (d *Depot) CheckCache() error {
 	}
 
 	if mTime.Unix() > d.meta.Revision {
-		return fmt.Errorf("Meta modification date is newer than generation date")
+		return fmt.Errorf(
+			"Meta modification date is newer than generation date (%d > %d)",
+			mTime.Unix(), d.meta.Revision,
+		)
 	}
 
 	for dbType := range d.dbs {
@@ -739,7 +742,10 @@ func (d *Depot) CheckCache() error {
 		}
 
 		if dbMTime.Unix() != dbInfo.Timestamp {
-			return fmt.Errorf("Database file is newer than cached")
+			return fmt.Errorf(
+				"Database file is newer than cached (%d > %d)",
+				dbMTime.Unix(), dbInfo.Timestamp,
+			)
 		}
 	}
 
