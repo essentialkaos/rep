@@ -97,6 +97,10 @@ jobs:
           echo "${{github.workspace}}/.local/bin" >> $GITHUB_PATH
 
           chmod +x ${{github.workspace}}/.local/bin/createrepo_c
+          ls -lah ${{github.workspace}}/.local/bin/
+          stat ${{github.workspace}}/.local/bin/createrepo_c
+          chmod 755 ${{github.workspace}}/.local/bin/createrepo_c
+          stat ${{github.workspace}}/.local/bin/createrepo_c
 
           if ! getent group | grep -q nobody ; then
             sudo groupadd nobody
@@ -105,9 +109,6 @@ jobs:
           if ! getent passwd | grep -q nobody ; then
             sudo useradd -g nobody -s /sbin/nologin nobody
           fi
-
-          ls -lah ${{github.workspace}}/.local/bin/createrepo_c
-          which createrepo_c
 
       - name: Print createrepo_c version info
         run: createrepo_c --version
