@@ -107,8 +107,8 @@ jobs:
 
       - name: Print createrepo_c version info
         run: |
-          echo "$PATH"
-          echo "$GITHUB_PATH"
+          which createrepo_c
+          ls -lah ${{github.workspace}}/.local/bin/createrepo_c
           createrepo_c --version
 
       - name: Set up Go
