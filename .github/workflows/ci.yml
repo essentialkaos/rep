@@ -59,8 +59,7 @@ jobs:
 
           cmake .. -DWITH_ZCHUNK=NO \
                    -DWITH_LIBMODULEMD=NO \
-                   -DENABLE_DRPM=OFF \
-                   -DBUILD_LIBCREATEREPO_C_SHARED=OFF
+                   -DENABLE_DRPM=OFF
 
           make -j 1
 
@@ -93,7 +92,7 @@ jobs:
         id: createrepo-bin-cache
         with:
           path: ~/.cache/bin/createrepo_c
-          key: ${{runner.os}}-ek-rep-createrepoc-${{env.CR_VERSION}}
+          key: ${{runner.os}}-rep-createrepoc-${{env.CR_VERSION}}
 
       - name: Check cache restore
         if: steps.createrepo-bin-cache.outputs.cache-hit != 'true'
