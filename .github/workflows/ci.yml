@@ -23,15 +23,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Cache createrepo_c binary
-        uses: actions/cache@v3
-        id: createrepo-bin-cache
-        with:
-          path: ~/.cache/bin/createrepo_c
-          key: ${{runner.os}}-rep-createrepoc-${{env.CR_VERSION}}
-
       - name: Install build dependencies
-        if: steps.createrepo-bin-cache.outputs.cache-hit != 'true'
         run: |
           sudo apt-get update
           sudo apt install -y libcurl4-openssl-dev \
@@ -48,7 +40,6 @@ jobs:
                               cmake
 
       - name: Build createrepo_c binary
-        if: steps.createrepo-bin-cache.outputs.cache-hit != 'true'
         run: |
           git clone --depth=1 --branch="${{env.CR_VERSION}}" \
                     "https://github.com/${{env.CR_REPO}}.git" createrepo_c
@@ -63,15 +54,22 @@ jobs:
 
           make -j 1
 
-          mkdir -p ~/.cache/bin/
+          mkdir -p ~/.local/bin/
 
-          cp src/createrepo_c "$HOME/.cache/bin/"
+          cp src/createrepo_c "$HOME/.local/bin/"
 
       - name: Update PATH
         run: echo "$HOME/.cache/bin" >> $GITHUB_PATH
 
       - name: Print createrepo_c version info
         run: createrepo_c --version
+
+      - name: Upload built artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: createrepo_c
+          path: $HOME/.local/bin/createrepo_c
+          retention-days: 3
 
   Go:
     name: Go
@@ -87,22 +85,14 @@ jobs:
         go: [ '1.17.x', '1.18.x' ]
 
     steps:
-      - name: Restore createrepo_c binary from cache
-        uses: actions/cache@v3
-        id: createrepo-bin-cache
+      - name: Download pre-built artifacts
+        uses: actions/download-artifact@v3
         with:
-          path: ~/.cache/bin/createrepo_c
-          key: ${{runner.os}}-rep-createrepoc-${{env.CR_VERSION}}
-
-      - name: Check cache restore
-        if: steps.createrepo-bin-cache.outputs.cache-hit != 'true'
-        run: |
-          echo "Can't restore createrepo_c binary from cache"
-          exit 1
+          name: createrepo_c
 
       - name: Configure environment
         run: |
-          echo "$HOME/.cache/bin" >> $GITHUB_PATH
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
           if ! getent group | grep -q nobody ; then
             sudo groupadd nobody
