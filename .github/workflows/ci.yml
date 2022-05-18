@@ -95,12 +95,7 @@ jobs:
       - name: Configure environment
         run: |
           echo "${{github.workspace}}/.local/bin" >> $GITHUB_PATH
-
           chmod +x ${{github.workspace}}/.local/bin/createrepo_c
-          ls -lah ${{github.workspace}}/.local/bin/
-          stat ${{github.workspace}}/.local/bin/createrepo_c
-          chmod 755 ${{github.workspace}}/.local/bin/createrepo_c
-          stat ${{github.workspace}}/.local/bin/createrepo_c
 
           if ! getent group | grep -q nobody ; then
             sudo groupadd nobody
@@ -111,7 +106,10 @@ jobs:
           fi
 
       - name: Print createrepo_c version info
-        run: createrepo_c --version
+        run: |
+          echo "$PATH"
+          echo "$GITHUB_PATH"
+          createrepo_c --version
 
       - name: Set up Go
         uses: actions/setup-go@v3
