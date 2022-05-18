@@ -141,7 +141,7 @@ jobs:
       - name: Update modification date for test repository
         run: |
           touch -t $(date -d @1644506277 +'%Y%m%d%H%M.%S') \
-                   testdata/testrepo/release/x86_64/repodata/*
+                   ${{env.SRC_DIR}}/testdata/testrepo/release/x86_64/repodata/*
 
       - name: Build binary
         working-directory: ${{env.SRC_DIR}}
