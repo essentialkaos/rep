@@ -28,7 +28,7 @@ jobs:
         id: createrepo-bin-cache
         with:
           path: ~/.cache/bin/createrepo_c
-          key: ${{runner.os}}-ek-rep-createrepoc-${{env.CR_VERSION}}
+          key: ${{runner.os}}-rep-createrepoc-${{env.CR_VERSION}}
 
       - name: Install build dependencies
         if: steps.createrepo-bin-cache.outputs.cache-hit != 'true'
