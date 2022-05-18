@@ -54,12 +54,12 @@ jobs:
 
           make -j 1
 
-          mkdir -p ~/.local/bin/
+          mkdir -p "${{github.workspace}}/.local/bin/"
 
-          cp src/createrepo_c "$HOME/.local/bin/"
+          cp src/createrepo_c "${{github.workspace}}/.local/bin/"
 
       - name: Update PATH
-        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+        run: echo "${{github.workspace}}/.local/bin" >> $GITHUB_PATH
 
       - name: Print createrepo_c version info
         run: createrepo_c --version
@@ -68,7 +68,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: createrepo_c
-          path: ${{env.HOME}}/.local/bin/createrepo_c
+          path: ${{github.workspace}}/.local/bin/createrepo_c
           if-no-files-found: error
           retention-days: 3
 
@@ -93,7 +93,7 @@ jobs:
 
       - name: Configure environment
         run: |
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "${{github.workspace}}/.local/bin" >> $GITHUB_PATH
 
           if ! getent group | grep -q nobody ; then
             sudo groupadd nobody
