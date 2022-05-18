@@ -100,8 +100,17 @@ jobs:
           echo "Can't restore createrepo_c binary from cache"
           exit 1
 
-      - name: Update PATH
-        run: echo "$HOME/.cache/bin" >> $GITHUB_PATH
+      - name: Configure environment
+        run: |
+          echo "$HOME/.cache/bin" >> $GITHUB_PATH
+
+          if ! getent group | grep -q nobody ; then
+            sudo groupadd nobody
+          fi
+
+          if ! getent passwd | grep -q nobody ; then
+            sudo useradd -g nobody -s /sbin/nologin nobody
+          fi
 
       - name: Print createrepo_c version info
         run: createrepo_c --version
