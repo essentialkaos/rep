@@ -612,11 +612,13 @@ func (s *StorageSuite) TestDepotIsCacheValid(c *C) {
 	c.Assert(dp, NotNil)
 
 	dp.dbs["test1"] = nil
+	c.Assert(dp.CheckCache(), IsNil)
 	c.Assert(dp.IsCacheValid(), Equals, true)
 	delete(dp.dbs, "test1")
 
 	origDataDir := dp.dataDir
 	dp.dataDir = "/_unknown_"
+	c.Assert(dp.CheckCache(), NotNil)
 	c.Assert(dp.IsCacheValid(), Equals, false)
 	dp.dataDir = origDataDir
 

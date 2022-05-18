@@ -704,19 +704,24 @@ func (d *Depot) IsEmpty() bool {
 // IsCacheValid checks if database files was updated and depot contains outdated
 // metadata info and keeps connection to outdated SQL databases
 func (d *Depot) IsCacheValid() bool {
+	return d.CheckCache() == nil
+}
+
+// CheckCache checks if cache is valid and healthy
+func (d *Depot) CheckCache() error {
 	if d == nil || d.meta == nil {
-		return false
+		return fmt.Errorf("Depot is nil")
 	}
 
 	metaFile := d.GetMetaIndexPath()
 	mTime, err := fsutil.GetMTime(metaFile)
 
 	if err != nil {
-		return false
+		return fmt.Errorf("Can't check meta modification date")
 	}
 
 	if mTime.Unix() > d.meta.Revision {
-		return false
+		return fmt.Errorf("Meta modification date is newer than generation date")
 	}
 
 	for dbType := range d.dbs {
@@ -730,15 +735,15 @@ func (d *Depot) IsCacheValid() bool {
 		dbMTime, err := fsutil.GetMTime(path.Clean(dbFile))
 
 		if err != nil {
-			return false
+			return fmt.Errorf("Can't check database file modification date")
 		}
 
 		if dbMTime.Unix() != dbInfo.Timestamp {
-			return false
+			return fmt.Errorf("Database file is newer than cached")
 		}
 	}
 
-	return true
+	return nil
 }
 
 // InvalidateCache invalidates repository cache
