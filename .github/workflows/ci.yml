@@ -90,6 +90,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: createrepo_c
+          path: ${{github.workspace}}/.local/bin/createrepo_c
 
       - name: Configure environment
         run: |
