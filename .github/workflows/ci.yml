@@ -96,6 +96,8 @@ jobs:
         run: |
           echo "${{github.workspace}}/.local/bin" >> $GITHUB_PATH
 
+          chmod +x ${{github.workspace}}/.local/bin/createrepo_c
+
           if ! getent group | grep -q nobody ; then
             sudo groupadd nobody
           fi
