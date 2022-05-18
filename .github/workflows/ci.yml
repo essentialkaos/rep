@@ -50,7 +50,8 @@ jobs:
 
           cmake .. -DWITH_ZCHUNK=NO \
                    -DWITH_LIBMODULEMD=NO \
-                   -DENABLE_DRPM=OFF
+                   -DENABLE_DRPM=OFF \
+                   -DBUILD_LIBCREATEREPO_C_SHARED=OFF
 
           make -j 1
 
