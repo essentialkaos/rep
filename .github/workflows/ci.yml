@@ -57,7 +57,11 @@ jobs:
           mkdir build
           cd build
 
-          cmake .. -DWITH_ZCHUNK=NO -DWITH_LIBMODULEMD=NO -DENABLE_DRPM=OFF
+          cmake .. -DWITH_ZCHUNK=NO \
+                   -DWITH_LIBMODULEMD=NO \
+                   -DENABLE_DRPM=OFF \
+                   -DBUILD_LIBCREATEREPO_C_SHARED=OFF
+
           make -j 1
 
           mkdir -p ~/.cache/bin/
