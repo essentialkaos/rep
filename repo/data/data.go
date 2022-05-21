@@ -28,7 +28,7 @@ const (
 
 // Arch flags
 const (
-	ARCH_FLAG_UNKNOWN          = 0
+	ARCH_FLAG_UNKNOWN ArchFlag = 0
 	ARCH_FLAG_SRC     ArchFlag = 1 << iota
 	ARCH_FLAG_NOARCH
 	ARCH_FLAG_I386

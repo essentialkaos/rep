@@ -11,6 +11,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"sort"
 	"testing"
 	"time"
 
@@ -47,6 +48,103 @@ func (s *RepoSuite) TestNewRepository(c *C) {
 	r, err := NewRepository("test", makeFSStorage(c))
 	c.Assert(err, IsNil)
 	c.Assert(r, NotNil)
+}
+
+func (s *RepoSuite) TestPackage(c *C) {
+	var p *Package
+
+	c.Assert(p.FullName(), Equals, "")
+	c.Assert(p.HasArch(data.ARCH_X64), Equals, false)
+
+	p = &Package{
+		Name:      "test-package",
+		Version:   "1.0.0",
+		Release:   "0.el7",
+		ArchFlags: data.ARCH_FLAG_X64 | data.ARCH_FLAG_SRC,
+	}
+
+	c.Assert(p.FullName(), Equals, "test-package-1.0.0-0.el7")
+	c.Assert(p.HasArch(data.ARCH_X64), Equals, true)
+	c.Assert(p.HasArch(data.ARCH_I386), Equals, false)
+	c.Assert(p.HasArch("abcd"), Equals, false)
+}
+
+func (s *RepoSuite) TestPackageStack(c *C) {
+	var ps PackageStack
+
+	c.Assert(ps.HasMultiBundles(), Equals, false)
+	c.Assert(ps.GetArchsFlag(), Equals, data.ARCH_FLAG_UNKNOWN)
+	c.Assert(ps.GetArchs(), IsNil)
+	c.Assert(ps.FlattenFiles(), IsNil)
+	c.Assert(ps.IsEmpty(), Equals, true)
+
+	ps = PackageStack{
+		PackageBundle{
+			&Package{
+				Name:      "test-package",
+				Version:   "1.0.0",
+				Release:   "0.el7",
+				ArchFlags: data.ARCH_FLAG_X64 | data.ARCH_FLAG_SRC,
+				Files: []PackageFile{
+					PackageFile{data.ARCH_SRC, "test-package-1.0.0-0.el7.src.rpm"},
+					PackageFile{data.ARCH_X64, "test-package-1.0.0-0.el7.x86_64.rpm"},
+				},
+			},
+			&Package{
+				Name:      "test-package",
+				Version:   "1.0.1",
+				Release:   "0.el7",
+				ArchFlags: data.ARCH_FLAG_X64,
+				Files: []PackageFile{
+					PackageFile{data.ARCH_X64, "test-package-1.0.1-0.el7.x86_64.rpm"},
+				},
+			},
+		},
+	}
+
+	c.Assert(ps.HasMultiBundles(), Equals, true)
+	c.Assert(ps.GetArchsFlag(), Equals, data.ARCH_FLAG_X64|data.ARCH_FLAG_SRC)
+	c.Assert(ps.GetArchs(), DeepEquals, []string{"src", "x86_64"})
+	c.Assert(ps.FlattenFiles(), DeepEquals, []PackageFile{
+		PackageFile{data.ARCH_SRC, "test-package-1.0.0-0.el7.src.rpm"},
+		PackageFile{data.ARCH_X64, "test-package-1.0.0-0.el7.x86_64.rpm"},
+		PackageFile{data.ARCH_X64, "test-package-1.0.1-0.el7.x86_64.rpm"},
+	})
+
+	ps = PackageStack{
+		PackageBundle{
+			&Package{},
+		},
+	}
+
+	c.Assert(ps.HasMultiBundles(), Equals, false)
+
+	ps = PackageStack{
+		PackageBundle{&Package{Name: "b", Version: "1.0.0", Release: "0.el7"}},
+		PackageBundle{&Package{Name: "b", Version: "1.0.1", Release: "0.el7"}},
+		PackageBundle{&Package{Name: "b", Version: "1.0.1", Release: "1.el7"}},
+		PackageBundle{&Package{Name: "a", Version: "1.0.0", Release: "0.el7"}},
+	}
+
+	sort.Sort(ps)
+
+	c.Assert(ps[0][0].FullName(), Equals, "a-1.0.0-0.el7")
+	c.Assert(ps[1][0].FullName(), Equals, "b-1.0.0-0.el7")
+	c.Assert(ps[2][0].FullName(), Equals, "b-1.0.1-0.el7")
+	c.Assert(ps[3][0].FullName(), Equals, "b-1.0.1-1.el7")
+}
+
+func (s *RepoSuite) TestPayloadData(c *C) {
+	pd := PayloadData{
+		PayloadObject{false, "/d/test1"},
+		PayloadObject{true, "/d/test2"},
+		PayloadObject{true, "/c/test1"},
+		PayloadObject{false, "/c/test2"},
+		PayloadObject{false, "/b/test"},
+		PayloadObject{false, "/a/test"},
+	}
+
+	sort.Sort(pd)
 }
 
 func (s *RepoSuite) TestRepositoryInitialize(c *C) {
@@ -200,6 +298,15 @@ func (s *RepoSuite) TestRepositoryInfo(c *C) {
 
 	r.storage = &FailStorage{}
 	_, _, err = r.Info("test-package", data.ARCH_X64)
+	c.Assert(err, NotNil)
+
+	_, err = r.Testing.collectPackageDepInfo("", "", "")
+	c.Assert(err, NotNil)
+	_, err = r.Testing.collectPackageFilesInfo("", "")
+	c.Assert(err, NotNil)
+	_, err = r.Testing.collectPackageChangelogInfo("", "")
+	c.Assert(err, NotNil)
+	_, _, err = r.Testing.collectPackageBasicInfo("", "")
 	c.Assert(err, NotNil)
 }
 
@@ -455,6 +562,36 @@ func (s *RepoSuite) TestSubRepositoryGetFullPackagePath(c *C) {
 
 	pkg := PackageFile{Arch: "x86_64", Path: "test-package-1.0.0-0.el7.x86_64.rpm"}
 	c.Assert(r.Testing.GetFullPackagePath(pkg), Matches, `.*/data/testing/x86_64/test-package-1.0.0-0.el7.x86_64.rpm`)
+}
+
+func (s *RepoSuite) TestSubRepositoryExecQuery(c *C) {
+	r, err := NewRepository("test", makeFSStorage(c))
+	c.Assert(err, IsNil)
+	c.Assert(r, NotNil)
+
+	err = r.Initialize([]string{data.ARCH_X64})
+	c.Assert(err, IsNil)
+
+	_, err = r.Testing.execQuery("", "abcd", "")
+	c.Assert(err, NotNil)
+	c.Assert(err, ErrorMatches, `Unknown or unsupported arch "abcd"`)
+}
+
+func (s *RepoSuite) TestSubRepositoryGuessArch(c *C) {
+	r, err := NewRepository("test", makeFSStorage(c))
+	c.Assert(err, IsNil)
+	c.Assert(r, NotNil)
+
+	err = r.Initialize([]string{data.ARCH_X64})
+	c.Assert(err, IsNil)
+
+	c.Assert(r.Testing.guessArch(data.ARCH_X64), Equals, data.ARCH_X64)
+	c.Assert(r.Testing.guessArch(data.ARCH_NOARCH), Equals, data.ARCH_X64)
+}
+
+func (s *RepoSuite) TestAux(c *C) {
+	c.Assert(sanitizeInput(""), Equals, "")
+	c.Assert(sanitizeInput("?'$"), Equals, "_ ")
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

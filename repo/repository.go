@@ -196,11 +196,19 @@ func NewSubRepository(name string) *SubRepository {
 
 // FullName returns full package name
 func (p *Package) FullName() string {
+	if p == nil {
+		return ""
+	}
+
 	return p.Name + "-" + p.Version + "-" + p.Release
 }
 
 // HasArch returns true if package have file for given arch
 func (p *Package) HasArch(arch string) bool {
+	if p == nil {
+		return false
+	}
+
 	archFlag := data.SupportedArchs[arch].Flag
 
 	if archFlag == 0 {
@@ -214,6 +222,10 @@ func (p *Package) HasArch(arch string) bool {
 
 // HasMultiBundles returns true if stack contains bundle with more than 1 package
 func (s PackageStack) HasMultiBundles() bool {
+	if s.IsEmpty() {
+		return false
+	}
+
 	for _, bundle := range s {
 		if len(bundle) > 1 {
 			return true
@@ -225,6 +237,10 @@ func (s PackageStack) HasMultiBundles() bool {
 
 // GetArchsFlag returns flag for all packages in all bundles in stack
 func (s PackageStack) GetArchsFlag() data.ArchFlag {
+	if s.IsEmpty() {
+		return data.ARCH_FLAG_UNKNOWN
+	}
+
 	var flag data.ArchFlag
 
 	for _, bundle := range s {
@@ -238,6 +254,10 @@ func (s PackageStack) GetArchsFlag() data.ArchFlag {
 
 // GetArchs returns slice with arch names presented in stack
 func (s PackageStack) GetArchs() []string {
+	if s.IsEmpty() {
+		return nil
+	}
+
 	var result []string
 
 	flag := s.GetArchsFlag()
@@ -253,6 +273,10 @@ func (s PackageStack) GetArchs() []string {
 
 // FlattenFiles returns slice with all packages files in stack
 func (s PackageStack) FlattenFiles() []PackageFile {
+	if s.IsEmpty() {
+		return nil
+	}
+
 	var result []PackageFile
 
 	for _, bundle := range s {
@@ -1055,13 +1079,10 @@ func (r *SubRepository) guessArch(arch string) string {
 		return arch
 	}
 
-	for _, a := range data.ArchList {
-		if a == data.ARCH_SRC || a == data.ARCH_NOARCH {
-			continue
-		}
-
+	for _, a := range data.BinArchList {
 		if r.HasArch(a) {
-			return a
+			arch = a
+			break
 		}
 	}
 
