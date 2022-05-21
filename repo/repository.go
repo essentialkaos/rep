@@ -148,10 +148,11 @@ type packageStackBuilder struct {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 var (
-	ErrNotInitialized = fmt.Errorf("Repository is not initialized")
-	ErrEmptyRepo      = fmt.Errorf("Repository is empty")
-	ErrNilStorage     = fmt.Errorf("Storage is nil")
 	ErrEmptyPath      = fmt.Errorf("Path to file is empty")
+	ErrEmptyRepo      = fmt.Errorf("Repository is empty")
+	ErrNilPackage     = fmt.Errorf("Package is nil")
+	ErrNilStorage     = fmt.Errorf("Storage is nil")
+	ErrNotInitialized = fmt.Errorf("Repository is not initialized")
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -346,7 +347,7 @@ func (r *Repository) IsPackageReleased(pkg *Package) (bool, time.Time, error) {
 	var releaseDate time.Time
 
 	if pkg == nil {
-		return false, releaseDate, fmt.Errorf("Package is nil")
+		return false, releaseDate, ErrNilPackage
 	}
 
 	for _, arch := range data.ArchList {

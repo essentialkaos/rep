@@ -8,8 +8,11 @@ package repo
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"database/sql"
+	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/essentialkaos/rep/repo/data"
 	"github.com/essentialkaos/rep/repo/index"
@@ -81,11 +84,70 @@ func (s *RepoSuite) TestRepositoryCopyPackage(c *C) {
 	c.Assert(err, NotNil)
 	c.Assert(err, ErrorMatches, `Target sub-repository is nil`)
 
+	err = r.CopyPackage(r.Testing, r.Release, "")
+	c.Assert(err, NotNil)
+	c.Assert(err, Equals, ErrEmptyPath)
+
 	err = r.Testing.AddPackage("../testdata/test-package-1.0.0-0.el7.x86_64.rpm")
 	c.Assert(err, IsNil)
 
 	err = r.CopyPackage(r.Testing, r.Release, "test-package-1.0.0-0.el7.x86_64.rpm")
 	c.Assert(err, IsNil)
+}
+
+func (s *RepoSuite) TestRepositoryIsPackageReleased(c *C) {
+	r, err := NewRepository("test", makeFSStorage(c))
+	c.Assert(err, IsNil)
+	c.Assert(r, NotNil)
+
+	_, _, err = r.IsPackageReleased(nil)
+	c.Assert(err, NotNil)
+	c.Assert(err, DeepEquals, ErrNotInitialized)
+
+	err = r.Initialize([]string{data.ARCH_X64})
+	c.Assert(err, IsNil)
+
+	err = r.CopyPackage(nil, r.Release, "test-package-1.0.0-0.el7.x86_64.rpm")
+	c.Assert(err, NotNil)
+	c.Assert(err, ErrorMatches, `Source sub-repository is nil`)
+
+	err = r.CopyPackage(r.Testing, nil, "test-package-1.0.0-0.el7.x86_64.rpm")
+	c.Assert(err, NotNil)
+	c.Assert(err, ErrorMatches, `Target sub-repository is nil`)
+
+	err = r.Testing.AddPackage("../testdata/test-package-1.0.0-0.el7.x86_64.rpm")
+	c.Assert(err, IsNil)
+
+	err = r.CopyPackage(r.Testing, r.Release, "test-package-1.0.0-0.el7.x86_64.rpm")
+	c.Assert(err, IsNil)
+
+	err = r.Testing.Reindex(false)
+	c.Assert(err, IsNil)
+	err = r.Release.Reindex(false)
+	c.Assert(err, IsNil)
+
+	_, _, err = r.IsPackageReleased(nil)
+	c.Assert(err, NotNil)
+	c.Assert(err, Equals, ErrNilPackage)
+
+	p := &Package{}
+	ok, _, err := r.IsPackageReleased(p)
+	c.Assert(err, IsNil)
+	c.Assert(ok, Equals, false)
+
+	p = &Package{ArchFlags: data.ARCH_FLAG_X64}
+	ok, _, err = r.IsPackageReleased(p)
+	c.Assert(err, IsNil)
+	c.Assert(ok, Equals, false)
+
+	p = &Package{ArchFlags: data.ARCH_FLAG_X64}
+	ok, _, err = r.IsPackageReleased(p)
+	c.Assert(err, IsNil)
+	c.Assert(ok, Equals, false)
+
+	r.storage = &FailStorage{}
+	_, _, err = r.IsPackageReleased(p)
+	c.Assert(err, NotNil)
 }
 
 func (s *RepoSuite) TestRepositoryInfo(c *C) {
@@ -135,6 +197,10 @@ func (s *RepoSuite) TestRepositoryInfo(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(pkg, NotNil)
 	c.Assert(mdt.IsZero(), Equals, false)
+
+	r.storage = &FailStorage{}
+	_, _, err = r.Info("test-package", data.ARCH_X64)
+	c.Assert(err, NotNil)
 }
 
 func (s *RepoSuite) TestRepositorySigning(c *C) {
@@ -277,6 +343,10 @@ func (s *RepoSuite) TestSubRepositoryStats(c *C) {
 
 	c.Assert(stats.TotalPackages, Equals, 1)
 	c.Assert(stats.TotalSize, Equals, int64(2288))
+
+	r.storage = &FailStorage{}
+	_, err = r.Testing.Stats()
+	c.Assert(err, NotNil)
 }
 
 func (s *RepoSuite) TestSubRepositoryList(c *C) {
@@ -308,6 +378,10 @@ func (s *RepoSuite) TestSubRepositoryList(c *C) {
 	stk, err = r.Testing.List("git", false)
 	c.Assert(err, IsNil)
 	c.Assert(stk, HasLen, 1)
+
+	r.storage = &FailStorage{}
+	_, err = r.Testing.List("git", false)
+	c.Assert(err, NotNil)
 }
 
 func (s *RepoSuite) TestSubRepositoryFind(c *C) {
@@ -342,6 +416,10 @@ func (s *RepoSuite) TestSubRepositoryFind(c *C) {
 	ps, err = r.Testing.Find(search.Query{search.TermName("unknown")})
 	c.Assert(err, IsNil)
 	c.Assert(ps, HasLen, 0)
+
+	r.storage = &FailStorage{}
+	_, err = r.Testing.Find(search.Query{search.TermName("git-all")})
+	c.Assert(err, NotNil)
 }
 
 func (s *RepoSuite) TestSubRepositoryReindex(c *C) {
@@ -361,6 +439,10 @@ func (s *RepoSuite) TestSubRepositoryReindex(c *C) {
 	c.Assert(err, IsNil)
 	err = r.Testing.Reindex(false)
 	c.Assert(err, IsNil)
+
+	r.storage = &FailStorage{}
+	err = r.Testing.Reindex(false)
+	c.Assert(err, NotNil)
 }
 
 func (s *RepoSuite) TestSubRepositoryGetFullPackagePath(c *C) {
@@ -373,6 +455,74 @@ func (s *RepoSuite) TestSubRepositoryGetFullPackagePath(c *C) {
 
 	pkg := PackageFile{Arch: "x86_64", Path: "test-package-1.0.0-0.el7.x86_64.rpm"}
 	c.Assert(r.Testing.GetFullPackagePath(pkg), Matches, `.*/data/testing/x86_64/test-package-1.0.0-0.el7.x86_64.rpm`)
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+type FailStorage struct{}
+
+func (s *FailStorage) Initialize(repoList, archList []string) error {
+	return fmt.Errorf("ERROR")
+}
+
+func (s *FailStorage) AddPackage(repo, rpmFilePath string) error {
+	return fmt.Errorf("ERROR")
+}
+
+func (s *FailStorage) RemovePackage(repo, rpmFileRelPath string) error {
+	return fmt.Errorf("ERROR")
+}
+
+func (s *FailStorage) CopyPackage(fromRepo, toRepo, rpmFileRelPath string) error {
+	return fmt.Errorf("ERROR")
+}
+
+func (s *FailStorage) IsInitialized() bool {
+	return true
+}
+
+func (s *FailStorage) IsEmpty(repo, arch string) bool {
+	return false
+}
+
+func (s *FailStorage) HasRepo(repo string) bool {
+	return true
+}
+
+func (s *FailStorage) HasArch(repo, arch string) bool {
+	return true
+}
+
+func (s *FailStorage) HasPackage(repo, rpmFileName string) bool {
+	return false
+}
+
+func (s *FailStorage) GetPackagePath(repo, arch, pkg string) string {
+	return ""
+}
+
+func (s *FailStorage) Reindex(repo, arch string, full bool) error {
+	return fmt.Errorf("ERROR")
+}
+
+func (s *FailStorage) GetDB(repo, arch, dbType string) (*sql.DB, error) {
+	return nil, fmt.Errorf("ERROR")
+}
+
+func (s *FailStorage) GetModTime(repo, arch string) time.Time {
+	return time.Time{}
+}
+
+func (s *FailStorage) InvalidateCache() error {
+	return fmt.Errorf("ERROR")
+}
+
+func (s *FailStorage) PurgeCache() error {
+	return fmt.Errorf("ERROR")
+}
+
+func (s *FailStorage) WarmupCache(repo, arch string) error {
+	return fmt.Errorf("ERROR")
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
