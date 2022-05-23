@@ -187,9 +187,14 @@ jobs:
     name: Docker Build Check
     runs-on: ubuntu-latest
 
-    if: github.event == 'pull_request'
-
     needs: Hadolint
+
+    # This is hack for issue https://github.com/actions/runner/issues/491
+    if: |
+      always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled') &&
+      github.event == 'pull_request'
 
     steps:
       - name: Checkout
