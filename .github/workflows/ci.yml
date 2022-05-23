@@ -187,6 +187,8 @@ jobs:
     name: Docker Build Check
     runs-on: ubuntu-latest
 
+    if: github.event == 'pull_request'
+
     needs: Hadolint
 
     steps:
