@@ -4,7 +4,7 @@ FROM essentialkaos/alpine:3.14 as cr-builder
 
 ARG VERSION=0.15.11
 
-# hadolint ignore=DL3018
+# hadolint ignore=DL3003,DL3018
 RUN apk add --no-cache bash-completion bzip2-dev cmake curl-dev expat-dev \
         file-dev gcc git glib-dev libxml2-dev make musl-dev openssl-dev \
         python3-dev rpm-dev scanelf sqlite-dev xz-dev zlib-dev && \
