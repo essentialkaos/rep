@@ -90,6 +90,7 @@ var DirNameValidatorRegex = regexp.MustCompile(`[a-zA-Z0-9]+`)
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 var chownFunc = os.Chown
+var chmodFunc = os.Chmod
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -626,26 +627,26 @@ func (d *Depot) AddPackage(rpmFile string) error {
 	packageDir := d.dataDir
 
 	if d.dataOptions.SplitFiles {
-		packageDir, err = d.makePackageDir(rpmFile, d.dataOptions.GetDirPerms())
+		packageDir, err = d.makePackageDir(rpmFile, 0750)
 
 		if err != nil {
 			return fmt.Errorf("Can't add package to storage depot: %w", err)
 		}
 
-		err = updateObjectOwner(packageDir, d.dataOptions.User, d.dataOptions.Group)
+		err = updateObjectAttrs(packageDir, d.dataOptions, true)
 
 		if err != nil {
 			return fmt.Errorf("Can't change directory owner: %w", err)
 		}
 	}
 
-	err = fsutil.CopyFile(rpmFile, packageDir, d.dataOptions.GetFilePerms())
+	err = fsutil.CopyFile(rpmFile, packageDir, 0640)
 
 	if err != nil {
 		return fmt.Errorf("Can't copy package to storage depot: %w", err)
 	}
 
-	err = updateObjectOwner(rpmFile, d.dataOptions.User, d.dataOptions.Group)
+	err = updateObjectAttrs(rpmFile, d.dataOptions, false)
 
 	if err != nil {
 		return fmt.Errorf("Can't change package owner: %w", err)
@@ -983,35 +984,47 @@ func (d *Depot) getPackageDir(rpmFileName string) string {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// updateObjectOwner update object (directory or file) owner
-func updateObjectOwner(path, user, group string) error {
-	if user == "" && group == "" {
-		return nil
-	}
+// updateObjectAttrs update object (directory or file) attributes
+func updateObjectAttrs(path string, options *Options, isDir bool) error {
+	var perms os.FileMode
 
 	uid, gid := -1, -1
 
-	if user != "" {
-		newUser, err := system.LookupUser(user)
+	if options.User != "" {
+		newUser, err := system.LookupUser(options.User)
 
 		if err != nil {
-			return fmt.Errorf("Can't get UID for user %q", user)
+			return fmt.Errorf("Can't get UID for user %q", options.User)
 		} else {
 			uid = newUser.UID
 		}
 	}
 
-	if group != "" {
-		newGroup, err := system.LookupGroup(group)
+	if options.Group != "" {
+		newGroup, err := system.LookupGroup(options.Group)
 
 		if err != nil {
-			return fmt.Errorf("Can't get GID for group %q", group)
+			return fmt.Errorf("Can't get GID for group %q", options.Group)
 		} else {
 			gid = newGroup.GID
 		}
 	}
 
-	return chownFunc(path, uid, gid)
+	if uid != -1 || gid != -1 {
+		err := chownFunc(path, uid, gid)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	if isDir {
+		perms = options.GetDirPerms()
+	} else {
+		perms = options.GetFilePerms()
+	}
+
+	return chmodFunc(path, perms)
 }
 
 // checkDataDir checks repository directory permissions

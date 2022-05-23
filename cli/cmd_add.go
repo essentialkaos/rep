@@ -123,11 +123,11 @@ func addRPMFile(ctx *context, file, tmpDir string, privateKey *sign.PrivateKey) 
 
 	pkgFile := file
 
-	if ctx.Repo.IsSigningRequired() {
+	if privateKey != nil {
 		isSigned, err := sign.IsSigned(file, privateKey)
 
 		if err != nil {
-			printSpinnerAddError(fileName, err.Error())
+			printSpinnerAddError(fileName, fmt.Sprintf("Can't check package signature: %v", err))
 			return false
 		}
 
@@ -138,7 +138,7 @@ func addRPMFile(ctx *context, file, tmpDir string, privateKey *sign.PrivateKey) 
 			err = sign.Sign(file, pkgFile, privateKey)
 
 			if err != nil {
-				printSpinnerAddError(fileName, err.Error())
+				printSpinnerAddError(fileName, fmt.Sprintf("Can't sign package: %v", err))
 				return false
 			}
 
@@ -157,7 +157,7 @@ func addRPMFile(ctx *context, file, tmpDir string, privateKey *sign.PrivateKey) 
 		err = os.Remove(file)
 
 		if err != nil {
-			printSpinnerAddError(fileName, err.Error())
+			printSpinnerAddError(fileName, fmt.Sprintf("Can't remove file: %v", err))
 			return false
 		}
 

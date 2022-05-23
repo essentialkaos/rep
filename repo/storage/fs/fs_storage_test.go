@@ -8,6 +8,7 @@ package fs
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -321,20 +322,35 @@ func (s *StorageSuite) TestHasPackage(c *C) {
 }
 
 func (s *StorageSuite) TestUpdateObjectOwner(c *C) {
-	chownFunc = func(name string, uid, gid int) error {
-		return nil
+	chownFunc = func(name string, uid, gid int) error { return nil }
+	chmodFunc = func(name string, mode os.FileMode) error { return nil }
+
+	options := &Options{
+		User:      "nobody",
+		Group:     "nobody",
+		DirPerms:  0777,
+		FilePerms: 0666,
 	}
 
-	c.Assert(updateObjectOwner("/path", "nobody", "nobody"), IsNil)
-	c.Assert(updateObjectOwner("/path", "", ""), IsNil)
+	c.Assert(updateObjectAttrs("/path", options, true), IsNil)
 
-	err := updateObjectOwner("/path", "_unknown_", "nobody")
+	options.User = "_unknown_"
+	err := updateObjectAttrs("/path", options, false)
 	c.Assert(err, ErrorMatches, `Can't get UID for user "_unknown_"`)
 
-	err = updateObjectOwner("/path", "nobody", "_unknown_")
+	options.User = "nobody"
+	options.Group = "_unknown_"
+	err = updateObjectAttrs("/path", options, true)
 	c.Assert(err, ErrorMatches, `Can't get GID for group "_unknown_"`)
 
+	chownFunc = func(name string, uid, gid int) error { return fmt.Errorf("ERROR") }
+
+	options.User = "nobody"
+	options.Group = "nobody"
+	c.Assert(updateObjectAttrs("/path", options, true), NotNil)
+
 	chownFunc = os.Chown
+	chmodFunc = os.Chmod
 }
 
 func (s *StorageSuite) TestStorageReindex(c *C) {
