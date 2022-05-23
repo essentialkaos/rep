@@ -189,13 +189,6 @@ jobs:
 
     needs: Hadolint
 
-    # This is hack for issue https://github.com/actions/runner/issues/491
-    if: |
-      always() &&
-      !contains(needs.*.result, 'failure') &&
-      !contains(needs.*.result, 'cancelled') &&
-      github.event == 'pull_request'
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
