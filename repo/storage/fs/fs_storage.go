@@ -89,8 +89,11 @@ var DirNameValidatorRegex = regexp.MustCompile(`[a-zA-Z0-9]+`)
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-var chownFunc = os.Chown
-var chmodFunc = os.Chmod
+var (
+	chownFunc  = os.Chown
+	chmodFunc  = os.Chmod
+	removeFunc = os.Remove
+)
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -569,7 +572,7 @@ func (s *Storage) PurgeCache() error {
 	fsutil.ListToAbsolute(s.dataOptions.CacheDir, files)
 
 	for _, sqlFile := range files {
-		err := os.Remove(sqlFile)
+		err := removeFunc(sqlFile)
 
 		if err != nil {
 			return err
@@ -656,7 +659,7 @@ func (d *Depot) RemovePackage(rpmFile string) error {
 		return fmt.Errorf("Can't remove package from storage depot: %w", err)
 	}
 
-	err = os.Remove(filePath)
+	err = removeFunc(filePath)
 
 	if err != nil {
 		return fmt.Errorf("Can't remove package from storage depot: %w", err)
@@ -966,7 +969,7 @@ func (d *Depot) removePackageDir(rpmFile string) error {
 		return nil
 	}
 
-	return os.Remove(rpmFileDirFull)
+	return removeFunc(rpmFileDirFull)
 }
 
 // getPackageDir returns full path to directory for given rpm file

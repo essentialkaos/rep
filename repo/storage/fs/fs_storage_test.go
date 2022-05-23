@@ -622,6 +622,23 @@ func (s *StorageSuite) TestStorageDBCaching(c *C) {
 	c.Assert(err, ErrorMatches, `Can't register new custom function after creating storage`)
 }
 
+func (s *StorageSuite) TestStoragePurgeCache(c *C) {
+	fs, err := NewStorage(genStorageOptions(c, dataDir), index.DefaultOptions)
+
+	c.Assert(fs, NotNil)
+	c.Assert(err, IsNil)
+
+	c.Assert(fs.WarmupCache(data.REPO_RELEASE, data.ARCH_X64), IsNil)
+	c.Assert(fs.PurgeCache(), IsNil)
+
+	c.Assert(fs.WarmupCache(data.REPO_RELEASE, data.ARCH_X64), IsNil)
+
+	removeFunc = func(path string) error { return fmt.Errorf("ERROR") }
+	c.Assert(fs.PurgeCache(), NotNil)
+	c.Assert(fs.PurgeCache(), ErrorMatches, `ERROR`)
+	removeFunc = os.Remove
+}
+
 func (s *StorageSuite) TestDepotIsCacheValid(c *C) {
 	fs, err := NewStorage(genStorageOptions(c, dataDir), index.DefaultOptions)
 
