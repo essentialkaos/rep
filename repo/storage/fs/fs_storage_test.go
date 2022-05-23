@@ -263,6 +263,14 @@ func (s *StorageSuite) TestRemovePackage(c *C) {
 	c.Assert(fsutil.IsExist(dp.dataDir+"/t"), Equals, false)
 
 	c.Assert(dp.removePackageDir("test-package-1.0.0-0.el7.x86_64.rpm"), IsNil)
+
+	removeFunc = func(path string) error { return fmt.Errorf("ERROR") }
+	opts.SplitFiles = false
+	fsutil.TouchFile(dp.dataDir+"/test-package-1.0.0-0.el7.x86_64.rpm", 0644)
+	err = fs.RemovePackage(data.REPO_RELEASE, "test-package-1.0.0-0.el7.x86_64.rpm")
+	c.Assert(err, NotNil)
+	c.Assert(err, ErrorMatches, `.*: ERROR`)
+	removeFunc = os.Remove
 }
 
 func (s *StorageSuite) TestCopyPackage(c *C) {
