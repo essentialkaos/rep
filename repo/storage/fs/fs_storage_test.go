@@ -186,10 +186,7 @@ func (s *StorageSuite) TestAddPackage(c *C) {
 	dp.dataDir = origDataDir
 
 	opts.SplitFiles = true
-
-	chownFunc = func(name string, uid, gid int) error {
-		return nil
-	}
+	chownFunc = func(name string, uid, gid int) error { return nil }
 
 	// Add package 2 times
 	c.Assert(dp.AddPackage("../../../testdata/test-package-1.0.0-0.el7.x86_64.rpm"), IsNil)
@@ -201,10 +198,22 @@ func (s *StorageSuite) TestAddPackage(c *C) {
 
 	c.Assert(fs.AddPackage(data.REPO_RELEASE, "unknown-package-1.0.0-0.el7.noarch.rpm"), ErrorMatches, `Can't add package to storage: File unknown-package-1.0.0-0.el7.noarch.rpm doesn't exist or not accessible`)
 
-	_, err = dp.makePackageDir("пакет.x86_64.rpm", 0755)
+	_, err = dp.makePackageDir("пакет.x86_64.rpm")
 	c.Assert(err, ErrorMatches, `Can't create directory for package: Can't use name "п" for directory`)
 
+	chownFunc = func(name string, uid, gid int) error { return fmt.Errorf("ERROR") }
+	chmodFunc = func(name string, mode os.FileMode) error { return fmt.Errorf("ERROR") }
+
+	opts.SplitFiles = true
+	_, err = dp.makePackageDir("abcd-package.rpm")
+	c.Assert(err, ErrorMatches, `.*: ERROR`)
+	opts.SplitFiles = false
+
+	err = dp.copyFile("../../../testdata/test-package-1.0.0-0.el7.x86_64.rpm", dp.dataDir)
+	c.Assert(err, ErrorMatches, `.*: ERROR`)
+
 	chownFunc = os.Chown
+	chmodFunc = os.Chmod
 }
 
 func (s *StorageSuite) TestRemovePackage(c *C) {
@@ -451,7 +460,6 @@ func (s *StorageSuite) TestStorageErrorsNotInitialized(c *C) {
 
 	c.Assert(fs.GetModTime(data.REPO_RELEASE, data.ARCH_X64).IsZero(), Equals, true)
 	c.Assert(fs.InvalidateCache(), ErrorMatches, `Can't invalidate cache: Repository storage is not initialized`)
-	c.Assert(fs.PurgeCache(), ErrorMatches, `Can't purge cache: Repository storage is not initialized`)
 	c.Assert(fs.WarmupCache(data.REPO_RELEASE, data.ARCH_X64), ErrorMatches, `Can't warmup cache: Repository storage is not initialized`)
 	c.Assert(fs.HasArch(data.REPO_RELEASE, data.ARCH_X64), Equals, false)
 	c.Assert(fs.HasRepo(data.REPO_RELEASE), Equals, false)
@@ -598,7 +606,6 @@ func (s *StorageSuite) TestStorageDBCaching(c *C) {
 	c.Assert(dp.IsDBCached(data.DB_PRIMARY), Equals, true)
 	c.Assert(dp.IsDBCached("unknown"), Equals, false)
 	c.Assert(dp.CacheDB("unknown"), NotNil)
-	c.Assert(dp.PurgeCache(), IsNil)
 
 	c.Assert(fs.InvalidateCache(), IsNil)
 	c.Assert(fs.PurgeCache(), IsNil)
@@ -700,25 +707,6 @@ func (s *StorageSuite) TestDepotCacheDB(c *C) {
 	fsutil.TouchFile(dbFile, 0644)
 	c.Assert(dp.CacheDB(data.DB_PRIMARY), ErrorMatches, `Can't cache DB: unexpected EOF`)
 	dp.dataDir = origDataDir
-}
-
-func (s *StorageSuite) TestDepotPurgeCache(c *C) {
-	fs, err := NewStorage(genStorageOptions(c, dataDir), index.DefaultOptions)
-
-	c.Assert(fs, NotNil)
-	c.Assert(err, IsNil)
-
-	c.Assert(fs.WarmupCache(data.REPO_RELEASE, data.ARCH_X64), IsNil)
-
-	dp := fs.depots["release-x86_64"]
-
-	c.Assert(dp, NotNil)
-	c.Assert(dp.PurgeCache(), IsNil)
-
-	c.Assert(fs.WarmupCache(data.REPO_RELEASE, data.ARCH_X64), IsNil)
-
-	os.Remove(dp.dataOptions.CacheDir + "/release-x86_64-primary.sqlite")
-	c.Assert(dp.PurgeCache(), IsNil)
 }
 
 func (s *StorageSuite) TestDepotGetMetaIndex(c *C) {

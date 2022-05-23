@@ -627,29 +627,17 @@ func (d *Depot) AddPackage(rpmFile string) error {
 	packageDir := d.dataDir
 
 	if d.dataOptions.SplitFiles {
-		packageDir, err = d.makePackageDir(rpmFile, 0750)
+		packageDir, err = d.makePackageDir(rpmFile)
 
 		if err != nil {
 			return fmt.Errorf("Can't add package to storage depot: %w", err)
 		}
-
-		err = updateObjectAttrs(packageDir, d.dataOptions, true)
-
-		if err != nil {
-			return fmt.Errorf("Can't change directory owner: %w", err)
-		}
 	}
 
-	err = fsutil.CopyFile(rpmFile, packageDir, 0640)
+	err = d.copyFile(rpmFile, packageDir)
 
 	if err != nil {
 		return fmt.Errorf("Can't copy package to storage depot: %w", err)
-	}
-
-	err = updateObjectAttrs(rpmFile, d.dataOptions, false)
-
-	if err != nil {
-		return fmt.Errorf("Can't change package owner: %w", err)
 	}
 
 	return nil
@@ -767,25 +755,6 @@ func (d *Depot) InvalidateCache() error {
 		}
 
 		delete(d.dbs, dbName)
-	}
-
-	return nil
-}
-
-// PurgeCache deletes all repository SQLite files from cache
-func (d *Depot) PurgeCache() error {
-	for _, dbType := range data.DBList {
-		dbFile := d.GetDBFilePath(dbType)
-
-		if !fsutil.IsExist(dbFile) {
-			continue
-		}
-
-		err := os.Remove(dbFile)
-
-		if err != nil {
-			return err
-		}
 	}
 
 	return nil
@@ -934,9 +903,27 @@ func (d *Depot) GetDBFilePath(dbType string) string {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// makePackageDir creates if required and returns path to directory for packages
+// copyFile copies package into package directory and change permissions for it
+func (d *Depot) copyFile(rpmFile, packageDir string) error {
+	err := fsutil.CopyFile(rpmFile, packageDir, 0600)
+
+	if err != nil {
+		return err
+	}
+
+	targetFile := joinPath(packageDir, path.Base(rpmFile))
+	err = updateObjectAttrs(targetFile, d.dataOptions, false)
+
+	if err != nil {
+		return fmt.Errorf("Can't change package attributes: %w", err)
+	}
+
+	return nil
+}
+
+// makePackageDir creates directory if required and returns path to directory for packages
 // if split-files option is enabled
-func (d *Depot) makePackageDir(rpmFile string, perms os.FileMode) (string, error) {
+func (d *Depot) makePackageDir(rpmFile string) (string, error) {
 	rpmFileName := path.Base(rpmFile)
 	dirName := strutil.Head(rpmFileName, 1)
 
@@ -950,7 +937,17 @@ func (d *Depot) makePackageDir(rpmFile string, perms os.FileMode) (string, error
 		return packageDir, nil
 	}
 
-	err := os.Mkdir(packageDir, perms)
+	err := os.Mkdir(packageDir, 0700)
+
+	if err != nil {
+		return "", err
+	}
+
+	err = updateObjectAttrs(packageDir, d.dataOptions, true)
+
+	if err != nil {
+		return "", fmt.Errorf("Can't change package directory attributes: %w", err)
+	}
 
 	return packageDir, err
 }
