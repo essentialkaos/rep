@@ -71,7 +71,7 @@ jobs:
           name: createrepo_c
           path: ${{github.workspace}}/.local/bin/createrepo_c
           if-no-files-found: error
-          retention-days: 3
+          retention-days: 1
 
   Go:
     name: Go
