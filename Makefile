@@ -43,7 +43,11 @@ update: mod-update ## Update dependencies to the latest versions
 vendor: mod-vendor ## Make vendored copy of dependencies
 
 test: ## Run tests
-	go test $(VERBOSE_FLAG) -covermode=count ./cli/logger ./cli/query ./repo ./repo/data ./repo/groups ./repo/helpers ./repo/index ./repo/meta ./repo/rpm ./repo/search ./repo/sign ./repo/storage/fs ./repo/storage/utils
+ifdef COVERAGE_FILE ## Save coverage data into file (String)
+		go test $(VERBOSE_FLAG) -covermode=count -coverprofile=$(COVERAGE_FILE) ./cli/logger ./cli/query ./repo ./repo/data ./repo/groups ./repo/helpers ./repo/index ./repo/meta ./repo/rpm ./repo/search ./repo/sign ./repo/storage/fs ./repo/storage/utils
+else
+		go test $(VERBOSE_FLAG) -covermode=count ./cli/logger ./cli/query ./repo ./repo/data ./repo/groups ./repo/helpers ./repo/index ./repo/meta ./repo/rpm ./repo/search ./repo/sign ./repo/storage/fs ./repo/storage/utils
+endif
 
 mod-init:
 ifdef MODULE_PATH ## Module path for initialization (String)
