@@ -48,14 +48,6 @@ func showApplicationInfo(gitrev string) {
 
 // showSystemInfo shows verbose information about system
 func showSystemInfo() {
-	systemInfo, err := system.GetSystemInfo()
-
-	if err != nil {
-		return
-	}
-
-	fmtutil.Separator(false, "SYSTEM INFO")
-
 	fmtInfo := func(s string) string {
 		if s == "" {
 			return fmtc.Sprintf("{s}unknown{!}")
@@ -64,8 +56,27 @@ func showSystemInfo() {
 		return s
 	}
 
-	fmtc.Printf("  {*}%-16s{!} %s\n", "OS Name:", fmtInfo(systemInfo.Distribution))
-	fmtc.Printf("  {*}%-16s{!} %s\n", "OS Version:", fmtInfo(systemInfo.Version))
+	osInfo, err := system.GetOSInfo()
+
+	if err == nil {
+		fmtutil.Separator(false, "SYSTEM INFO")
+		fmtc.Printf("  {*}%-16s{!} %s\n", "OS Name:", fmtInfo(osInfo.Name))
+		fmtc.Printf("  {*}%-16s{!} %s\n", "OS Version:", fmtInfo(osInfo.VersionID))
+		fmtc.Printf("  {*}%-16s{!} %s\n", "OS ID:", fmtInfo(osInfo.ID))
+	}
+
+	systemInfo, err := system.GetSystemInfo()
+
+	if err != nil {
+		return
+	} else {
+		if osInfo == nil {
+			fmtutil.Separator(false, "SYSTEM INFO")
+			fmtc.Printf("  {*}%-16s{!} %s\n", "OS Name:", fmtInfo(systemInfo.Distribution))
+			fmtc.Printf("  {*}%-16s{!} %s\n", "OS Version:", fmtInfo(osInfo.VersionID))
+		}
+	}
+
 	fmtc.Printf("  {*}%-16s{!} %s\n", "Arch:", fmtInfo(systemInfo.Arch))
 	fmtc.Printf("  {*}%-16s{!} %s\n", "Kernel:", fmtInfo(systemInfo.Kernel))
 }

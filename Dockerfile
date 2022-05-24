@@ -7,13 +7,13 @@ ARG VERSION=0.15.11
 # hadolint ignore=DL3003,DL3018
 RUN apk add --no-cache bash-completion bzip2-dev cmake curl-dev expat-dev \
         file-dev gcc git glib-dev libxml2-dev make musl-dev openssl-dev \
-        python3-dev rpm-dev scanelf sqlite-dev xz-dev zlib-dev && \
+        python3-dev rpm-dev scanelf sqlite-dev upx xz-dev zlib-dev && \
     git clone --depth=1 --branch="$VERSION" \
         https://github.com/rpm-software-management/createrepo_c.git createrepo_c && \
     mkdir createrepo_c/build && cd createrepo_c/build && \
     cmake .. -DWITH_ZCHUNK=NO -DWITH_LIBMODULEMD=NO -DENABLE_DRPM=OFF \
              -DBUILD_LIBCREATEREPO_C_SHARED=OFF && \
-    make
+    make && upx src/createrepo_c
 
 ## GO BUILDER ##################################################################
 
@@ -44,7 +44,9 @@ COPY --from=cr-builder /createrepo_c/build/src/createrepo_c /usr/bin/
 
 COPY common/rep-docker.knf /etc/rep.knf
 
-RUN ln -sf /rep/conf /etc/rep.d
+# hadolint ignore=DL3018
+RUN ln -sf /rep/conf /etc/rep.d && \
+    apk add --no-cache curl glib libxml2 rpm sqlite zlib
 
 VOLUME /rep
 
