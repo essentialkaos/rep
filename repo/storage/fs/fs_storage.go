@@ -185,6 +185,8 @@ func (s *Storage) Initialize(repoList, archList []string) error {
 		return fmt.Errorf("Can't initialize the new storage: At least one repository must be defined")
 	case len(archList) == 0:
 		return fmt.Errorf("Can't initialize the new storage: At least one architecture must be defined")
+	case s.dataOptions.DataDir == "":
+		return fmt.Errorf("Can't initialize the new storage: Data directory is not set (empty)")
 	case !fsutil.CheckPerms("DWX", dataDirParent):
 		return fmt.Errorf(
 			"Can't initialize the new storage: The current user doesn't have enough permissions for creating new directories in %q",
@@ -202,14 +204,29 @@ func (s *Storage) Initialize(repoList, archList []string) error {
 		}
 	}
 
-	for _, repo := range repoList {
-		for _, arch := range archList {
-			repoDir := joinPath(s.dataOptions.DataDir, repo, data.SupportedArchs[arch].Dir)
-			err := os.MkdirAll(repoDir, 0755)
+	var dirList []string
 
-			if err != nil {
-				return fmt.Errorf("Can't initialize the new storage: %w", err)
-			}
+	for _, repo := range repoList {
+		dirList = append(dirList, joinPath(s.dataOptions.DataDir, repo))
+		for _, arch := range archList {
+			dirList = append(
+				dirList,
+				joinPath(s.dataOptions.DataDir, repo, data.SupportedArchs[arch].Dir),
+			)
+		}
+	}
+
+	for _, dir := range dirList {
+		err := os.Mkdir(dir, 0700)
+
+		if err != nil {
+			return fmt.Errorf("Can't initialize the new storage: %w", err)
+		}
+
+		err = updateObjectAttrs(dir, s.dataOptions, true)
+
+		if err != nil {
+			return fmt.Errorf("Can't initialize the new storage: %w", err)
 		}
 	}
 

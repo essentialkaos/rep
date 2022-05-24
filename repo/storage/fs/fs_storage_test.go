@@ -94,16 +94,30 @@ func (s *StorageSuite) TestNewStorageErrors(c *C) {
 }
 
 func (s *StorageSuite) TestStorageInitialize(c *C) {
+	chownFunc = func(name string, uid, gid int) error { return nil }
+
 	fs, err := NewStorage(genStorageOptions(c, "/_unknown_"), index.DefaultOptions)
 
 	c.Assert(fs, NotNil)
 	c.Assert(err, IsNil)
 
-	err = fs.Initialize(defRepos, []string{data.ARCH_X64})
+	c.Assert(
+		fs.Initialize(defRepos, []string{data.ARCH_X64}).Error(), Equals,
+		`Can't initialize the new storage: The current user doesn't have enough permissions for creating new directories in "/"`,
+	)
 
-	c.Assert(fs, NotNil)
+	fs.dataOptions.DataDir = ""
+	c.Assert(
+		fs.Initialize(defRepos, []string{data.ARCH_X64}).Error(), Equals,
+		`Can't initialize the new storage: Data directory is not set (empty)`,
+	)
 
 	fs, err = NewStorage(genStorageOptions(c, ""), index.DefaultOptions)
+
+	fs.dataOptions.User = "nobody"
+	fs.dataOptions.Group = "nobody"
+	fs.dataOptions.DirPerms = 0750
+	fs.dataOptions.FilePerms = 0640
 
 	c.Assert(fs, NotNil)
 	c.Assert(err, IsNil)
@@ -127,6 +141,10 @@ func (s *StorageSuite) TestStorageInitialize(c *C) {
 	c.Assert(fsutil.CheckPerms("DWRX", fs.dataOptions.DataDir+"/testing/SRPMS"), Equals, true)
 	c.Assert(fsutil.CheckPerms("DWRX", fs.dataOptions.DataDir+"/release/x86_64"), Equals, true)
 	c.Assert(fsutil.CheckPerms("DWRX", fs.dataOptions.DataDir+"/release/SRPMS"), Equals, true)
+	c.Assert(fsutil.GetMode(fs.dataOptions.DataDir+"/testing/x86_64"), Equals, os.FileMode(0750))
+	c.Assert(fsutil.GetMode(fs.dataOptions.DataDir+"/testing/SRPMS"), Equals, os.FileMode(0750))
+	c.Assert(fsutil.GetMode(fs.dataOptions.DataDir+"/release/x86_64"), Equals, os.FileMode(0750))
+	c.Assert(fsutil.GetMode(fs.dataOptions.DataDir+"/release/SRPMS"), Equals, os.FileMode(0750))
 	c.Assert(fs.IsEmpty(data.REPO_TESTING, data.ARCH_X64), Equals, true)
 	c.Assert(fs.IsEmpty(data.REPO_TESTING, data.ARCH_NOARCH), Equals, true)
 
@@ -140,10 +158,15 @@ func (s *StorageSuite) TestStorageInitialize(c *C) {
 
 	err = fs.Initialize(defRepos, defArchs)
 	c.Assert(err, ErrorMatches, `Can't initialize the new storage: Storage already initialized`)
+
+	chownFunc = os.Chown
 }
 
 func (s *StorageSuite) TestAddPackage(c *C) {
+	chownFunc = func(name string, uid, gid int) error { return nil }
+
 	opts := genStorageOptions(c, "")
+
 	opts.SplitFiles = true
 	opts.User = "nobody"
 	opts.Group = "nobody"
@@ -186,7 +209,6 @@ func (s *StorageSuite) TestAddPackage(c *C) {
 	dp.dataDir = origDataDir
 
 	opts.SplitFiles = true
-	chownFunc = func(name string, uid, gid int) error { return nil }
 
 	// Add package 2 times
 	c.Assert(dp.AddPackage("../../../testdata/test-package-1.0.0-0.el7.x86_64.rpm"), IsNil)
