@@ -36,6 +36,8 @@ func cmdStats(ctx *context, args options.Arguments) bool {
 		}
 
 		printRepoStats(ctx.Repo.Release, stats)
+
+		fmtc.NewLine()
 	}
 
 	if showAll || options.GetB(OPT_TESTING) {
@@ -47,9 +49,10 @@ func cmdStats(ctx *context, args options.Arguments) bool {
 		}
 
 		printRepoStats(ctx.Repo.Testing, stats)
+
+		fmtc.NewLine()
 	}
 
-	fmtc.NewLine()
 	fmtutil.Separator(true)
 
 	return true
