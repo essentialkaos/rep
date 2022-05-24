@@ -93,6 +93,7 @@ var (
 	chownFunc  = os.Chown
 	chmodFunc  = os.Chmod
 	removeFunc = os.Remove
+	mkdirFunc  = os.Mkdir
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -217,7 +218,7 @@ func (s *Storage) Initialize(repoList, archList []string) error {
 	}
 
 	for _, dir := range dirList {
-		err := os.Mkdir(dir, 0700)
+		err := mkdirFunc(dir, 0700)
 
 		if err != nil {
 			return fmt.Errorf("Can't initialize the new storage: %w", err)
@@ -957,7 +958,7 @@ func (d *Depot) makePackageDir(rpmFile string) (string, error) {
 		return packageDir, nil
 	}
 
-	err := os.Mkdir(packageDir, 0700)
+	err := mkdirFunc(packageDir, 0700)
 
 	if err != nil {
 		return "", err

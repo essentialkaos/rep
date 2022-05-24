@@ -159,7 +159,24 @@ func (s *StorageSuite) TestStorageInitialize(c *C) {
 	err = fs.Initialize(defRepos, defArchs)
 	c.Assert(err, ErrorMatches, `Can't initialize the new storage: Storage already initialized`)
 
+	fs, err = NewStorage(genStorageOptions(c, ""), index.DefaultOptions)
+
+	c.Assert(fs, NotNil)
+	c.Assert(err, IsNil)
+
+	chmodFunc = func(name string, mode os.FileMode) error { return fmt.Errorf("ERROR") }
+
+	err = fs.Initialize(defRepos, defArchs)
+	c.Assert(err, NotNil)
+
+	mkdirFunc = func(name string, mode os.FileMode) error { return fmt.Errorf("ERROR") }
+
+	err = fs.Initialize(defRepos, defArchs)
+	c.Assert(err, NotNil)
+
 	chownFunc = os.Chown
+	chmodFunc = os.Chmod
+	mkdirFunc = os.Mkdir
 }
 
 func (s *StorageSuite) TestAddPackage(c *C) {

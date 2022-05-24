@@ -55,11 +55,7 @@ func registerDrivers() {
 			&sqlite3.SQLiteDriver{
 				ConnectHook: func(conn *sqlite3.SQLiteConn) error {
 					for _, f := range funcs {
-						err := conn.RegisterFunc(f.Name, f.Impl, f.IsPure)
-
-						if err != nil {
-							return err
-						}
+						conn.RegisterFunc(f.Name, f.Impl, f.IsPure)
 					}
 
 					return nil
