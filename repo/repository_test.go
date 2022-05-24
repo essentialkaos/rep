@@ -561,7 +561,7 @@ func (s *RepoSuite) TestSubRepositoryGetFullPackagePath(c *C) {
 	c.Assert(err, IsNil)
 
 	pkg := PackageFile{Arch: "x86_64", Path: "test-package-1.0.0-0.el7.x86_64.rpm"}
-	c.Assert(r.Testing.GetFullPackagePath(pkg), Matches, `.*/data/testing/x86_64/test-package-1.0.0-0.el7.x86_64.rpm`)
+	c.Assert(r.Testing.GetFullPackagePath(pkg), Matches, `.*/testing/x86_64/test-package-1.0.0-0.el7.x86_64.rpm`)
 }
 
 func (s *RepoSuite) TestSubRepositoryExecQuery(c *C) {
@@ -672,7 +672,7 @@ func makeFSStorage(c *C) *fs.Storage {
 
 	fss, err := fs.NewStorage(
 		&fs.Options{
-			DataDir:    dir + "/data",
+			DataDir:    dir + "/data/testrepo",
 			CacheDir:   dir + "/cache",
 			SplitFiles: false,
 		},
