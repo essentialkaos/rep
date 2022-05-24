@@ -49,6 +49,9 @@ RUN ln -sf /rep/conf /etc/rep.d && \
     apk add --no-cache curl glib libxml2 rpm sqlite zlib
 
 VOLUME /rep
+VOLUME /input
+
+WORKDIR /input
 
 ENTRYPOINT ["rep"]
 
