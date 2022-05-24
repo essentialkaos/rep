@@ -204,7 +204,7 @@ func (s *Storage) Initialize(repoList, archList []string) error {
 		}
 	}
 
-	var dirList []string
+	dirList := []string{s.dataOptions.DataDir}
 
 	for _, repo := range repoList {
 		dirList = append(dirList, joinPath(s.dataOptions.DataDir, repo))

@@ -653,7 +653,17 @@ func (s *StorageSuite) TestStorageDBCaching(c *C) {
 }
 
 func (s *StorageSuite) TestStoragePurgeCache(c *C) {
-	fs, err := NewStorage(genStorageOptions(c, dataDir), index.DefaultOptions)
+	fs, err := NewStorage(genStorageOptions(c, ""), index.DefaultOptions)
+
+	c.Assert(fs, NotNil)
+	c.Assert(err, IsNil)
+
+	err = fs.PurgeCache()
+
+	c.Assert(err, NotNil)
+	c.Assert(err, ErrorMatches, `Can't purge cache: Repository storage is not initialized`)
+
+	fs, err = NewStorage(genStorageOptions(c, dataDir), index.DefaultOptions)
 
 	c.Assert(fs, NotNil)
 	c.Assert(err, IsNil)
@@ -810,7 +820,7 @@ func (s *StorageSuite) TestFuncs(c *C) {
 
 func genStorageOptions(c *C, dataDir string) *Options {
 	if dataDir == "" {
-		return &Options{c.MkDir(), c.MkDir(), false, "", "", 0, 0}
+		return &Options{c.MkDir() + "/testrepo", c.MkDir(), false, "", "", 0, 0}
 	}
 
 	return &Options{dataDir, c.MkDir(), false, "", "", 0, 0}
