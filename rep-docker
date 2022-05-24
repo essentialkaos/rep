@@ -1,0 +1,54 @@
+#! /usr/bin/env bash
+
+################################################################################
+
+# Official Docker image (String)
+IMAGE="ghcr.io/essentialkaos/rep:latest"
+
+################################################################################
+
+# Main function
+#
+# Code: No
+# Echo: No
+main() {
+  if ! hasApp "docker" ; then
+    echo "You must install Docker runtime first"
+    exit 1
+  fi
+
+  if ! isImageDownloaded ; then
+    echo -e "Downloading official rep image…\n"
+    docker pull "$IMAGE"
+    echo ""
+  fi
+
+  docker run -it --rm -v '/opt/rep':'/rep' -v "$(pwd)":'/input' "$IMAGE" "$@"
+}
+
+# Check if Docker image downloaded or not
+#
+# Code: Yes
+# Echo: No
+isImageDownloaded() {
+  if [[ -z "$(docker images -q $IMAGE 2> /dev/null)" ]] ; then
+    return 1
+  fi
+
+  return 0
+}
+
+# Check if some app is installed
+#
+# 1: Binary name (String)
+#
+# Code: Yes
+# Echo: No
+hasApp() {
+  type "$1" &> /dev/null
+  return $?
+}
+
+################################################################################
+
+main "$@"

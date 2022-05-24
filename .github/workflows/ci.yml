@@ -168,6 +168,21 @@ jobs:
         with:
           files: common/rep.spec
 
+  Shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+
+    needs: Go
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Check scripts with Shellcheck
+        uses: essentialkaos/shellcheck-action@v1
+        with:
+          files: rep-docker
+
   Hadolint:
     name: Hadolint
     runs-on: ubuntu-latest
