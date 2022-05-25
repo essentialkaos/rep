@@ -8,7 +8,7 @@
   <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
 </p>
 
-<p align="center"><a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#ci-status">CI Status</a> • <a href="#license">License</a></p>
+<p align="center"><a href="#installation">Installation</a> • <a href="#using-with-docker">Using with Docker</a> • <a href="#usage">Usage</a> • <a href="#ci-status">CI Status</a> • <a href="#license">License</a></p>
 
 <br/>
 
@@ -22,6 +22,29 @@
 sudo yum install -y https://yum.kaos.st/get/$(uname -r).rpm
 sudo yum install rep
 ```
+
+### Using with Docker
+
+You can use Docker containers for working with your repository. Install latest version of Docker, then:
+
+```bash
+curl -fL# -o rep-docker https://kaos.sh/rep/rep-docker
+chmod +x rep-docker
+sudo mv rep-docker /usr/bin/rep
+
+mkdir /opt/rep
+export REP_DIR=/opt/rep
+
+# Create repository configuration in /opt/rep/conf (use common/repository.knf.example as an example)
+
+rep init src x86_64
+rep add my-package.el7.x86_64.rpm
+```
+
+Official Docker images with `rep`:
+
+- [`essentialkaos/rep:latest`](https://kaos.sh/d/rep)
+- [`ghcr.io/essentialkaos/rep:latest`](https://kaos.sh/p/rep)
 
 ### Usage
 
