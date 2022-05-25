@@ -1,9 +1,17 @@
 #! /usr/bin/env bash
 
+########################################################################################
+
+BOLD=1
+RED=31
+
 ################################################################################
 
 # Official Docker image (String)
 IMAGE="ghcr.io/essentialkaos/rep:latest"
+
+# Path to working dir (String)
+WORKDIR="$REP_DIR"
 
 ################################################################################
 
@@ -12,18 +20,68 @@ IMAGE="ghcr.io/essentialkaos/rep:latest"
 # Code: No
 # Echo: No
 main() {
+  checkEnv
+  prepareEnv
+
+  docker run -it --rm -v "$WORKDIR":'/rep' -v "$(pwd)":'/input' "$IMAGE" "$@"
+}
+
+# Check environment
+#
+# Code: No
+# Echo: No
+checkEnv() {
   if ! hasApp "docker" ; then
-    echo "You must install Docker runtime first"
+    error "You must install Docker runtime first"
     exit 1
   fi
 
-  if ! isImageDownloaded ; then
-    echo -e "Downloading official rep image…\n"
-    docker pull "$IMAGE"
-    echo ""
+  if [[ ! -e "$WORKDIR" ]] ; then
+    error "Working directory \"$WORKDIR\" doesn't exist"
+    exit 1
   fi
 
-  docker run -it --rm -v '/opt/rep':'/rep' -v "$(pwd)":'/input' "$IMAGE" "$@"
+  if [[ ! -d "$WORKDIR" ]] ; then
+    error "\"$WORKDIR\" is not directory"
+    exit 1
+  fi
+
+  if [[ ! -w "$WORKDIR" ]] ; then
+    error "Working directory \"$WORKDIR\" is not writable"
+    exit 1
+  fi
+
+  if [[ ! -r "$WORKDIR" ]] ; then
+    error "Working directory \"$WORKDIR\" is not readable"
+    exit 1
+  fi
+}
+
+# Prepare environment for running image
+#
+# Code: No
+# Echo: No
+prepareEnv() {
+  if ! isImageDownloaded ; then
+    show "Downloading official rep image…\n" $BOLD
+    docker pull "$IMAGE"
+  fi
+
+  if [[ ! -e "$WORKDIR/conf" ]] ; then
+    mkdir "$WORKDIR/conf"
+  fi
+
+  if [[ ! -e "$WORKDIR/data" ]] ; then
+    mkdir "$WORKDIR/data"
+  fi
+
+  if [[ ! -e "$WORKDIR/cache" ]] ; then
+    mkdir "$WORKDIR/cache"
+  fi
+
+  if [[ ! -e "$WORKDIR/logs" ]] ; then
+    mkdir "$WORKDIR/logs"
+  fi
 }
 
 # Check if Docker image downloaded or not
@@ -47,6 +105,32 @@ isImageDownloaded() {
 hasApp() {
   type "$1" &> /dev/null
   return $?
+}
+
+# Show message
+#
+# 1: Message (String)
+# 2: Message color (Number) [Optional]
+#
+# Code: No
+# Echo: No
+show() {
+  if [[ -n "$2" ]] ; then
+    echo -e "\e[${2}m${1}\e[0m"
+  else
+    echo -e "$*"
+  fi
+}
+
+# Print error message
+#
+# 1: Message (String)
+# 2: Message color (Number) [Optional]
+#
+# Code: No
+# Echo: No
+error() {
+  show "$*" $RED 1>&2
 }
 
 ################################################################################
