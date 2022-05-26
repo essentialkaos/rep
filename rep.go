@@ -18,7 +18,7 @@ import (
 //go:embed go.mod
 var gomod []byte
 
-// gitrev is git short revision
+// gitrev is short hash of the latest git commit
 var gitrev string
 
 // ////////////////////////////////////////////////////////////////////////////////// //

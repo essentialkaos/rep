@@ -22,8 +22,8 @@ import (
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // showVerboseAbout prints verbose info about app
-func showVerboseAbout(gitrev string, gomod []byte) {
-	showApplicationInfo(gitrev)
+func showVerboseAbout(gitRev string, gomod []byte) {
+	showApplicationInfo(gitRev)
 	showSystemInfo()
 	showEnvironmentInfo()
 	showDepsInfo(gomod)
@@ -31,7 +31,7 @@ func showVerboseAbout(gitrev string, gomod []byte) {
 }
 
 // showApplicationInfo shows verbose information about application
-func showApplicationInfo(gitrev string) {
+func showApplicationInfo(gitRev string) {
 	fmtutil.Separator(false, "APPLICATION INFO")
 
 	fmtc.Printf("  {*}%-12s{!} %s\n", "Name:", APP)
@@ -41,8 +41,8 @@ func showApplicationInfo(gitrev string) {
 		fmtc.Printf("  {*}%-12s{!} %s\n", "Release:", REL)
 	}
 
-	if gitrev != "" {
-		fmtc.Printf("  {*}%-12s{!} %s\n", "Git SHA:", gitrev)
+	if gitRev != "" {
+		fmtc.Printf("  {*}%-12s{!} %s\n", "Git SHA:", gitRev)
 	}
 }
 
@@ -73,7 +73,7 @@ func showSystemInfo() {
 		if osInfo == nil {
 			fmtutil.Separator(false, "SYSTEM INFO")
 			fmtc.Printf("  {*}%-16s{!} %s\n", "OS Name:", fmtInfo(systemInfo.Distribution))
-			fmtc.Printf("  {*}%-16s{!} %s\n", "OS Version:", fmtInfo(osInfo.VersionID))
+			fmtc.Printf("  {*}%-16s{!} %s\n", "OS Version:", fmtInfo(systemInfo.Version))
 		}
 	}
 

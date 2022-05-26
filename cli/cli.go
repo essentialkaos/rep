@@ -211,7 +211,7 @@ var rawOutput = false
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-func Init(gitrev string, gomod []byte) {
+func Init(gitRev string, gomod []byte) {
 	args, errs := options.Parse(optMap)
 
 	if len(errs) != 0 {
@@ -232,10 +232,10 @@ func Init(gitrev string, gomod []byte) {
 	case options.Has(OPT_GENERATE_MAN):
 		os.Exit(genMan())
 	case options.GetB(OPT_VER):
-		showAbout(gitrev)
+		showAbout(gitRev)
 		return
 	case options.GetB(OPT_VERB_VER):
-		showVerboseAbout(gitrev, gomod)
+		showVerboseAbout(gitRev, gomod)
 		return
 	case options.GetB(OPT_HELP) || len(args) == 0:
 		showUsage()
@@ -494,8 +494,8 @@ func showUsage() {
 }
 
 // showAbout prints info about version
-func showAbout(gitrev string) {
-	genAbout(gitrev).Render()
+func showAbout(gitRev string) {
+	genAbout(gitRev).Render()
 }
 
 // genCompletion generates completion for different shells
@@ -597,7 +597,7 @@ func genUsage() *usage.Info {
 }
 
 // genAbout generates info about version
-func genAbout(gitrev string) *usage.About {
+func genAbout(gitRev string) *usage.About {
 	about := &usage.About{
 		App:           APP,
 		Version:       VER,
@@ -608,8 +608,8 @@ func genAbout(gitrev string) *usage.About {
 		UpdateChecker: usage.UpdateChecker{"essentialkaos/rep", update.GitHubChecker},
 	}
 
-	if gitrev != "" {
-		about.Build = "git:" + gitrev
+	if gitRev != "" {
+		about.Build = "git:" + gitRev
 	}
 
 	if REL != "" {
