@@ -577,6 +577,7 @@ func genUsage() *usage.Info {
 	info.BoundOptions(COMMAND_INFO, OPT_ARCH)
 	info.BoundOptions(COMMAND_LIST, OPT_RELEASE)
 	info.BoundOptions(COMMAND_LIST, OPT_SHOW_ALL)
+	info.BoundOptions(COMMAND_LIST, OPT_STATUS)
 	info.BoundOptions(COMMAND_LIST, OPT_TESTING)
 	info.BoundOptions(COMMAND_PAYLOAD, OPT_ARCH)
 	info.BoundOptions(COMMAND_PURGE_CACHE, OPT_RELEASE)
@@ -587,9 +588,9 @@ func genUsage() *usage.Info {
 	info.BoundOptions(COMMAND_RELEASE, OPT_FORCE)
 	info.BoundOptions(COMMAND_REMOVE, OPT_ALL)
 	info.BoundOptions(COMMAND_REMOVE, OPT_FORCE)
-	info.BoundOptions(COMMAND_UNRELEASE, OPT_FORCE)
 	info.BoundOptions(COMMAND_STATS, OPT_RELEASE)
 	info.BoundOptions(COMMAND_STATS, OPT_TESTING)
+	info.BoundOptions(COMMAND_UNRELEASE, OPT_FORCE)
 	info.BoundOptions(COMMAND_WHICH_SOURCE, OPT_RELEASE)
 	info.BoundOptions(COMMAND_WHICH_SOURCE, OPT_TESTING)
 
