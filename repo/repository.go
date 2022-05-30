@@ -86,10 +86,13 @@ type Package struct {
 	Epoch     string        // Epoch
 	ArchFlags data.ArchFlag // Archs flag
 	Src       string        // Source package name
-	Files     []PackageFile // RPM files list
+	Files     PackageFiles  // RPM files list
 
 	Info *PackageInfo // Additional info
 }
+
+// PackageFiles is slice with package files
+type PackageFiles []PackageFile
 
 // PackageInfo contains additional information about package
 type PackageInfo struct {
@@ -216,6 +219,19 @@ func (p *Package) HasArch(arch string) bool {
 	}
 
 	return p.ArchFlags.Has(archFlag)
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// HasArch returns true if slice contains given arch
+func (p PackageFiles) HasArch(arch string) bool {
+	for _, pf := range p {
+		if pf.Arch == arch {
+			return true
+		}
+	}
+
+	return false
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -375,11 +391,12 @@ func (r *Repository) IsPackageReleased(pkg *Package) (bool, time.Time, error) {
 	}
 
 	for _, arch := range data.ArchList {
-		if !r.Release.HasArch(arch) || r.Release.IsEmpty(arch) {
+		switch {
+		case arch == data.ARCH_NOARCH, !r.Release.HasArch(arch), r.Release.IsEmpty(arch):
 			continue
 		}
 
-		if !pkg.HasArch(arch) {
+		if !pkg.HasArch(arch) && !pkg.Files.HasArch(arch) {
 			continue
 		}
 
