@@ -69,6 +69,18 @@ func (s *RepoSuite) TestPackage(c *C) {
 	c.Assert(p.HasArch("abcd"), Equals, false)
 }
 
+func (s *RepoSuite) TestPackageFiles(c *C) {
+	pf := PackageFiles{
+		PackageFile{data.ARCH_SRC, "test-package-1.0.0-0.el7.src.rpm"},
+		PackageFile{data.ARCH_X64, "test-package-1.0.0-0.el7.x86_64.rpm"},
+	}
+
+	c.Assert(pf.HasArch(data.ARCH_SRC), Equals, true)
+	c.Assert(pf.HasArch(data.ARCH_X64), Equals, true)
+	c.Assert(pf.HasArch(""), Equals, false)
+	c.Assert(pf.HasArch(data.ARCH_I386), Equals, false)
+}
+
 func (s *RepoSuite) TestPackageStack(c *C) {
 	var ps PackageStack
 
@@ -85,7 +97,7 @@ func (s *RepoSuite) TestPackageStack(c *C) {
 				Version:   "1.0.0",
 				Release:   "0.el7",
 				ArchFlags: data.ARCH_FLAG_X64 | data.ARCH_FLAG_SRC,
-				Files: []PackageFile{
+				Files: PackageFiles{
 					PackageFile{data.ARCH_SRC, "test-package-1.0.0-0.el7.src.rpm"},
 					PackageFile{data.ARCH_X64, "test-package-1.0.0-0.el7.x86_64.rpm"},
 				},
@@ -95,7 +107,7 @@ func (s *RepoSuite) TestPackageStack(c *C) {
 				Version:   "1.0.1",
 				Release:   "0.el7",
 				ArchFlags: data.ARCH_FLAG_X64,
-				Files: []PackageFile{
+				Files: PackageFiles{
 					PackageFile{data.ARCH_X64, "test-package-1.0.1-0.el7.x86_64.rpm"},
 				},
 			},
@@ -105,7 +117,7 @@ func (s *RepoSuite) TestPackageStack(c *C) {
 	c.Assert(ps.HasMultiBundles(), Equals, true)
 	c.Assert(ps.GetArchsFlag(), Equals, data.ARCH_FLAG_X64|data.ARCH_FLAG_SRC)
 	c.Assert(ps.GetArchs(), DeepEquals, []string{"src", "x86_64"})
-	c.Assert(ps.FlattenFiles(), DeepEquals, []PackageFile{
+	c.Assert(ps.FlattenFiles(), DeepEquals, PackageFiles{
 		PackageFile{data.ARCH_SRC, "test-package-1.0.0-0.el7.src.rpm"},
 		PackageFile{data.ARCH_X64, "test-package-1.0.0-0.el7.x86_64.rpm"},
 		PackageFile{data.ARCH_X64, "test-package-1.0.1-0.el7.x86_64.rpm"},

@@ -288,12 +288,12 @@ func (s PackageStack) GetArchs() []string {
 }
 
 // FlattenFiles returns slice with all packages files in stack
-func (s PackageStack) FlattenFiles() []PackageFile {
+func (s PackageStack) FlattenFiles() PackageFiles {
 	if s.IsEmpty() {
 		return nil
 	}
 
-	var result []PackageFile
+	var result PackageFiles
 
 	for _, bundle := range s {
 		for _, pkg := range bundle {
@@ -757,7 +757,7 @@ ROWSLOOP:
 				Epoch:     pkgEpc.String,
 				ArchFlags: data.SupportedArchs[pkgArch.String].Flag,
 				Src:       sourceRPM,
-				Files:     []PackageFile{PackageFile{arch, pkgHREF.String}},
+				Files:     PackageFiles{PackageFile{arch, pkgHREF.String}},
 			},
 		)
 	}
@@ -953,7 +953,7 @@ func (r *SubRepository) collectPackageBasicInfo(name, arch string) (*Package, st
 		Epoch:     pkgEpc.String,
 		ArchFlags: data.SupportedArchs[pkgArch.String].Flag,
 		Src:       pkgSrc.String,
-		Files:     []PackageFile{PackageFile{arch, pkgHREF.String}},
+		Files:     PackageFiles{PackageFile{arch, pkgHREF.String}},
 		Info: &PackageInfo{
 			Summary:       pkgSum.String,
 			Desc:          pkgDesc.String,
