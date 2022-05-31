@@ -285,6 +285,7 @@ func helpFind() {
 			{"n:'*utils*'", "Search packages with substring \"utils\" in name"},
 			{"n:nginx v:1.21.3", "Search packages with given name and version"},
 			{"n:nginx v:1.21.3 r:1.el7", "Search packages with given name, version and release"},
+			{"n:nginx v:1.21.3 r::1.*", "Search packages with given name, version and release which NOT equals 1"},
 			{"n:nginx v:'1.19.6|1.21.3|1.21.0'", "Search packages with given name and versions"},
 			{"my-package a:x86_64", "Search packages with given name and architecture"},
 			{"s:redis-6.0.4-0.el7.src", "Search packages built from given source package"},
