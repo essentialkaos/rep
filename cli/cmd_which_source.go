@@ -105,7 +105,7 @@ func printPackageStackSources(r *repo.SubRepository, stack repo.PackageStack) {
 				pkgInfo += "{s-}" + pkg.Epoch + ":{!}"
 			}
 
-			if options.GetB(OPT_STATUS) && r.Name == data.REPO_TESTING {
+			if options.GetB(OPT_STATUS) && r.Is(data.REPO_TESTING) {
 				isReleased, _, _ := r.Parent.IsPackageReleased(pkg)
 
 				if isReleased {

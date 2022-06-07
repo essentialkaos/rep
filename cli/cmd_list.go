@@ -148,7 +148,7 @@ func genListArchInfo(pkg *repo.Package, archList []string) string {
 func genListPkgName(r *repo.SubRepository, pkg *repo.Package, filter string) string {
 	pkgName := pkg.FullName()
 
-	if options.GetB(OPT_STATUS) && r.Name == data.REPO_TESTING {
+	if options.GetB(OPT_STATUS) && r.Is(data.REPO_TESTING) {
 		isReleased, _, _ := r.Parent.IsPackageReleased(pkg)
 
 		if isReleased {

@@ -666,7 +666,6 @@ func (r *SubRepository) IsEmpty(arch string) bool {
 }
 
 // Is is shortcut for checking sub-repository name
-// TODO: Use it more
 func (r *SubRepository) Is(name string) bool {
 	return r.Name == name
 }
