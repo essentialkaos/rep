@@ -23,7 +23,7 @@ import (
 
 // cmdRemove is 'remove' command handler
 func cmdRemove(ctx *context, args options.Arguments) bool {
-	searchQuery, err := query.Parse(args.Strings())
+	searchRequest, err := query.Parse(args.Strings())
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())
@@ -32,7 +32,7 @@ func cmdRemove(ctx *context, args options.Arguments) bool {
 
 	var testingStack, releaseStack repo.PackageStack
 
-	testingStack, err = ctx.Repo.Testing.Find(searchQuery)
+	testingStack, err = findPackages(ctx.Repo.Testing, searchRequest)
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())
@@ -40,7 +40,7 @@ func cmdRemove(ctx *context, args options.Arguments) bool {
 	}
 
 	if options.GetB(OPT_ALL) {
-		releaseStack, err = ctx.Repo.Release.Find(searchQuery)
+		releaseStack, err = findPackages(ctx.Repo.Release, searchRequest)
 
 		if err != nil {
 			terminal.PrintErrorMessage(err.Error())

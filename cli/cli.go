@@ -574,6 +574,7 @@ func genUsage() *usage.Info {
 	info.BoundOptions(COMMAND_ADD, OPT_NO_SOURCE)
 	info.BoundOptions(COMMAND_FIND, OPT_RELEASE)
 	info.BoundOptions(COMMAND_FIND, OPT_TESTING)
+	info.BoundOptions(COMMAND_FIND, OPT_STATUS)
 	info.BoundOptions(COMMAND_INFO, OPT_ARCH)
 	info.BoundOptions(COMMAND_LIST, OPT_RELEASE)
 	info.BoundOptions(COMMAND_LIST, OPT_SHOW_ALL)

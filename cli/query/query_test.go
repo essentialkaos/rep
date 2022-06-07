@@ -29,24 +29,45 @@ var _ = Suite(&QueryParserSuite{})
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 func (s *QueryParserSuite) TestParser(c *C) {
-	q, err := Parse(nil)
+	sr, err := Parse(nil)
 
-	c.Assert(q, HasLen, 0)
+	c.Assert(sr, IsNil)
 
-	q, err = Parse([]string{"", "", ""})
+	sr, err = Parse([]string{"", "", ""})
 
-	c.Assert(q, HasLen, 0)
+	c.Assert(sr, IsNil)
 
-	q, err = Parse([]string{"k:test"})
+	sr, err = Parse([]string{"k:test"})
 
 	c.Assert(err, NotNil)
-	c.Assert(q, IsNil)
+	c.Assert(sr, IsNil)
 
-	q, err = Parse([]string{"n:test"})
+	sr, err = Parse([]string{"n:test"})
 
 	c.Assert(err, IsNil)
-	c.Assert(q, NotNil)
-	c.Assert(q, HasLen, 1)
+	c.Assert(sr, NotNil)
+	c.Assert(sr.Query, HasLen, 1)
+}
+
+func (s *QueryParserSuite) TestFlagsParser(c *C) {
+	sr, err := Parse([]string{"n:test", "^:yes"})
+
+	c.Assert(err, IsNil)
+	c.Assert(sr, NotNil)
+	c.Assert(sr.Query, HasLen, 1)
+	c.Assert(sr.FilterFlag, Equals, FILTER_FLAG_RELEASED)
+
+	sr, err = Parse([]string{"n:test", "^:no"})
+
+	c.Assert(err, IsNil)
+	c.Assert(sr, NotNil)
+	c.Assert(sr.Query, HasLen, 1)
+	c.Assert(sr.FilterFlag, Equals, FILTER_FLAG_UNRELEASED)
+
+	sr, err = Parse([]string{"n:test", "^:test"})
+
+	c.Assert(err, NotNil)
+	c.Assert(sr, IsNil)
 }
 
 func (s *QueryParserSuite) TestTermParser(c *C) {
@@ -158,6 +179,33 @@ func (s *QueryParserSuite) TestSizeTermParser(c *C) {
 	c.Assert(err, NotNil)
 }
 
+func (s *QueryParserSuite) TestBoolTermParser(c *C) {
+	v, err := parseBoolTermValue("true", false)
+
+	c.Assert(v, Equals, true)
+	c.Assert(err, IsNil)
+
+	v, err = parseBoolTermValue("false", false)
+
+	c.Assert(v, Equals, false)
+	c.Assert(err, IsNil)
+
+	v, err = parseBoolTermValue("true", true)
+
+	c.Assert(v, Equals, false)
+	c.Assert(err, IsNil)
+
+	v, err = parseBoolTermValue("test", true)
+
+	c.Assert(v, Equals, false)
+	c.Assert(err, NotNil)
+
+	v, err = parseBoolTermValue("", true)
+
+	c.Assert(v, Equals, false)
+	c.Assert(err, NotNil)
+}
+
 func (s *QueryParserSuite) TestDepNameParser(c *C) {
 	dep := extractDepInfo("webkaos>=2:3.8.1-4.el7")
 	c.Assert(dep.Name, Equals, "webkaos")
@@ -195,7 +243,7 @@ func (s *QueryParserSuite) TestDepNameParser(c *C) {
 	c.Assert(condToFlag(""), Equals, data.CompFlag(data.COMP_FLAG_ANY))
 
 	// Check parsing errors
-	t, err := parseDepTerm(search.TERM_PROVIDES, "webkaos>=", 0)
+	t, err := parseDepTermValue(search.TERM_PROVIDES, "webkaos>=", 0)
 	c.Assert(t, IsNil)
 	c.Assert(err, NotNil)
 }

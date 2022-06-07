@@ -243,8 +243,10 @@ func (s PackageStack) HasMultiBundles() bool {
 	}
 
 	for _, bundle := range s {
-		if len(bundle) > 1 {
-			return true
+		if bundle != nil {
+			if len(bundle) > 1 {
+				return true
+			}
 		}
 	}
 
@@ -260,8 +262,12 @@ func (s PackageStack) GetArchsFlag() data.ArchFlag {
 	var flag data.ArchFlag
 
 	for _, bundle := range s {
-		for _, pkg := range bundle {
-			flag |= pkg.ArchFlags
+		if bundle != nil {
+			for _, pkg := range bundle {
+				if pkg != nil {
+					flag |= pkg.ArchFlags
+				}
+			}
 		}
 	}
 
@@ -296,9 +302,13 @@ func (s PackageStack) FlattenFiles() PackageFiles {
 	var result PackageFiles
 
 	for _, bundle := range s {
-		for _, pkg := range bundle {
-			for _, file := range pkg.Files {
-				result = append(result, file)
+		if bundle != nil {
+			for _, pkg := range bundle {
+				if pkg != nil {
+					for _, file := range pkg.Files {
+						result = append(result, file)
+					}
+				}
 			}
 		}
 	}
@@ -308,7 +318,15 @@ func (s PackageStack) FlattenFiles() PackageFiles {
 
 // IsEmpty returns true if package stack is empty
 func (s PackageStack) IsEmpty() bool {
-	return len(s) == 0
+	for _, bundle := range s {
+		for _, pkg := range bundle {
+			if pkg != nil {
+				return false
+			}
+		}
+	}
+
+	return true
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -642,9 +660,15 @@ func (r *SubRepository) HasArch(arch string) bool {
 	return r.Parent.storage.HasArch(r.Name, arch)
 }
 
-// returns true if repository is empty (no packages)
+// IsEmpty returns true if sub-repository is empty (no packages)
 func (r *SubRepository) IsEmpty(arch string) bool {
 	return r.Parent.storage.IsEmpty(r.Name, arch)
+}
+
+// Is is shortcut for checking sub-repository name
+// TODO: Use it more
+func (r *SubRepository) Is(name string) bool {
+	return r.Name == name
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

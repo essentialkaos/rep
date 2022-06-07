@@ -24,14 +24,14 @@ import (
 
 // cmdRelease is 'release' command handler
 func cmdRelease(ctx *context, args options.Arguments) bool {
-	searchQuery, err := query.Parse(args.Strings())
+	searchRequest, err := query.Parse(args.Strings())
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())
 		return false
 	}
 
-	stack, err := ctx.Repo.Testing.Find(searchQuery)
+	stack, err := findPackages(ctx.Repo.Testing, searchRequest)
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())

@@ -300,6 +300,8 @@ func helpFind() {
 			{"S:50mb-100mb", "Search packages with a size between 50 and 100 megabytes"},
 			{"f:'/etc/redis.conf'", "Search packages with configuration file \"/etc/redis.conf\""},
 			{"@:'/usr/include/curl/*.h'", "Search packages with header files for cURL"},
+			{"n:nginx ^:no", "All nginx packages which not yet released"},
+			{"n:nginx ^:true", "All released nginx packages"},
 			{
 				"postgres v:'10.*' | grep -E '(devel|docs)' | awk -F'/' '{print $NF}' | sort -u",
 				"Search packages and process list with found rpm files with grep, awk, and sort",
@@ -336,6 +338,7 @@ func helpFind() {
 	help.Query(query.TERM_SHORT_SIZE, query.TERM_SIZE, "Package size", "Size")
 	help.Query(query.TERM_SHORT_FILE, query.TERM_FILE, "Path of config, binary or executable file provided by package", "String")
 	help.Query(query.TERM_SHORT_PAYLOAD, query.TERM_PAYLOAD, "Path of file or directory in package", "String")
+	help.Query(query.TERM_SHORT_RELEASED, query.TERM_RELEASED, "Release status", "Boolean")
 
 	fmtc.NewLine()
 
@@ -343,6 +346,7 @@ func helpFind() {
 
 	fmtc.Println("    {s-}•{!} String        Any string value")
 	fmtc.Println("    {s-}•{!} Number        Integer greater or equal to zero")
+	fmtc.Println("    {s-}•{!} Boolean       Boolean value {s}(yes/true/1 or no/false/0){!}")
 	fmtc.Println("    {s-}•{!} SemVer        Version in semantic versioning format")
 	fmtc.Println("    {s-}•{!} Dependency    Package name with or without version and release condition")
 	fmtc.Println("    {s-}•{!} Architecture  Package architecture {s}(" + strings.Join(data.ArchList, ", ") + "){!}")

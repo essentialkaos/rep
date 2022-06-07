@@ -24,14 +24,14 @@ import (
 
 // cmdUnrelease is 'unrelease' command handler
 func cmdUnrelease(ctx *context, args options.Arguments) bool {
-	searchQuery, err := query.Parse(args.Strings())
+	searchRequest, err := query.Parse(args.Strings())
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())
 		return false
 	}
 
-	stack, err := ctx.Repo.Release.Find(searchQuery)
+	stack, err := findPackages(ctx.Repo.Release, searchRequest)
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())

@@ -74,6 +74,26 @@ const (
 	TERM_PAYLOAD     = "payload"
 )
 
+const (
+	TERM_SHORT_RELEASED = "^"
+
+	TERM_RELEASED = "released"
+)
+
+const (
+	FILTER_FLAG_NONE       uint8 = 0
+	FILTER_FLAG_RELEASED   uint8 = 1
+	FILTER_FLAG_UNRELEASED uint8 = 2
+)
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// Request contains parsed query data
+type Request struct {
+	Query      search.Query
+	FilterFlag uint8
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 var terms = map[string]uint8{
@@ -126,36 +146,55 @@ var terms = map[string]uint8{
 	TERM_PAYLOAD:     search.TERM_PAYLOAD,
 }
 
+var extTerm = map[string]bool{
+	TERM_SHORT_RELEASED: true,
+	TERM_RELEASED:       true,
+}
+
 var depRegex = regexp.MustCompile(`([a-zA-Z0-9\._\-:\(\)\*]+)(>=|<=|>|<|=)?([0-9]:)?([0-9a-z\.\*]+)?-?(.*)?`)
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Parse parses string with data and creates search query
-func Parse(q []string) (search.Query, error) {
-	var query search.Query
+func Parse(q []string) (*Request, error) {
+	result := &Request{}
 
 	for _, rawTerm := range q {
 		if len(rawTerm) == 0 {
 			continue
 		}
 
-		term, err := parseTerm(rawTerm)
+		termName, _, _ := extractTermInfo(rawTerm)
 
-		if err != nil {
-			return nil, err
+		if extTerm[termName] {
+			err := parseExtTerm(rawTerm, result)
+
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			term, err := parseTerm(rawTerm)
+
+			if err != nil {
+				return nil, err
+			}
+
+			result.Query = append(result.Query, term)
 		}
-
-		query = append(query, term)
 	}
 
-	return query, nil
+	if result.Query == nil {
+		return nil, nil
+	}
+
+	return result, nil
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // parseTerm parses query term
-func parseTerm(t string) (*search.Term, error) {
-	name, value, isNegative := extractTermInfo(t)
+func parseTerm(rawTerm string) (*search.Term, error) {
+	name, value, isNegative := extractTermInfo(rawTerm)
 	termType, mod := terms[name], uint8(0)
 
 	if name != "" {
@@ -184,21 +223,21 @@ func parseTerm(t string) (*search.Term, error) {
 		value = strings.ReplaceAll(value, "x32", "i386")
 		return search.TermArch(value, mod), nil
 	case search.TERM_REQUIRES:
-		return parseDepTerm(search.TERM_REQUIRES, value, mod)
+		return parseDepTermValue(search.TERM_REQUIRES, value, mod)
 	case search.TERM_PROVIDES:
-		return parseDepTerm(search.TERM_PROVIDES, value, mod)
+		return parseDepTermValue(search.TERM_PROVIDES, value, mod)
 	case search.TERM_RECOMMENDS:
-		return parseDepTerm(search.TERM_RECOMMENDS, value, mod)
+		return parseDepTermValue(search.TERM_RECOMMENDS, value, mod)
 	case search.TERM_CONFLICTS:
-		return parseDepTerm(search.TERM_CONFLICTS, value, mod)
+		return parseDepTermValue(search.TERM_CONFLICTS, value, mod)
 	case search.TERM_OBSOLETES:
-		return parseDepTerm(search.TERM_OBSOLETES, value, mod)
+		return parseDepTermValue(search.TERM_OBSOLETES, value, mod)
 	case search.TERM_ENHANCES:
-		return parseDepTerm(search.TERM_ENHANCES, value, mod)
+		return parseDepTermValue(search.TERM_ENHANCES, value, mod)
 	case search.TERM_SUGGESTS:
-		return parseDepTerm(search.TERM_SUGGESTS, value, mod)
+		return parseDepTermValue(search.TERM_SUGGESTS, value, mod)
 	case search.TERM_SUPPLEMENTS:
-		return parseDepTerm(search.TERM_SUPPLEMENTS, value, mod)
+		return parseDepTermValue(search.TERM_SUPPLEMENTS, value, mod)
 	case search.TERM_FILE:
 		return search.TermFile(value, mod), nil
 	case search.TERM_SOURCE:
@@ -212,9 +251,9 @@ func parseTerm(t string) (*search.Term, error) {
 	case search.TERM_BUILD_HOST:
 		return search.TermBuildHost(value, mod), nil
 	case search.TERM_DATE_ADD, search.TERM_DATE_BUILD:
-		return parseDateTerm(termType, value, mod)
+		return parseDateTermValue(termType, value, mod)
 	case search.TERM_SIZE:
-		return parseSizeTerm(value, mod)
+		return parseSizeTermValue(value, mod)
 	case search.TERM_PAYLOAD:
 		return search.TermPayload(value, mod), nil
 	default:
@@ -222,8 +261,29 @@ func parseTerm(t string) (*search.Term, error) {
 	}
 }
 
-// parseDateTerm parses date term
-func parseDateTerm(termType uint8, value string, mod uint8) (*search.Term, error) {
+// parseExtTerm parses extended (not supported by search package) terms
+func parseExtTerm(rawTerm string, searchResult *Request) error {
+	name, value, isNegative := extractTermInfo(rawTerm)
+
+	if name == TERM_RELEASED || name == TERM_SHORT_RELEASED {
+		v, err := parseBoolTermValue(value, isNegative)
+
+		if err != nil {
+			return err
+		}
+
+		if v {
+			searchResult.FilterFlag = FILTER_FLAG_RELEASED
+		} else {
+			searchResult.FilterFlag = FILTER_FLAG_UNRELEASED
+		}
+	}
+
+	return nil
+}
+
+// parseDateTermValue parses date term value
+func parseDateTermValue(termType uint8, value string, mod uint8) (*search.Term, error) {
 	dur, err := timeutil.ParseDuration(value, 'd')
 
 	if err != nil {
@@ -236,8 +296,30 @@ func parseDateTerm(termType uint8, value string, mod uint8) (*search.Term, error
 	return &search.Term{Type: termType, Value: search.Range{from, to}, Modificator: mod}, nil
 }
 
-// parseSizeTerm parses size term
-func parseSizeTerm(value string, mod uint8) (*search.Term, error) {
+// parseBoolTermValue parses boolean term value
+func parseBoolTermValue(value string, isNegative bool) (bool, error) {
+	var result bool
+
+	switch strings.ToLower(value) {
+	case "":
+		return false, fmt.Errorf("Query term value can not be empty")
+	case "yes", "y", "true", "1":
+		result = true
+	case "no", "n", "false", "0":
+		result = false
+	default:
+		return false, fmt.Errorf("Unsupported query term value %q", value)
+	}
+
+	if isNegative {
+		return !result, nil
+	}
+
+	return result, nil
+}
+
+// parseSizeTermValue parses size term value
+func parseSizeTermValue(value string, mod uint8) (*search.Term, error) {
 	var from, to uint64
 
 	switch {
@@ -267,8 +349,8 @@ func parseSizeTerm(value string, mod uint8) (*search.Term, error) {
 	return search.TermSize(int64(from), int64(to), mod), nil
 }
 
-// parseDepTerm parses term with dependency info (used for requires/provides)
-func parseDepTerm(termType uint8, value string, mod uint8) (*search.Term, error) {
+// parseDepTermValue parses term with dependency info (used for requires/provides)
+func parseDepTermValue(termType uint8, value string, mod uint8) (*search.Term, error) {
 	dep := extractDepInfo(value)
 
 	if dep.Flag != data.COMP_FLAG_ANY {
@@ -294,14 +376,14 @@ func extractDepInfo(v string) data.Dependency {
 }
 
 // extractTermInfo extracts info from token
-func extractTermInfo(t string) (string, string, bool) {
-	if !strings.Contains(t, ":") {
-		return "", t, false
+func extractTermInfo(rawTerm string) (string, string, bool) {
+	if !strings.Contains(rawTerm, ":") {
+		return "", rawTerm, false
 	}
 
-	sepIndex := strings.Index(t, ":")
-	name := t[:sepIndex]
-	value := t[sepIndex+1:]
+	sepIndex := strings.Index(rawTerm, ":")
+	name := rawTerm[:sepIndex]
+	value := rawTerm[sepIndex+1:]
 	isNegative := false
 
 	if strings.HasPrefix(value, ":") {

@@ -17,10 +17,8 @@ import (
 	"github.com/essentialkaos/ek/v12/terminal"
 
 	"github.com/essentialkaos/rep/cli/query"
-
 	"github.com/essentialkaos/rep/repo"
 	"github.com/essentialkaos/rep/repo/data"
-	"github.com/essentialkaos/rep/repo/search"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -28,7 +26,7 @@ import (
 // cmdWhichSource is 'which-source' command handler
 func cmdWhichSource(ctx *context, args options.Arguments) bool {
 	showAll := !options.GetB(OPT_RELEASE) && !options.GetB(OPT_TESTING)
-	searchQuery, err := query.Parse(args.Strings())
+	searchRequest, err := query.Parse(args.Strings())
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())
@@ -36,7 +34,7 @@ func cmdWhichSource(ctx *context, args options.Arguments) bool {
 	}
 
 	if options.GetB(OPT_RELEASE) || showAll {
-		status := findSources(ctx.Repo.Release, searchQuery)
+		status := findSources(ctx.Repo.Release, searchRequest)
 
 		if status != true {
 			return false
@@ -44,7 +42,7 @@ func cmdWhichSource(ctx *context, args options.Arguments) bool {
 	}
 
 	if options.GetB(OPT_TESTING) || showAll {
-		status := findSources(ctx.Repo.Testing, searchQuery)
+		status := findSources(ctx.Repo.Testing, searchRequest)
 
 		if status != true {
 			return false
@@ -59,11 +57,11 @@ func cmdWhichSource(ctx *context, args options.Arguments) bool {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // findSources tries to find source package name
-func findSources(r *repo.SubRepository, q search.Query) bool {
+func findSources(r *repo.SubRepository, searchRequest *query.Request) bool {
 	fmtutil.Separator(true, strings.ToUpper(r.Name))
 	fmtc.NewLine()
 
-	stack, err := r.Find(q)
+	stack, err := findPackages(r, searchRequest)
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())

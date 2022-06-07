@@ -172,6 +172,9 @@ func (s *RepoSuite) TestRepositoryInitialize(c *C) {
 
 	c.Assert(r.HasArch(data.ARCH_X64), Equals, true)
 	c.Assert(r.HasArch(data.ARCH_I686), Equals, false)
+
+	c.Assert(r.Testing.Is(data.REPO_TESTING), Equals, true)
+	c.Assert(r.Testing.Is(data.REPO_RELEASE), Equals, false)
 }
 
 func (s *RepoSuite) TestRepositoryCopyPackage(c *C) {

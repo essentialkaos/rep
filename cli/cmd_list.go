@@ -88,7 +88,9 @@ func printPackageStack(r *repo.SubRepository, stack repo.PackageStack, filter st
 	archList := stack.GetArchs()
 
 	for _, bundle := range stack {
-		printPackageBundle(r, bundle, archList, stack.HasMultiBundles(), filter)
+		if bundle != nil {
+			printPackageBundle(r, bundle, archList, stack.HasMultiBundles(), filter)
+		}
 	}
 }
 
@@ -104,6 +106,10 @@ func printPackageBundle(r *repo.SubRepository, bundle repo.PackageBundle, archLi
 	var groupSym string
 
 	for index, pkg := range bundle {
+		if pkg == nil {
+			continue
+		}
+
 		switch {
 		case index == 0 && len(bundle) == 1 && hasMultiBundle:
 			groupSym = "   "

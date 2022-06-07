@@ -8,6 +8,8 @@ package cli
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"fmt"
+
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fmtutil"
 	"github.com/essentialkaos/ek/v12/options"
@@ -15,14 +17,14 @@ import (
 
 	"github.com/essentialkaos/rep/cli/query"
 	"github.com/essentialkaos/rep/repo"
-	"github.com/essentialkaos/rep/repo/search"
+	"github.com/essentialkaos/rep/repo/data"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // cmdFind is 'find' command handler
 func cmdFind(ctx *context, args options.Arguments) bool {
-	searchQuery, err := query.Parse(args.Strings())
+	searchRequest, err := query.Parse(args.Strings())
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())
@@ -30,13 +32,13 @@ func cmdFind(ctx *context, args options.Arguments) bool {
 	}
 
 	if options.GetB(OPT_DEBUG) {
-		printQueryDebug(searchQuery)
+		printQueryDebug(searchRequest)
 	}
 
 	showAll := !options.GetB(OPT_RELEASE) && !options.GetB(OPT_TESTING)
 
 	if showAll || options.GetB(OPT_RELEASE) {
-		status := findPackages(ctx.Repo.Release, searchQuery)
+		status := findAndShowPackages(ctx.Repo.Release, searchRequest)
 
 		if status != true {
 			return false
@@ -44,7 +46,7 @@ func cmdFind(ctx *context, args options.Arguments) bool {
 	}
 
 	if showAll || options.GetB(OPT_TESTING) {
-		status := findPackages(ctx.Repo.Testing, searchQuery)
+		status := findAndShowPackages(ctx.Repo.Testing, searchRequest)
 
 		if status != true {
 			return false
@@ -60,9 +62,33 @@ func cmdFind(ctx *context, args options.Arguments) bool {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// findPackages tries to find packages with given query
-func findPackages(r *repo.SubRepository, q search.Query) bool {
-	stack, err := r.Find(q)
+// findPackages tries to find packages with given search request
+func findPackages(r *repo.SubRepository, searchRequest *query.Request) (repo.PackageStack, error) {
+	if searchRequest == nil {
+		return nil, fmt.Errorf("Search query must have at least one search (non-filtering) term")
+	}
+
+	stack, err := r.Find(searchRequest.Query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !stack.IsEmpty() && searchRequest.FilterFlag != query.FILTER_FLAG_NONE {
+		switch searchRequest.FilterFlag {
+		case query.FILTER_FLAG_RELEASED:
+			stack = filterPackagesByReleaseStatus(r, stack, true)
+		case query.FILTER_FLAG_UNRELEASED:
+			stack = filterPackagesByReleaseStatus(r, stack, false)
+		}
+	}
+
+	return stack, err
+}
+
+// findAndShowPackages tries to find packages with given search request and show it
+func findAndShowPackages(r *repo.SubRepository, searchRequest *query.Request) bool {
+	stack, err := findPackages(r, searchRequest)
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())
@@ -75,9 +101,8 @@ func findPackages(r *repo.SubRepository, q search.Query) bool {
 }
 
 // printQueryDebug prints debug search query info
-func printQueryDebug(q search.Query) {
-
-	for index, term := range q {
+func printQueryDebug(searchRequest *query.Request) {
+	for index, term := range searchRequest.Query {
 		db, qrs := term.SQL()
 
 		for _, qr := range qrs {
@@ -86,4 +111,31 @@ func printQueryDebug(q search.Query) {
 	}
 
 	fmtc.NewLine()
+}
+
+// filterPackagesByReleaseStatus filters given package stack by released status
+func filterPackagesByReleaseStatus(r *repo.SubRepository, stack repo.PackageStack, released bool) repo.PackageStack {
+	if r.Is(data.REPO_RELEASE) {
+		if released {
+			return stack
+		} else {
+			return nil
+		}
+	}
+
+	for _, bundle := range stack {
+		if bundle != nil {
+			for index, pkg := range bundle {
+				if pkg != nil {
+					isReleased, _, err := r.Parent.IsPackageReleased(pkg)
+
+					if err == nil && isReleased != released {
+						bundle[index] = nil
+					}
+				}
+			}
+		}
+	}
+
+	return stack
 }
