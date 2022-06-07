@@ -42,7 +42,11 @@ func showApplicationInfo(gitRev string) {
 	}
 
 	if gitRev != "" {
-		fmtc.Printf("  {*}%-12s{!} %s\n", "Git SHA:", gitRev)
+		if fmtc.IsTrueColorSupported() {
+			fmtc.Printf("  {*}%-12s{!} %s {#"+strutil.Head(gitRev, 6)+"}●{!}\n", "Git SHA:", gitRev)
+		} else {
+			fmtc.Printf("  {*}%-12s{!} %s\n", "Git SHA:", gitRev)
+		}
 	}
 }
 
