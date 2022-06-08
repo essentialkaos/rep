@@ -162,8 +162,10 @@ jobs:
 
       - name: Generate HTML coverage report
         uses: essentialkaos/htmlcov-action@v1
+        if: ${{ github.event_name == 'pull_request' }}
         with:
-          profile: ${{env.SRC_DIR}}/cover.out
+          path: ${{env.SRC_DIR}}
+          profile: cover.out
           output: coverage-${{matrix.go}}
 
   SendCoverage:
