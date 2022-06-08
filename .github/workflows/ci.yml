@@ -166,7 +166,7 @@ jobs:
         with:
           path: ${{env.SRC_DIR}}
           profile: cover.out
-          output: coverage-${{matrix.go}}
+          output: coverage-report-${{runner.os}}-${{matrix.go}}
 
   SendCoverage:
     name: Send Coverage
