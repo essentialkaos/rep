@@ -160,6 +160,12 @@ jobs:
           parallel: true
           flag-name: linux-${{ matrix.go }}
 
+      - name: Generate HTML coverage report
+        uses: essentialkaos/htmlcov-action@v1
+        with:
+          profile: ${{env.SRC_DIR}}/cover.out
+          output: coverage-${{matrix.go}}
+
   SendCoverage:
     name: Send Coverage
     runs-on: ubuntu-latest
