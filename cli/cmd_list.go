@@ -114,11 +114,11 @@ func printPackageBundle(r *repo.SubRepository, bundle repo.PackageBundle, archLi
 		case index == 0 && len(bundle) == 1 && hasMultiBundle:
 			groupSym = "   "
 		case len(bundle) != 1 && index == 0:
-			groupSym = " {s}┌{!} "
+			groupSym = " {s-}┌{!} "
 		case len(bundle) != 1 && index == len(bundle)-1:
-			groupSym = " {s}└{!} "
+			groupSym = " {s-}└{!} "
 		case len(bundle) != 1:
-			groupSym = " {s}│{!} "
+			groupSym = " {s-}│{!} "
 		default:
 			groupSym = " "
 		}
@@ -129,7 +129,7 @@ func printPackageBundle(r *repo.SubRepository, bundle repo.PackageBundle, archLi
 
 // genListArchInfo generates arches info for listing
 func genListArchInfo(pkg *repo.Package, archList []string) string {
-	result := "[ "
+	result := "{s}[{!} "
 
 	for _, arch := range archList {
 		tag := archTags[arch]
@@ -141,7 +141,7 @@ func genListArchInfo(pkg *repo.Package, archList []string) string {
 		}
 	}
 
-	return result + "]"
+	return result + "{s}]{!}"
 }
 
 // genListPkgName generates package name for listing
