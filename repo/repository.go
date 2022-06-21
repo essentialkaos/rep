@@ -39,7 +39,7 @@ const (
 	_SQL_CONTAINS_ONE   = `SELECT pkgKey FROM filelist WHERE length(filetypes) = 1 AND (dirname || "/" || filenames) GLOB ?;`
 	_SQL_CONTAINS_MANY  = `SELECT pkgKey FROM filelist WHERE length(filetypes) > 1 AND filelist_globber(?, dirname, filenames);`
 	_SQL_STATS          = `SELECT SUM(size_package),COUNT(*) FROM packages;`
-	_SQL_INFO_BASE      = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href,summary,description,url,time_file,time_build,rpm_license,rpm_vendor,rpm_group,size_package,size_installed FROM packages WHERE (name || "-" || version || "-" || release) LIKE ? GROUP BY name HAVING MAX(pkgKey) LIMIT 1;`
+	_SQL_INFO_BASE      = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href,summary,description,url,time_file,time_build,rpm_license,rpm_vendor,rpm_group,size_package,size_installed FROM packages WHERE (name || "-" || version || "-" || release) LIKE ? GROUP BY name HAVING MAX(time_build) LIMIT 1;`
 	_SQL_INFO_FILES     = `SELECT f.dirname,f.filenames,f.filetypes FROM filelist f INNER JOIN packages p ON f.pkgKey = p.pkgKey WHERE p.pkgId = ? ORDER BY f.dirname,f.filenames;`
 	_SQL_INFO_REQUIRES  = `SELECT r.name,r.flags,r.epoch,r.version,r.release FROM requires r INNER JOIN packages p ON r.pkgKey = p.pkgKey WHERE p.pkgId = ? ORDER BY r.name;`
 	_SQL_INFO_PROVIDES  = `SELECT r.name,r.flags,r.epoch,r.version,r.release FROM provides r INNER JOIN packages p ON r.pkgKey = p.pkgKey WHERE p.pkgId = ? ORDER BY r.name;`
