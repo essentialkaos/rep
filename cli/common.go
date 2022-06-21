@@ -105,7 +105,7 @@ func getRepoPrivateKey(r *repo.Repository) (*sign.PrivateKey, bool) {
 	var password *secstr.String
 
 	if r.SigningKey.IsEncrypted {
-		password, err = terminal.ReadPasswordSecure("Passphrase to unlock the secret key", true)
+		password, err = terminal.ReadPasswordSecure("Enter passphrase to unlock the secret key", true)
 
 		if err != nil {
 			return nil, false

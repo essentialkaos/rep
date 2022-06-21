@@ -37,6 +37,18 @@ func cmdAdd(ctx *context, args options.Arguments) bool {
 		return false
 	}
 
+	if !options.GetB(OPT_FORCE) {
+		printFilesList(files)
+
+		ok, err := terminal.ReadAnswer("Do you want to add these packages?", "n")
+
+		if err != nil || !ok {
+			return false
+		}
+
+		fmtc.NewLine()
+	}
+
 	if !isSignRequired(ctx.Repo.Testing, files) {
 		return addRPMFiles(ctx, files, nil)
 	}
@@ -51,6 +63,16 @@ func cmdAdd(ctx *context, args options.Arguments) bool {
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
+
+// printFilesList prints list with new packages
+func printFilesList(files []string) {
+	for _, file := range files {
+		filename := path.Base(file)
+		fmtc.Printf("{s-}•{!} "+colorTagPackage+"%s{!}\n", filename)
+	}
+
+	fmtc.NewLine()
+}
 
 // addRPMFiles adds given RPM files to testing repository
 func addRPMFiles(ctx *context, files []string, privateKey *sign.PrivateKey) bool {
