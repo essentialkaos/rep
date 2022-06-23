@@ -53,6 +53,8 @@ func (c *commandHelp) Usage() {
 
 	if cmd != nil && len(cmd.Args) != 0 {
 		fmtc.Print(" " + c.renderArgs(cmd.Args) + "\n")
+	} else {
+		fmtc.Print("\n")
 	}
 
 	fmtc.NewLine()
@@ -148,7 +150,7 @@ func cmdHelp(ctx *context, args options.Arguments) bool {
 
 	switch cmdName {
 	case "":
-		showUsage()
+		helpAll()
 
 	case COMMAND_INIT:
 		helpInit()
@@ -208,6 +210,22 @@ func cmdHelp(ctx *context, args options.Arguments) bool {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// helpAll shows info about all supported commands
+func helpAll() {
+	usageInfo := genUsage()
+
+	for _, c := range usageInfo.Commands {
+		if c.Name == COMMAND_HELP {
+			continue
+		}
+
+		c.Render()
+	}
+
+	fmtc.NewLine()
+	fmtc.Println("  {s}For detailed information about command use{!} {y}help {command}{!}")
+}
+
 // helpInit shows help content about "init" command
 func helpInit() {
 	help := &commandHelp{
@@ -242,8 +260,6 @@ func helpGenKey() {
 
 	help.Usage()
 	help.Paragraph("The command generates new 4096 bits long RSA private key for signing packages.")
-
-	fmtc.NewLine()
 	help.Examples()
 }
 

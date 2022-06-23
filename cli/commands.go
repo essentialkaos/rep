@@ -67,7 +67,7 @@ var commands = map[string]command{
 	COMMAND_REINDEX:            {cmdReindex, 0, false},
 	COMMAND_PURGE_CACHE:        {cmdPurgeCache, 0, false},
 	COMMAND_STATS:              {cmdStats, 0, false},
-	COMMAND_HELP:               {cmdHelp, 1, false},
+	COMMAND_HELP:               {cmdHelp, 0, false},
 	COMMAND_SHORT_LIST:         {cmdList, 0, true},
 	COMMAND_SHORT_WHICH_SOURCE: {cmdWhichSource, 1, false},
 	COMMAND_SHORT_FIND:         {cmdFind, 1, true},
@@ -81,7 +81,7 @@ var commands = map[string]command{
 	COMMAND_SHORT_REINDEX:      {cmdReindex, 0, false},
 	COMMAND_SHORT_PURGE_CACHE:  {cmdPurgeCache, 0, false},
 	COMMAND_SHORT_STATS:        {cmdStats, 0, false},
-	COMMAND_SHORT_HELP:         {cmdHelp, 1, false},
+	COMMAND_SHORT_HELP:         {cmdHelp, 0, false},
 	"":                         {cmdList, 0, false}, // default command
 }
 
