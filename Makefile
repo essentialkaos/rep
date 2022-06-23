@@ -44,9 +44,9 @@ vendor: mod-vendor ## Make vendored copy of dependencies
 
 test: ## Run tests
 ifdef COVERAGE_FILE ## Save coverage data into file (String)
-		go test $(VERBOSE_FLAG) -covermode=count -coverprofile=$(COVERAGE_FILE) ./cli/logger ./cli/query ./repo ./repo/data ./repo/groups ./repo/helpers ./repo/index ./repo/meta ./repo/rpm ./repo/search ./repo/sign ./repo/storage/fs ./repo/storage/utils
+		go test $(VERBOSE_FLAG) -covermode=count -coverprofile=$(COVERAGE_FILE) ./cli/logger ./cli/query ./repo ./repo/data ./repo/groups ./repo/helpers ./repo/index ./repo/meta ./repo/rpm ./repo/search ./repo/sign ./repo/sign/keygen ./repo/storage/fs ./repo/storage/utils
 else
-		go test $(VERBOSE_FLAG) -covermode=count ./cli/logger ./cli/query ./repo ./repo/data ./repo/groups ./repo/helpers ./repo/index ./repo/meta ./repo/rpm ./repo/search ./repo/sign ./repo/storage/fs ./repo/storage/utils
+		go test $(VERBOSE_FLAG) -covermode=count ./cli/logger ./cli/query ./repo ./repo/data ./repo/groups ./repo/helpers ./repo/index ./repo/meta ./repo/rpm ./repo/search ./repo/sign ./repo/sign/keygen ./repo/storage/fs ./repo/storage/utils
 endif
 
 mod-init:

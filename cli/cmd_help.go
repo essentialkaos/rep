@@ -153,6 +153,9 @@ func cmdHelp(ctx *context, args options.Arguments) bool {
 	case COMMAND_INIT:
 		helpInit()
 
+	case COMMAND_GEN_KEY:
+		helpGenKey()
+
 	case COMMAND_LIST, COMMAND_SHORT_LIST:
 		helpList()
 
@@ -222,6 +225,23 @@ func helpInit() {
 	for _, arch := range sliceutil.Exclude(data.ArchList, data.ARCH_NOARCH) {
 		fmtc.Printf("    {s-}•{!} {m}%s{!}\n", arch)
 	}
+
+	fmtc.NewLine()
+	help.Examples()
+}
+
+// helpGenKey shows help content about "gen-key" command
+func helpGenKey() {
+	help := &commandHelp{
+		command: COMMAND_GEN_KEY,
+		info:    genUsage(),
+		examples: []commandExample{
+			{"", "Generate new private key"},
+		},
+	}
+
+	help.Usage()
+	help.Paragraph("The command generates new 4096 bits long RSA private key for signing packages.")
 
 	fmtc.NewLine()
 	help.Examples()

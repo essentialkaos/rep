@@ -53,6 +53,7 @@ type context struct {
 // commands is map [long command → {handler + min args}]
 var commands = map[string]command{
 	COMMAND_INIT:               {cmdInit, 1, false},
+	COMMAND_GEN_KEY:            {cmdGenKey, 0, false},
 	COMMAND_LIST:               {cmdList, 0, true},
 	COMMAND_WHICH_SOURCE:       {cmdWhichSource, 1, false},
 	COMMAND_FIND:               {cmdFind, 1, true},

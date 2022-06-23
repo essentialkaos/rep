@@ -50,6 +50,7 @@ const (
 // Commands
 const (
 	COMMAND_INIT         = "init"
+	COMMAND_GEN_KEY      = "gen-key"
 	COMMAND_LIST         = "list"
 	COMMAND_WHICH_SOURCE = "which-source"
 	COMMAND_FIND         = "find"
@@ -539,6 +540,7 @@ func genUsage() *usage.Info {
 	)
 
 	info.AddCommand(COMMAND_INIT, "Initialize new repository", "arch…")
+	info.AddCommand(COMMAND_GEN_KEY, "Generate private key for signing packages")
 	info.AddCommand(COMMAND_LIST, "List latest versions of packages within repository", "?filter")
 	info.AddCommand(COMMAND_FIND, "Search packages", "query…")
 	info.AddCommand(COMMAND_WHICH_SOURCE, "Show source package name", "query…")

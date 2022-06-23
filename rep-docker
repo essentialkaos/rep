@@ -11,7 +11,7 @@ RED=31
 IMAGE="ghcr.io/essentialkaos/rep:latest"
 
 # Path to working dir (String)
-WORKDIR="$REP_DIR"
+WORKDIR="${REP_DIR:-/opt/rep}"
 
 ################################################################################
 
