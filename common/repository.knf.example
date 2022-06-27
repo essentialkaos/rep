@@ -26,4 +26,4 @@
 [sign]
 
   # Path to PGP private key file for signing packages
-  key: /etc/rep.d/key.private
+  key:
