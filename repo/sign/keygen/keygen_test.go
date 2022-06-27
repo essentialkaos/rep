@@ -12,6 +12,8 @@ import (
 
 	"github.com/essentialkaos/ek/v12/secstr"
 
+	"github.com/essentialkaos/rep/repo/sign"
+
 	. "github.com/essentialkaos/check"
 )
 
@@ -28,30 +30,54 @@ var _ = Suite(&KeygenSuite{})
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 func (s *KeygenSuite) TestErrors(c *C) {
-	_, err := Generate("", "", nil)
-	c.Assert(err, ErrorMatches, "Can't generate signing key: name is empty")
+	_, _, err := Generate("", "", nil)
+	c.Assert(err, ErrorMatches, "Can't generate keys: name is empty")
 
-	_, err = Generate("test", "", nil)
-	c.Assert(err, ErrorMatches, "Can't generate signing key: email is empty")
+	_, _, err = Generate("test", "", nil)
+	c.Assert(err, ErrorMatches, "Can't generate keys: email is empty")
 
-	_, err = Generate("test", "test@domain.com", nil)
-	c.Assert(err, ErrorMatches, "Can't generate signing key: password is empty")
+	_, _, err = Generate("test", "test@domain.com", nil)
+	c.Assert(err, ErrorMatches, "Can't generate keys: password is empty")
 
 	p, _ := secstr.NewSecureString("")
-	_, err = Generate("test", "test@domain.com", p)
-	c.Assert(err, ErrorMatches, "Can't generate signing key: password is empty")
+	_, _, err = Generate("test", "test@domain.com", p)
+	c.Assert(err, ErrorMatches, "Can't generate keys: password is empty")
+	p.Destroy()
 
 	p, _ = secstr.NewSecureString("test1234TEST")
-	_, err = Generate("<<<<", "test@domain.com", p)
-	c.Assert(err, ErrorMatches, "Can't generate signing key: openpgp: invalid argument: user id field contained invalid characters")
+	_, _, err = Generate("<<<<", "test@domain.com", p)
+	c.Assert(err, ErrorMatches, "Can't generate keys: openpgp: invalid argument: user id field contained invalid characters")
+	p.Destroy()
 }
 
 func (s *KeygenSuite) TestGeneration(c *C) {
 	keySize = 1024
 
 	p, _ := secstr.NewSecureString("test1234TEST")
-	key, err := Generate("test", "test@domain.com", p)
+	privKeyData, pubKeyData, err := Generate("test", "test@domain.com", p)
 
 	c.Assert(err, IsNil)
-	c.Assert(key, NotNil)
+	c.Assert(privKeyData, NotNil)
+	c.Assert(pubKeyData, NotNil)
+}
+
+func (s *KeygenSuite) TestFullCycle(c *C) {
+	keySize = 1024
+
+	p, _ := secstr.NewSecureString("test1234TEST")
+	privKeyData, pubKeyData, err := Generate("test", "test@domain.com", p)
+
+	c.Assert(err, IsNil)
+	c.Assert(privKeyData, NotNil)
+	c.Assert(pubKeyData, NotNil)
+
+	k, err := sign.LoadKey(privKeyData)
+
+	c.Assert(err, IsNil)
+	c.Assert(k, NotNil)
+
+	privKey, err := k.Get(p)
+
+	c.Assert(err, IsNil)
+	c.Assert(privKey, NotNil)
 }

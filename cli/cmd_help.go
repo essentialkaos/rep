@@ -254,12 +254,12 @@ func helpGenKey() {
 		command: COMMAND_GEN_KEY,
 		info:    genUsage(),
 		examples: []commandExample{
-			{"", "Generate new private key"},
+			{"", "Generate new private and public keys"},
 		},
 	}
 
 	help.Usage()
-	help.Paragraph("The command generates new 4096 bits long RSA private key for signing packages.")
+	help.Paragraph("The command generates new 4096 bits long RSA private and public keys for signing packages.")
 	help.Examples()
 }
 

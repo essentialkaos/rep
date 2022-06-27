@@ -540,7 +540,7 @@ func genUsage() *usage.Info {
 	)
 
 	info.AddCommand(COMMAND_INIT, "Initialize new repository", "arch…")
-	info.AddCommand(COMMAND_GEN_KEY, "Generate private key for signing packages")
+	info.AddCommand(COMMAND_GEN_KEY, "Generate keys for signing packages")
 	info.AddCommand(COMMAND_LIST, "List latest versions of packages within repository", "?filter")
 	info.AddCommand(COMMAND_FIND, "Search packages", "query…")
 	info.AddCommand(COMMAND_WHICH_SOURCE, "Show source package name", "query…")

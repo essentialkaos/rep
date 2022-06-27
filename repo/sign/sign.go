@@ -39,7 +39,7 @@ var (
 	ErrKeyIsEncrypted = fmt.Errorf("Private key is encrypted")
 	ErrKeyIsNil       = fmt.Errorf("Private key is nil")
 	ErrKeyIsEmpty     = fmt.Errorf("Private key is empty")
-	ErrKeyringIsEmpty = fmt.Errorf("Keyring is empty")
+	ErrKeyringIsEmpty = fmt.Errorf("Keyring is empty (there is no private key)")
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -98,14 +98,8 @@ func HasSignature(file string) (bool, error) {
 	return hdr.HasTag(rpmutils.SIG_PGP), nil
 }
 
-// ReadKey securely reads signing key from file
-func ReadKey(file string) (*Key, error) {
-	data, err := directio.ReadFile(file)
-
-	if err != nil {
-		return nil, err
-	}
-
+// LoadKey loads private key data
+func LoadKey(data []byte) (*Key, error) {
 	k := &Key{IsEncrypted: false, data: data}
 	pk, err := k.getKey()
 
@@ -116,6 +110,17 @@ func ReadKey(file string) (*Key, error) {
 	k.IsEncrypted = pk.Encrypted
 
 	return k, nil
+}
+
+// ReadKey securely reads signing key from file
+func ReadKey(file string) (*Key, error) {
+	data, err := directio.ReadFile(file)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return LoadKey(data)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -155,6 +160,10 @@ func (k *Key) getKey() (*PrivateKey, error) {
 
 	if err != nil {
 		return nil, err
+	}
+
+	if kr[0].PrivateKey == nil {
+		return nil, ErrKeyringIsEmpty
 	}
 
 	return kr[0].PrivateKey, nil

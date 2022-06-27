@@ -112,7 +112,16 @@ func (s *SignSuite) TestReadKey(c *C) {
 	c.Assert(err, ErrorMatches, "openpgp: invalid argument: no armored data found")
 }
 
+func (s *SignSuite) TestEmptyKeyring(c *C) {
+
+}
+
 func (s *SignSuite) TestErrors(c *C) {
+	_, err := ReadKey("../../testdata/empty.private")
+
+	c.Assert(err, NotNil)
+	c.Assert(err, Equals, ErrKeyringIsEmpty)
+
 	key, err := ReadKey("../../testdata/reptest.private")
 
 	c.Assert(err, IsNil)

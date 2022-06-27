@@ -30,33 +30,33 @@ var headers = map[string]string{
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Generate generates private key for signing packages
-func Generate(name, email string, password *secstr.String) ([]byte, error) {
+// Generate generates private and public keys for signing packages
+func Generate(name, email string, password *secstr.String) ([]byte, []byte, error) {
 	if name == "" {
-		return nil, fmt.Errorf("Can't generate signing key: name is empty")
+		return nil, nil, fmt.Errorf("Can't generate keys: name is empty")
 	}
 
 	if email == "" {
-		return nil, fmt.Errorf("Can't generate signing key: email is empty")
+		return nil, nil, fmt.Errorf("Can't generate keys: email is empty")
 	}
 
 	if password == nil || password.IsEmpty() {
-		return nil, fmt.Errorf("Can't generate signing key: password is empty")
+		return nil, nil, fmt.Errorf("Can't generate keys: password is empty")
 	}
 
-	data, err := generatePrivateKey(name, email, password)
+	e, err := generateKey(name, email, password)
 
 	if err != nil {
-		return nil, fmt.Errorf("Can't generate signing key: %w", err)
+		return nil, nil, fmt.Errorf("Can't generate keys: %w", err)
 	}
 
-	return data, nil
+	return exportPrivateKey(e), exportPublicKey(e), nil
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// generatePrivateKey generates private key
-func generatePrivateKey(name, email string, password *secstr.String) ([]byte, error) {
+// generateKey generates private and public keys
+func generateKey(name, email string, password *secstr.String) (*openpgp.Entity, error) {
 	e, err := openpgp.NewEntity(name, "", email, &packet.Config{RSABits: keySize})
 
 	if err != nil {
@@ -72,17 +72,32 @@ func generatePrivateKey(name, email string, password *secstr.String) ([]byte, er
 	}
 
 	e.PrivateKey.Encrypt(password.Data)
-	password.Destroy()
 
+	return e, nil
+}
+
+// exportPublicKey serializes public key data
+func exportPublicKey(e *openpgp.Entity) []byte {
 	buf := &bytes.Buffer{}
-	w, err := armor.Encode(buf, openpgp.PrivateKeyType, headers)
-
-	if err != nil {
-		return nil, err
-	}
+	w, _ := armor.Encode(buf, openpgp.PublicKeyType, headers)
 
 	e.Serialize(w)
 	w.Close()
 
-	return buf.Bytes(), nil
+	buf.WriteRune('\n')
+
+	return buf.Bytes()
+}
+
+// exportPrivateKey serializes private key data
+func exportPrivateKey(e *openpgp.Entity) []byte {
+	buf := &bytes.Buffer{}
+	w, _ := armor.Encode(buf, openpgp.PrivateKeyType, headers)
+
+	e.SerializePrivateWithoutSigning(w, &packet.Config{RSABits: keySize})
+	w.Close()
+
+	buf.WriteRune('\n')
+
+	return buf.Bytes()
 }

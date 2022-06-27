@@ -9,6 +9,9 @@ package cli
 
 import (
 	"io/ioutil"
+	"os"
+	"regexp"
+	"strings"
 
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fsutil"
@@ -22,22 +25,44 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// outputKeyFile is default name for generated private key file
-var outputKeyFile = "key.private"
+// outputPrivKeyFile is default name for generated private key file
+var outputPrivKeyFile = "key.private"
+
+// repoKeyNameValidator is regex pattern for repository key name validation
+var repoKeyNameValidator = regexp.MustCompile(`^[A-Za-z0-9_\-\ ]+$`)
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // cmdGenKey is 'gen-key' command handler
 func cmdGenKey(ctx *context, args options.Arguments) bool {
-	if fsutil.IsExist(outputKeyFile) {
-		terminal.PrintErrorMessage("Private key file (%s) already exists", outputKeyFile)
+	if fsutil.IsExist(outputPrivKeyFile) {
+		terminal.PrintErrorMessage("Private key file (%s) already exists", outputPrivKeyFile)
 		return false
 	}
 
-	name, err := terminal.ReadUI("Key name", true)
+	var err error
+	var name, outputPubKeyFile string
 
-	if err != nil {
-		return false
+	for {
+		name, err = terminal.ReadUI("Key name", true)
+
+		if err != nil {
+			return false
+		}
+
+		if !repoKeyNameValidator.MatchString(name) {
+			terminal.PrintErrorMessage("\nGiven name is invalid\n")
+			continue
+		}
+
+		outputPubKeyFile = "RPM-GPG-KEY-" + strings.ReplaceAll(name, " ", "-")
+
+		if fsutil.IsExist(outputPubKeyFile) {
+			terminal.PrintErrorMessage("\nPublic key file for given name (%s) already exists\n", outputPubKeyFile)
+			continue
+		}
+
+		break
 	}
 
 	fmtc.NewLine()
@@ -58,16 +83,16 @@ func cmdGenKey(ctx *context, args options.Arguments) bool {
 
 	fmtc.NewLine()
 
-	return generatePrivateKey(name, email, password)
+	return generateKeys(name, email, password, outputPubKeyFile)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // generatePrivateKey generates and saves private key file
-func generatePrivateKey(name, email string, password *secstr.String) bool {
-	spinner.Show("Generating private key")
+func generateKeys(name, email string, password *secstr.String, outputPubKeyFile string) bool {
+	spinner.Show("Generating keys")
 
-	data, err := keygen.Generate(name, email, password)
+	privKeyData, pubKeyData, err := keygen.Generate(name, email, password)
 
 	if err != nil {
 		spinner.Update(err.Error())
@@ -75,16 +100,32 @@ func generatePrivateKey(name, email string, password *secstr.String) bool {
 		return false
 	}
 
-	err = ioutil.WriteFile(outputKeyFile, data, 0600)
+	err = ioutil.WriteFile(outputPrivKeyFile, privKeyData, 0600)
 
 	if err != nil {
-		spinner.Update("Can't generate signing key: %v", err)
+		spinner.Update("Can't save private key: %v", err)
 		spinner.Done(false)
 		return false
 	}
 
-	spinner.Update("Private key saved as {*}%s{!}", outputKeyFile)
+	err = ioutil.WriteFile(outputPubKeyFile, pubKeyData, 0644)
+
+	if err != nil {
+		spinner.Update("Can't save public key: %v", err)
+		spinner.Done(false)
+		return false
+	}
+
+	os.Chmod(outputPrivKeyFile, 0600)
+	os.Chmod(outputPubKeyFile, 0644)
+
+	spinner.Update("Keys successfully generated")
 	spinner.Done(true)
+
+	fmtc.NewLine()
+
+	fmtc.Printf("{g}Private key saved as {*}%s{!}\n", outputPrivKeyFile)
+	fmtc.Printf("{g}Public key saved as {*}%s{!}\n", outputPubKeyFile)
 
 	return true
 }
