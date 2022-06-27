@@ -101,6 +101,7 @@ install -dm 755 %{buildroot}%{_sysconfdir}
 install -dm 755 %{buildroot}%{_sysconfdir}/%{name}.d
 install -dm 750 %{buildroot}%{_localstatedir}/cache/%{name}
 install -dm 755 %{buildroot}%{_logdir}/%{name}
+install -dm 755 %{buildroot}%{_mandir}/man1
 
 install -dm 755 %{buildroot}%{_opt}/%{name}
 
@@ -112,8 +113,38 @@ install -pm 644 %{srcdir}/common/%{name}.knf \
 install -pm 644 %{srcdir}/common/*.example \
                 %{buildroot}%{_sysconfdir}/%{name}.d/
 
+./%{srcdir}/%{name} --generate-man > %{buildroot}%{_mandir}/man1/%{name}.1
+
 %clean
 rm -rf %{buildroot}
+
+%post
+if [[ -d %{_sysconfdir}/bash_completion.d ]] ; then
+  %{name} --completion=bash 1> %{_sysconfdir}/bash_completion.d/%{name} 2>/dev/null
+fi
+
+if [[ -d %{_datarootdir}/fish/vendor_completions.d ]] ; then
+  %{name} --completion=fish 1> %{_datarootdir}/fish/vendor_completions.d/%{name}.fish 2>/dev/null
+fi
+
+if [[ -d %{_datadir}/zsh/site-functions ]] ; then
+  %{name} --completion=zsh 1> %{_datadir}/zsh/site-functions/_%{name} 2>/dev/null
+fi
+
+%postun
+if [[ $1 == 0 ]] ; then
+  if [[ -f %{_sysconfdir}/bash_completion.d/%{name} ]] ; then
+    rm -f %{_sysconfdir}/bash_completion.d/%{name} &>/dev/null || :
+  fi
+
+  if [[ -f %{_datarootdir}/fish/vendor_completions.d/%{name}.fish ]] ; then
+    rm -f %{_datarootdir}/fish/vendor_completions.d/%{name}.fish &>/dev/null || :
+  fi
+
+  if [[ -f %{_datadir}/zsh/site-functions/_%{name} ]] ; then
+    rm -f %{_datadir}/zsh/site-functions/_%{name} &>/dev/null || :
+  fi
+fi
 
 ################################################################################
 
@@ -124,11 +155,12 @@ rm -rf %{buildroot}
 %dir %{_localstatedir}/cache/%{name}
 %dir %{_opt}/%{name}
 %dir %{_logdir}/%{name}
+%{_mandir}/man1/%{name}.1.*
 %{_sysconfdir}/%{name}.d/*.example
 %{_bindir}/%{name}
 
 ################################################################################
 
 %changelog
-* Mon Apr 11 2022 Anton Novojilov <andy@essentialkaos.com> - 3.0.0-0
+* Mon Jun 27 2022 Anton Novojilov <andy@essentialkaos.com> - 3.0.0-0
 - First public release of 3.x

@@ -188,7 +188,7 @@ var optMap = options.Map{
 	OPT_VERB_VER: {Type: options.BOOL},
 
 	OPT_COMPLETION:   {},
-	OPT_GENERATE_MAN: {},
+	OPT_GENERATE_MAN: {Type: options.BOOL},
 }
 
 // repoNameRegex is regexp for repository name validation
@@ -575,9 +575,10 @@ func genUsage() *usage.Info {
 	info.BoundOptions(COMMAND_ADD, OPT_MOVE)
 	info.BoundOptions(COMMAND_ADD, OPT_NO_SOURCE)
 	info.BoundOptions(COMMAND_FIND, OPT_RELEASE)
-	info.BoundOptions(COMMAND_FIND, OPT_TESTING)
 	info.BoundOptions(COMMAND_FIND, OPT_STATUS)
+	info.BoundOptions(COMMAND_FIND, OPT_TESTING)
 	info.BoundOptions(COMMAND_INFO, OPT_ARCH)
+	info.BoundOptions(COMMAND_LIST, OPT_EPOCH)
 	info.BoundOptions(COMMAND_LIST, OPT_RELEASE)
 	info.BoundOptions(COMMAND_LIST, OPT_SHOW_ALL)
 	info.BoundOptions(COMMAND_LIST, OPT_STATUS)
@@ -594,6 +595,7 @@ func genUsage() *usage.Info {
 	info.BoundOptions(COMMAND_STATS, OPT_RELEASE)
 	info.BoundOptions(COMMAND_STATS, OPT_TESTING)
 	info.BoundOptions(COMMAND_UNRELEASE, OPT_FORCE)
+	info.BoundOptions(COMMAND_WHICH_SOURCE, OPT_EPOCH)
 	info.BoundOptions(COMMAND_WHICH_SOURCE, OPT_RELEASE)
 	info.BoundOptions(COMMAND_WHICH_SOURCE, OPT_TESTING)
 
