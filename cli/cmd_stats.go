@@ -66,7 +66,7 @@ func printRepoStats(r *repo.SubRepository, stats *repo.RepositoryStats) {
 	fmtc.NewLine()
 
 	if stats.TotalPackages == 0 {
-		fmtc.Println("{s-}-- empty --{!}\n")
+		fmtc.Println("{s-}-- empty --{!}")
 		return
 	}
 
