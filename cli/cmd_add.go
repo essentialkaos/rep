@@ -154,7 +154,7 @@ func addRPMFile(ctx *context, file, tmpDir string, privateKey *sign.PrivateKey) 
 		}
 
 		if !isSigned {
-			spinner.Update("Adding (signing) "+colorTagPackage+"%s{!}", fileName)
+			spinner.Update("Signing "+colorTagPackage+"%s{!}", fileName)
 
 			pkgFile = path.Join(tmpDir, fileName)
 			err = sign.Sign(file, pkgFile, privateKey)
