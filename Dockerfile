@@ -39,6 +39,8 @@ LABEL org.opencontainers.image.title="rep" \
       org.opencontainers.image.url="https://kaos.sh/rep" \
       org.opencontainers.image.source="https://github.com/essentialkaos/rep"
 
+ENV TERM xterm-256color
+
 COPY --from=go-builder /go/src/github.com/essentialkaos/rep/rep /usr/bin/
 COPY --from=cr-builder /createrepo_c/build/src/createrepo_c /usr/bin/
 
