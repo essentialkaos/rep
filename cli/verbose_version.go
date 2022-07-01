@@ -37,10 +37,6 @@ func showApplicationInfo(gitRev string) {
 	fmtc.Printf("  {*}%-12s{!} %s\n", "Name:", APP)
 	fmtc.Printf("  {*}%-12s{!} %s\n", "Version:", VER)
 
-	if REL != "" {
-		fmtc.Printf("  {*}%-12s{!} %s\n", "Release:", REL)
-	}
-
 	if gitRev != "" {
 		if fmtc.IsTrueColorSupported() {
 			fmtc.Printf("  {*}%-12s{!} %s {#"+strutil.Head(gitRev, 6)+"}●{!}\n", "Git SHA:", gitRev)

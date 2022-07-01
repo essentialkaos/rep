@@ -41,7 +41,6 @@ import (
 const (
 	APP  = "rep"
 	VER  = "3.0.0"
-	REL  = "β1"
 	DESC = "YUM repository management utility"
 )
 
@@ -616,10 +615,6 @@ func genAbout(gitRev string) *usage.About {
 
 	if gitRev != "" {
 		about.Build = "git:" + gitRev
-	}
-
-	if REL != "" {
-		about.Release = " " + REL
 	}
 
 	if fmtc.Is256ColorsSupported() {
