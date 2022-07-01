@@ -669,6 +669,10 @@ func (s *FailStorage) InvalidateCache() error {
 	return fmt.Errorf("ERROR")
 }
 
+func (s *FailStorage) IsCacheValid(repo, arch string) bool {
+	return false
+}
+
 func (s *FailStorage) PurgeCache() error {
 	return fmt.Errorf("ERROR")
 }
