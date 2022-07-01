@@ -71,6 +71,9 @@ type Storage interface {
 	// InvalidateCache invalidates cache
 	InvalidateCache() error
 
+	// IsCacheValid returns true if cache is valid
+	IsCacheValid(repo, arch string) bool
+
 	// PurgeCache deletes all SQLite files from cache directory
 	PurgeCache() error
 

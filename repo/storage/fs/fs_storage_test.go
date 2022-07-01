@@ -711,12 +711,14 @@ func (s *StorageSuite) TestDepotIsCacheValid(c *C) {
 	dp.dbs["test1"] = nil
 	c.Assert(dp.CheckCache(), IsNil)
 	c.Assert(dp.IsCacheValid(), Equals, true)
+	c.Assert(fs.IsCacheValid("release", "x86_64"), Equals, true)
 	delete(dp.dbs, "test1")
 
 	origDataDir := dp.dataDir
 	dp.dataDir = "/_unknown_"
 	c.Assert(dp.CheckCache(), NotNil)
 	c.Assert(dp.IsCacheValid(), Equals, false)
+	c.Assert(fs.IsCacheValid("release", "x86_64"), Equals, false)
 	dp.dataDir = origDataDir
 
 	origDataDir = dp.dataDir
@@ -823,6 +825,38 @@ func (s *StorageSuite) TestDepotOpenDB(c *C) {
 
 	dp.dataOptions.CacheDir = "/_unknown_"
 	c.Assert(dp.OpenDB(data.DB_PRIMARY), ErrorMatches, `Can't find file /_unknown_/release-x86_64-primary.sqlite`)
+}
+
+func (s *StorageSuite) TestNilDepot(c *C) {
+	var d *Depot
+	// var err error
+
+	c.Assert(d.Reindex(true), Equals, ErrNilDepot)
+	c.Assert(d.AddPackage("test.rpm"), ErrorMatches, "Can't add package to storage depot: Can't find depot for given repository or architecture")
+	c.Assert(d.RemovePackage("test.rpm"), ErrorMatches, "Can't remove package from storage depot: Can't find depot for given repository or architecture")
+	c.Assert(d.GetPackagePath("test.rpm"), Equals, "")
+	c.Assert(d.HasPackage("test.rpm"), Equals, false)
+	c.Assert(d.IsEmpty(), Equals, true)
+	c.Assert(d.IsCacheValid(), Equals, false)
+	c.Assert(d.CheckCache(), Equals, ErrNilDepot)
+	c.Assert(d.InvalidateCache(), Equals, ErrNilDepot)
+	c.Assert(d.IsDBCached("test"), Equals, false)
+	c.Assert(d.CacheDB("test"), ErrorMatches, "Can't cache DB: Can't find depot for given repository or architecture")
+	c.Assert(d.OpenDB("test"), Equals, ErrNilDepot)
+	c.Assert(d.GetMetaIndexPath(), Equals, "")
+	c.Assert(d.GetDBFilePath("test"), Equals, "")
+	c.Assert(d.copyFile("test", "test"), ErrorMatches, "Can't change package attributes: Can't find depot for given repository or architecture")
+	c.Assert(d.removePackageDir("test"), Equals, ErrNilDepot)
+	c.Assert(d.getPackageDir("test"), Equals, "")
+
+	_, err := d.GetDB("test")
+	c.Assert(err, Equals, ErrNilDepot)
+
+	_, err = d.GetMetaIndex()
+	c.Assert(err, Equals, ErrNilDepot)
+
+	_, err = d.makePackageDir("test")
+	c.Assert(err, ErrorMatches, "Can't create directory for package: Can't find depot for given repository or architecture")
 }
 
 func (s *StorageSuite) TestFuncs(c *C) {

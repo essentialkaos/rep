@@ -82,6 +82,7 @@ var (
 	ErrEmptyPath      = fmt.Errorf("Path to file can't be empty")
 	ErrEmptyArchName  = fmt.Errorf("Arch name can't be empty")
 	ErrUnknownArch    = fmt.Errorf("Unknown RPM package architecture")
+	ErrNilDepot       = fmt.Errorf("Can't find depot for given repository or architecture")
 )
 
 // DirNameValidatorRegex is directory name validation regexp
@@ -577,6 +578,11 @@ func (s *Storage) InvalidateCache() error {
 	return nil
 }
 
+// IsCacheValid returns true if cache is valid
+func (s *Storage) IsCacheValid(repo, arch string) bool {
+	return s.GetDepot(repo, arch).IsCacheValid()
+}
+
 // PurgeCache deletes all SQLite files from cache directory
 func (s *Storage) PurgeCache() error {
 	if !s.IsInitialized() {
@@ -626,6 +632,10 @@ func (s *Storage) WarmupCache(repo, arch string) error {
 
 // Reindex generates index metadata for the given repository and arch
 func (d *Depot) Reindex(full bool) error {
+	if d == nil {
+		return ErrNilDepot
+	}
+
 	return index.Generate(d.dataDir, d.indexOptions, full)
 }
 
@@ -633,6 +643,10 @@ func (d *Depot) Reindex(full bool) error {
 func (d *Depot) AddPackage(rpmFile string) error {
 	if rpmFile == "" {
 		return fmt.Errorf("Can't add package to storage depot: %w", ErrEmptyPath)
+	}
+
+	if d == nil {
+		return fmt.Errorf("Can't add package to storage depot: %w", ErrNilDepot)
 	}
 
 	err := fsutil.ValidatePerms("FRS", rpmFile)
@@ -670,6 +684,10 @@ func (d *Depot) RemovePackage(rpmFile string) error {
 		return fmt.Errorf("Can't remove package from storage depot: %w", ErrEmptyPath)
 	}
 
+	if d == nil {
+		return fmt.Errorf("Can't remove package from storage depot: %w", ErrNilDepot)
+	}
+
 	filePath := joinPath(d.dataDir, rpmFile)
 	err := fsutil.ValidatePerms("FW", filePath)
 
@@ -696,31 +714,47 @@ func (d *Depot) RemovePackage(rpmFile string) error {
 
 // GetPackagePath returns full path to package RPM file
 func (d *Depot) GetPackagePath(rpmFileRelPath string) string {
+	if d == nil {
+		return ""
+	}
+
 	rpmFileName := path.Base(rpmFileRelPath)
 	return joinPath(d.getPackageDir(rpmFileName), rpmFileName)
 }
 
 // HasPackage checks if depot contains file with given name
 func (d *Depot) HasPackage(rpmFileName string) bool {
+	if d == nil {
+		return false
+	}
+
 	filePath := joinPath(d.getPackageDir(rpmFileName), rpmFileName)
 	return fsutil.IsExist(filePath)
 }
 
 // IsEmpty returns true if repository is empty (no packages)
 func (d *Depot) IsEmpty() bool {
+	if d == nil {
+		return true
+	}
+
 	return fsutil.IsEmptyDir(d.dataDir)
 }
 
 // IsCacheValid checks if database files was updated and depot contains outdated
 // metadata info and keeps connection to outdated SQL databases
 func (d *Depot) IsCacheValid() bool {
+	if d == nil {
+		return false
+	}
+
 	return d.CheckCache() == nil
 }
 
 // CheckCache checks if cache is valid and healthy
 func (d *Depot) CheckCache() error {
 	if d == nil || d.meta == nil {
-		return fmt.Errorf("Depot is nil")
+		return ErrNilDepot
 	}
 
 	metaFile := d.GetMetaIndexPath()
@@ -764,6 +798,10 @@ func (d *Depot) CheckCache() error {
 
 // InvalidateCache invalidates repository cache
 func (d *Depot) InvalidateCache() error {
+	if d == nil {
+		return ErrNilDepot
+	}
+
 	d.meta = nil
 
 	for dbName, db := range d.dbs {
@@ -783,6 +821,10 @@ func (d *Depot) InvalidateCache() error {
 
 // IsDBCached returns true if SQLite DB is cached
 func (d *Depot) IsDBCached(dbType string) bool {
+	if d == nil {
+		return false
+	}
+
 	dbFile := d.GetDBFilePath(dbType)
 
 	if !fsutil.IsExist(dbFile) {
@@ -814,6 +856,10 @@ func (d *Depot) CacheDB(dbType string) error {
 		return fmt.Errorf("Can't cache DB: DB type can't be empty")
 	}
 
+	if d == nil {
+		return fmt.Errorf("Can't cache DB: %w", ErrNilDepot)
+	}
+
 	dbInfo := d.meta.Get(dbType + "_db")
 
 	if dbInfo == nil {
@@ -838,6 +884,10 @@ func (d *Depot) CacheDB(dbType string) error {
 
 // OpenDB opens SQLite DB
 func (d *Depot) OpenDB(dbType string) error {
+	if d == nil {
+		return ErrNilDepot
+	}
+
 	dbFile := d.GetDBFilePath(dbType)
 
 	if !fsutil.IsExist(dbFile) {
@@ -864,6 +914,10 @@ func (d *Depot) OpenDB(dbType string) error {
 
 // GetDB returns connection to SQLite DB
 func (d *Depot) GetDB(dbType string) (*sql.DB, error) {
+	if d == nil {
+		return nil, ErrNilDepot
+	}
+
 	var err error
 
 	if !d.IsCacheValid() {
@@ -903,6 +957,10 @@ func (d *Depot) GetDB(dbType string) (*sql.DB, error) {
 
 // GetMetaIndex reads repository metadata
 func (d *Depot) GetMetaIndex() (*meta.Index, error) {
+	if d == nil {
+		return nil, ErrNilDepot
+	}
+
 	metaFile := d.GetMetaIndexPath()
 
 	if !fsutil.CheckPerms("FRS", metaFile) {
@@ -914,11 +972,19 @@ func (d *Depot) GetMetaIndex() (*meta.Index, error) {
 
 // GetMetaIndexPath returns path to metadata index file (repomd.xml)
 func (d *Depot) GetMetaIndexPath() string {
+	if d == nil {
+		return ""
+	}
+
 	return joinPath(d.dataDir, "/repodata/repomd.xml")
 }
 
 // GetDBFilePath returns path to SQLite DB file
 func (d *Depot) GetDBFilePath(dbType string) string {
+	if d == nil {
+		return ""
+	}
+
 	return joinPath(d.dataOptions.CacheDir, fmt.Sprintf("%s-%s.sqlite", d.id, dbType))
 }
 
@@ -926,6 +992,10 @@ func (d *Depot) GetDBFilePath(dbType string) string {
 
 // copyFile copies package into package directory and change permissions for it
 func (d *Depot) copyFile(rpmFile, packageDir string) error {
+	if d == nil {
+		return fmt.Errorf("Can't change package attributes: %w", ErrNilDepot)
+	}
+
 	err := fsutil.CopyFile(rpmFile, packageDir, 0600)
 
 	if err != nil {
@@ -945,6 +1015,10 @@ func (d *Depot) copyFile(rpmFile, packageDir string) error {
 // makePackageDir creates directory if required and returns path to directory for packages
 // if split-files option is enabled
 func (d *Depot) makePackageDir(rpmFile string) (string, error) {
+	if d == nil {
+		return "", fmt.Errorf("Can't create directory for package: %w", ErrNilDepot)
+	}
+
 	rpmFileName := path.Base(rpmFile)
 	dirName := strutil.Head(rpmFileName, 1)
 
@@ -975,6 +1049,10 @@ func (d *Depot) makePackageDir(rpmFile string) (string, error) {
 
 // removePackageDir removes package
 func (d *Depot) removePackageDir(rpmFile string) error {
+	if d == nil {
+		return ErrNilDepot
+	}
+
 	rpmFileDir := path.Dir(rpmFile)
 
 	if rpmFileDir == "." || rpmFileDir == "/" {
@@ -992,6 +1070,10 @@ func (d *Depot) removePackageDir(rpmFile string) error {
 
 // getPackageDir returns full path to directory for given rpm file
 func (d *Depot) getPackageDir(rpmFileName string) string {
+	if d == nil {
+		return ""
+	}
+
 	if d.dataOptions.SplitFiles {
 		dirName := strutil.Head(rpmFileName, 1)
 		return joinPath(d.dataDir, dirName)
