@@ -36,9 +36,10 @@ type handler func(ctx *context, args options.Arguments) bool
 
 // command contains basic information about command (handler + min num of args)
 type command struct {
-	Handler  handler
-	MinArgs  int
-	AllowRaw bool
+	Handler      handler
+	MinArgs      int
+	RequireCache bool
+	AllowRaw     bool
 }
 
 // context is struct which contains all required data for handling CLI command
@@ -52,37 +53,37 @@ type context struct {
 
 // commands is map [long command → {handler + min args}]
 var commands = map[string]command{
-	COMMAND_INIT:               {cmdInit, 1, false},
-	COMMAND_GEN_KEY:            {cmdGenKey, 0, false},
-	COMMAND_LIST:               {cmdList, 0, true},
-	COMMAND_WHICH_SOURCE:       {cmdWhichSource, 1, false},
-	COMMAND_FIND:               {cmdFind, 1, true},
-	COMMAND_INFO:               {cmdInfo, 1, false},
-	COMMAND_PAYLOAD:            {cmdPayload, 1, true},
-	COMMAND_SIGN:               {cmdSign, 1, false},
-	COMMAND_ADD:                {cmdAdd, 1, false},
-	COMMAND_REMOVE:             {cmdRemove, 1, false},
-	COMMAND_RELEASE:            {cmdRelease, 1, false},
-	COMMAND_UNRELEASE:          {cmdUnrelease, 1, false},
-	COMMAND_REINDEX:            {cmdReindex, 0, false},
-	COMMAND_PURGE_CACHE:        {cmdPurgeCache, 0, false},
-	COMMAND_STATS:              {cmdStats, 0, false},
-	COMMAND_HELP:               {cmdHelp, 0, false},
-	COMMAND_SHORT_LIST:         {cmdList, 0, true},
-	COMMAND_SHORT_WHICH_SOURCE: {cmdWhichSource, 1, false},
-	COMMAND_SHORT_FIND:         {cmdFind, 1, true},
-	COMMAND_SHORT_INFO:         {cmdInfo, 1, false},
-	COMMAND_SHORT_PAYLOAD:      {cmdPayload, 1, true},
-	COMMAND_SHORT_SIGN:         {cmdSign, 0, false},
-	COMMAND_SHORT_ADD:          {cmdAdd, 1, false},
-	COMMAND_SHORT_REMOVE:       {cmdRemove, 1, false},
-	COMMAND_SHORT_RELEASE:      {cmdRelease, 1, false},
-	COMMAND_SHORT_UNRELEASE:    {cmdUnrelease, 1, false},
-	COMMAND_SHORT_REINDEX:      {cmdReindex, 0, false},
-	COMMAND_SHORT_PURGE_CACHE:  {cmdPurgeCache, 0, false},
-	COMMAND_SHORT_STATS:        {cmdStats, 0, false},
-	COMMAND_SHORT_HELP:         {cmdHelp, 0, false},
-	"":                         {cmdList, 0, false}, // default command
+	COMMAND_INIT:               {cmdInit, 1, false, false},
+	COMMAND_GEN_KEY:            {cmdGenKey, 0, false, false},
+	COMMAND_LIST:               {cmdList, 0, true, true},
+	COMMAND_WHICH_SOURCE:       {cmdWhichSource, 1, true, false},
+	COMMAND_FIND:               {cmdFind, 1, true, true},
+	COMMAND_INFO:               {cmdInfo, 1, true, false},
+	COMMAND_PAYLOAD:            {cmdPayload, 1, true, true},
+	COMMAND_SIGN:               {cmdSign, 1, false, false},
+	COMMAND_ADD:                {cmdAdd, 1, true, false},
+	COMMAND_REMOVE:             {cmdRemove, 1, true, false},
+	COMMAND_RELEASE:            {cmdRelease, 1, true, false},
+	COMMAND_UNRELEASE:          {cmdUnrelease, 1, true, false},
+	COMMAND_REINDEX:            {cmdReindex, 0, false, false},
+	COMMAND_PURGE_CACHE:        {cmdPurgeCache, 0, false, false},
+	COMMAND_STATS:              {cmdStats, 0, true, false},
+	COMMAND_HELP:               {cmdHelp, 0, false, false},
+	COMMAND_SHORT_LIST:         {cmdList, 0, true, true},
+	COMMAND_SHORT_WHICH_SOURCE: {cmdWhichSource, 1, true, false},
+	COMMAND_SHORT_FIND:         {cmdFind, 1, true, true},
+	COMMAND_SHORT_INFO:         {cmdInfo, 1, true, false},
+	COMMAND_SHORT_PAYLOAD:      {cmdPayload, 1, true, true},
+	COMMAND_SHORT_SIGN:         {cmdSign, 0, false, false},
+	COMMAND_SHORT_ADD:          {cmdAdd, 1, true, false},
+	COMMAND_SHORT_REMOVE:       {cmdRemove, 1, true, false},
+	COMMAND_SHORT_RELEASE:      {cmdRelease, 1, true, false},
+	COMMAND_SHORT_UNRELEASE:    {cmdUnrelease, 1, true, false},
+	COMMAND_SHORT_REINDEX:      {cmdReindex, 0, true, false},
+	COMMAND_SHORT_PURGE_CACHE:  {cmdPurgeCache, 0, false, false},
+	COMMAND_SHORT_STATS:        {cmdStats, 0, false, false},
+	COMMAND_SHORT_HELP:         {cmdHelp, 0, true, false},
+	"":                         {cmdList, 0, true, false}, // default command
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -125,6 +126,10 @@ func runCommand(repoCfg *knf.Config, cmdName string, cmdArgs options.Arguments) 
 		rawOutput = false
 	}
 
+	if cmd.RequireCache {
+		warmUpCache(ctx.Repo)
+	}
+
 	ok = cmd.Handler(ctx, cmdArgs)
 
 	if !rawOutput {
@@ -148,6 +153,38 @@ func checkCommand(cmdName string, args options.Arguments) bool {
 	}
 
 	return true
+}
+
+// warmUpCache warms up repository cache if required
+func warmUpCache(r *repo.Repository) {
+	var warmupTesting, warmupRelease bool
+
+	warmupTesting = r.Testing.IsCacheValid() == false
+	warmupRelease = r.Release.IsCacheValid() == false
+
+	if !warmupRelease && !warmupTesting {
+		return
+	}
+
+	if !options.GetB(OPT_ALL) && !options.GetB(OPT_RELEASE) && options.GetB(OPT_TESTING) {
+		warmupRelease, warmupTesting = false, true
+	}
+
+	if !options.GetB(OPT_ALL) && !options.GetB(OPT_TESTING) && options.GetB(OPT_RELEASE) {
+		warmupRelease, warmupTesting = true, false
+	}
+
+	if warmupTesting {
+		fmtc.TPrintf("{s-}Warming up testing cache (it can take a while)…{!}")
+		r.Testing.WarmupCache()
+	}
+
+	if warmupRelease {
+		fmtc.TPrintf("{s-}Warming up release cache (it can take a while)…{!}")
+		r.Release.WarmupCache()
+	}
+
+	fmtc.TPrintf("")
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
