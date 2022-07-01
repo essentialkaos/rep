@@ -567,6 +567,31 @@ func (s *RepoSuite) TestSubRepositoryReindex(c *C) {
 	c.Assert(err, NotNil)
 }
 
+func (s *RepoSuite) TestSubRepositoryCaching(c *C) {
+	r, err := NewRepository("test", makeFSStorage(c))
+	c.Assert(err, IsNil)
+	c.Assert(r, NotNil)
+
+	c.Assert(r.Testing.IsCacheValid(), Equals, false)
+	c.Assert(r.Testing.WarmupCache(), DeepEquals, ErrNotInitialized)
+
+	err = r.Initialize([]string{data.ARCH_X64})
+	c.Assert(err, IsNil)
+
+	err = r.Testing.AddPackage("../testdata/git-all-2.27.0-0.el7.noarch.rpm")
+	c.Assert(err, IsNil)
+	err = r.Testing.Reindex(true)
+	c.Assert(err, IsNil)
+
+	c.Assert(r.Testing.IsCacheValid(), Equals, false)
+	c.Assert(r.Testing.WarmupCache(), IsNil)
+	c.Assert(r.Testing.IsCacheValid(), Equals, true)
+
+	r.storage = &FailStorage{}
+
+	c.Assert(r.Testing.WarmupCache(), NotNil)
+}
+
 func (s *RepoSuite) TestSubRepositoryGetFullPackagePath(c *C) {
 	r, err := NewRepository("test", makeFSStorage(c))
 	c.Assert(err, IsNil)

@@ -650,6 +650,46 @@ func (r *SubRepository) Reindex(full bool) error {
 	return nil
 }
 
+// IsCacheValid returns true if cache for architectures is valid
+func (r *SubRepository) IsCacheValid() bool {
+	if !r.Parent.storage.IsInitialized() {
+		return false
+	}
+
+	for _, arch := range data.ArchList {
+		if !r.HasArch(arch) || data.SupportedArchs[arch].Dir == "" {
+			continue
+		}
+
+		if !r.Parent.storage.IsCacheValid(r.Name, arch) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// WarmupCache warmups cache for all architectures
+func (r *SubRepository) WarmupCache() error {
+	if !r.Parent.storage.IsInitialized() {
+		return ErrNotInitialized
+	}
+
+	for _, arch := range data.ArchList {
+		if !r.HasArch(arch) || data.SupportedArchs[arch].Dir == "" {
+			continue
+		}
+
+		err := r.Parent.storage.WarmupCache(r.Name, arch)
+
+		if err != nil {
+			return fmt.Errorf("Can't warmup %s cache: %w", r.Name, err)
+		}
+	}
+
+	return nil
+}
+
 // GetFullPackagePath returns full path to package
 func (r *SubRepository) GetFullPackagePath(pkg PackageFile) string {
 	return r.Parent.storage.GetPackagePath(r.Name, pkg.Arch, pkg.Path)
