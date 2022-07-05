@@ -12,7 +12,7 @@
   cache: /var/cache/rep
 
   # Split files to separate directories
-  split-files: false
+  split-files: true
 
 [index]
 
