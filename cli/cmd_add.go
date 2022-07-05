@@ -116,7 +116,11 @@ func addRPMFiles(ctx *context, files []string, privateKey *sign.PrivateKey) bool
 func addRPMFile(ctx *context, file, tmpDir string, privateKey *sign.PrivateKey) bool {
 	fileName := path.Base(file)
 
-	spinner.Show("Adding "+colorTagPackage+"%s{!}", fileName)
+	if options.GetB(OPT_MOVE) {
+		spinner.Show("Moving "+colorTagPackage+"%s{!}", fileName)
+	} else {
+		spinner.Show("Copying "+colorTagPackage+"%s{!}", fileName)
+	}
 
 	matchFilePattern, err := path.Match(ctx.Repo.FileFilter, fileName)
 
