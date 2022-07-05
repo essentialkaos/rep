@@ -79,15 +79,24 @@ func signRPMFiles(files []string, ctx *context, privateKey *sign.PrivateKey) boo
 
 // signRPMFile signs given RPM file
 func signRPMFile(file, tmpDir string, ctx *context, privateKey *sign.PrivateKey) bool {
+	var err error
+
 	fileName := path.Base(file)
 
 	spinner.Show("Signing "+colorTagPackage+"%s{!}", file)
 
-	matchFilePattern, _ := path.Match(ctx.Repo.FileFilter, fileName)
+	if !options.GetB(OPT_IGNORE_FILTER) {
+		matchFilePattern, err := path.Match(ctx.Repo.FileFilter, fileName)
 
-	if !matchFilePattern {
-		printSpinnerSignError(fileName, fmt.Sprintf("File doesn't match repository filter (%s)", ctx.Repo.FileFilter))
-		return false
+		if err != nil {
+			printSpinnerSignError(fileName, fmt.Sprintf("Can't parse file filter pattern: %v", err))
+			return false
+		}
+
+		if !matchFilePattern {
+			printSpinnerSignError(fileName, fmt.Sprintf("File doesn't match repository filter (%s)", ctx.Repo.FileFilter))
+			return false
+		}
 	}
 
 	if !rpm.IsRPM(file) {

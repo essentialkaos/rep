@@ -114,6 +114,8 @@ func addRPMFiles(ctx *context, files []string, privateKey *sign.PrivateKey) bool
 
 // addRPMFile adds given RPM file to testing repository
 func addRPMFile(ctx *context, file, tmpDir string, privateKey *sign.PrivateKey) bool {
+	var err error
+
 	fileName := path.Base(file)
 
 	if options.GetB(OPT_MOVE) {
@@ -122,20 +124,22 @@ func addRPMFile(ctx *context, file, tmpDir string, privateKey *sign.PrivateKey) 
 		spinner.Show("Copying "+colorTagPackage+"%s{!}", fileName)
 	}
 
-	matchFilePattern, err := path.Match(ctx.Repo.FileFilter, fileName)
+	if !options.GetB(OPT_IGNORE_FILTER) {
+		matchFilePattern, err := path.Match(ctx.Repo.FileFilter, fileName)
 
-	if err != nil {
-		printSpinnerAddError(fileName, fmt.Sprintf("Can't parse file filter pattern: %v", err))
-		return false
-	}
+		if err != nil {
+			printSpinnerAddError(fileName, fmt.Sprintf("Can't parse file filter pattern: %v", err))
+			return false
+		}
 
-	if !matchFilePattern {
-		printSpinnerAddError(fileName, fmt.Sprintf("File doesn't match repository filter (%s)", ctx.Repo.FileFilter))
-		return false
+		if !matchFilePattern {
+			printSpinnerAddError(fileName, fmt.Sprintf("File doesn't match repository filter (%s)", ctx.Repo.FileFilter))
+			return false
+		}
 	}
 
 	if options.GetB(OPT_NO_SOURCE) {
-		matchFilePattern, _ = path.Match("*.src.rpm", fileName)
+		matchFilePattern, _ := path.Match("*.src.rpm", fileName)
 
 		if matchFilePattern {
 			skipOption, _ := options.ParseOptionName(OPT_NO_SOURCE)
