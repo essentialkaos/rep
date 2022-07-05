@@ -92,12 +92,18 @@ func removePackagesFiles(ctx *context, releaseFiles, testingFiles []repo.Package
 	var hasErrors, releaseRemoved, testingRemoved bool
 	var file repo.PackageFile
 
+	isCancelProtected = true
+
 	for _, file = range releaseFiles {
 		ok := removePackageFile(ctx, ctx.Repo.Release, file.Path)
 
 		if !ok {
 			hasErrors = true
 			continue
+		}
+
+		if isCanceled {
+			return false
 		}
 
 		releaseRemoved = true
@@ -109,6 +115,10 @@ func removePackagesFiles(ctx *context, releaseFiles, testingFiles []repo.Package
 		if !ok {
 			hasErrors = true
 			continue
+		}
+
+		if isCanceled {
+			return false
 		}
 
 		testingRemoved = true
@@ -125,6 +135,8 @@ func removePackagesFiles(ctx *context, releaseFiles, testingFiles []repo.Package
 			reindexRepository(ctx, ctx.Repo.Testing, false)
 		}
 	}
+
+	isCancelProtected = false
 
 	return hasErrors == false
 }

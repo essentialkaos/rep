@@ -61,7 +61,7 @@ var commands = map[string]command{
 	COMMAND_INFO:               {cmdInfo, 1, true, false},
 	COMMAND_PAYLOAD:            {cmdPayload, 1, true, true},
 	COMMAND_SIGN:               {cmdSign, 1, false, false},
-	COMMAND_ADD:                {cmdAdd, 1, true, false},
+	COMMAND_ADD:                {cmdAdd, 1, false, false},
 	COMMAND_REMOVE:             {cmdRemove, 1, true, false},
 	COMMAND_RELEASE:            {cmdRelease, 1, true, false},
 	COMMAND_UNRELEASE:          {cmdUnrelease, 1, true, false},
@@ -75,7 +75,7 @@ var commands = map[string]command{
 	COMMAND_SHORT_INFO:         {cmdInfo, 1, true, false},
 	COMMAND_SHORT_PAYLOAD:      {cmdPayload, 1, true, true},
 	COMMAND_SHORT_SIGN:         {cmdSign, 0, false, false},
-	COMMAND_SHORT_ADD:          {cmdAdd, 1, true, false},
+	COMMAND_SHORT_ADD:          {cmdAdd, 1, false, false},
 	COMMAND_SHORT_REMOVE:       {cmdRemove, 1, true, false},
 	COMMAND_SHORT_RELEASE:      {cmdRelease, 1, true, false},
 	COMMAND_SHORT_UNRELEASE:    {cmdUnrelease, 1, true, false},
@@ -131,6 +131,26 @@ func runCommand(repoCfg *knf.Config, cmdName string, cmdArgs options.Arguments) 
 	}
 
 	ok = cmd.Handler(ctx, cmdArgs)
+
+	if !rawOutput {
+		fmtc.NewLine()
+	}
+
+	return ok
+}
+
+// runSimpleCommand runs some simple commands like help or gen-key
+func runSimpleCommand(cmdName string, cmdArgs options.Arguments) bool {
+	if !rawOutput {
+		fmtc.NewLine()
+	}
+
+	if !checkCommand(cmdName, cmdArgs) {
+		return false
+	}
+
+	cmd := commands[cmdName]
+	ok := cmd.Handler(nil, cmdArgs)
 
 	if !rawOutput {
 		fmtc.NewLine()

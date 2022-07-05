@@ -72,12 +72,18 @@ func releasePackages(ctx *context, stack repo.PackageStack) bool {
 func releasePackagesFiles(ctx *context, files []repo.PackageFile) bool {
 	var hasErrors, released bool
 
+	isCancelProtected = true
+
 	for _, file := range files {
 		ok := releasePackageFile(ctx, file.Path)
 
 		if !ok {
 			hasErrors = true
 			continue
+		}
+
+		if isCanceled {
+			return false
 		}
 
 		released = true
@@ -87,6 +93,8 @@ func releasePackagesFiles(ctx *context, files []repo.PackageFile) bool {
 		fmtc.NewLine()
 		reindexRepository(ctx, ctx.Repo.Release, false)
 	}
+
+	isCancelProtected = false
 
 	return hasErrors == false
 }

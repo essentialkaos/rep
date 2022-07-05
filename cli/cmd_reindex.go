@@ -31,6 +31,10 @@ func cmdReindex(ctx *context, args options.Arguments) bool {
 		ctx.Logger.Get(data.REPO_RELEASE).Print("Repository reindexed (full: %t)", full)
 	}
 
+	if isCanceled {
+		return false
+	}
+
 	if reindexAll || options.GetB(OPT_TESTING) {
 		if !reindexRepository(ctx, ctx.Repo.Testing, full) {
 			return false
@@ -48,6 +52,8 @@ func cmdReindex(ctx *context, args options.Arguments) bool {
 func reindexRepository(ctx *context, r *repo.SubRepository, full bool) bool {
 	spinner.Show("Indexing "+colorTagRepository+"%s{!} repository", r.Name)
 
+	isCancelProtected = true
+
 	err := r.Reindex(full)
 
 	if err == nil {
@@ -57,6 +63,8 @@ func reindexRepository(ctx *context, r *repo.SubRepository, full bool) bool {
 	}
 
 	spinner.Done(err == nil)
+
+	isCancelProtected = false
 
 	if err != nil {
 		terminal.PrintErrorMessage("   %v", err)

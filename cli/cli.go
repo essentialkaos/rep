@@ -18,6 +18,7 @@ import (
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/knf"
 	"github.com/essentialkaos/ek/v12/options"
+	"github.com/essentialkaos/ek/v12/signal"
 	"github.com/essentialkaos/ek/v12/system"
 	"github.com/essentialkaos/ek/v12/terminal"
 	"github.com/essentialkaos/ek/v12/usage"
@@ -206,6 +207,12 @@ var colorTagRepository = "{c*}"
 // configs contains repositories configs
 var configs map[string]*knf.Config
 
+// isCanceled is a flag for marking that user want to cancel app execution
+var isCanceled = false
+
+// isCancelProtected is a flag for marking current execution from canceling
+var isCancelProtected = false
+
 // rawOutput is raw output flag
 var rawOutput = false
 
@@ -248,6 +255,7 @@ func Init(gitRev string, gomod []byte) {
 	loadRepoConfigs()
 	validateRepoConfigs()
 	configureRepoCache()
+	configureSignalHandlers()
 
 	ok := process(args)
 
@@ -363,8 +371,7 @@ func loadRepoConfigs() {
 	configFiles := fsutil.List(CONFIG_DIR, false, filter)
 
 	if len(configFiles) == 0 {
-		terminal.PrintWarnMessage("No repository configuration files were found")
-		os.Exit(1)
+		return
 	}
 
 	fsutil.ListToAbsolute(CONFIG_DIR, configFiles)
@@ -448,6 +455,15 @@ func configureRepoCache() {
 	}
 }
 
+// configureSignalHandlers configures handlers for signals
+func configureSignalHandlers() {
+	signal.Handlers{
+		signal.QUIT: sigHandler,
+		signal.TERM: sigHandler,
+		signal.INT:  sigHandler,
+	}.TrackAsync()
+}
+
 // getPrimaryRepoName returns primary repository name
 func getPrimaryRepoName() string {
 	for repo := range configs {
@@ -465,8 +481,14 @@ func process(args options.Arguments) bool {
 
 	repo := args.Get(0).String()
 
-	if repo == COMMAND_HELP || repo == COMMAND_SHORT_HELP {
-		return cmdHelp(nil, args[1:])
+	switch repo {
+	case COMMAND_HELP, COMMAND_SHORT_HELP, COMMAND_GEN_KEY:
+		return runSimpleCommand(repo, args[1:])
+	}
+
+	if len(configs) == 0 {
+		terminal.PrintWarnMessage("No repository configuration files were found")
+		return false
 	}
 
 	if configs[repo] == nil {
@@ -479,6 +501,15 @@ func process(args options.Arguments) bool {
 	}
 
 	return runCommand(configs[repo], args.Get(1).String(), args[2:])
+}
+
+// sigHandler is handler for TERM, QUIT and INT signals
+func sigHandler() {
+	if !isCancelProtected {
+		shutdown(1)
+	}
+
+	isCanceled = true
 }
 
 // shutdown cleans temporary data and exits from CLI

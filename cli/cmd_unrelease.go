@@ -74,12 +74,18 @@ func unreleasePackages(ctx *context, stack repo.PackageStack) bool {
 func unreleasePackagesFiles(ctx *context, files []repo.PackageFile) bool {
 	var hasErrors, unreleased, restored bool
 
+	isCancelProtected = true
+
 	for _, file := range files {
 		ok, testingRestored := unreleasePackageFile(ctx, file.Path)
 
 		if !ok {
 			hasErrors = true
 			continue
+		}
+
+		if isCanceled {
+			return false
 		}
 
 		if testingRestored {
@@ -98,6 +104,8 @@ func unreleasePackagesFiles(ctx *context, files []repo.PackageFile) bool {
 			reindexRepository(ctx, ctx.Repo.Testing, false)
 		}
 	}
+
+	isCancelProtected = false
 
 	return hasErrors == false
 }

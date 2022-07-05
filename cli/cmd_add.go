@@ -83,6 +83,8 @@ func addRPMFiles(ctx *context, files []string, privateKey *sign.PrivateKey) bool
 		return false
 	}
 
+	isCancelProtected = true
+
 	var hasErrors, hasAdded bool
 
 	for _, file := range files {
@@ -93,6 +95,10 @@ func addRPMFiles(ctx *context, files []string, privateKey *sign.PrivateKey) bool
 			continue
 		}
 
+		if isCanceled {
+			return false
+		}
+
 		hasAdded = true
 	}
 
@@ -100,6 +106,8 @@ func addRPMFiles(ctx *context, files []string, privateKey *sign.PrivateKey) bool
 		fmtc.NewLine()
 		reindexRepository(ctx, ctx.Repo.Testing, false)
 	}
+
+	isCancelProtected = false
 
 	return hasErrors == false
 }
