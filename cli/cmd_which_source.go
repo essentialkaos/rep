@@ -26,19 +26,9 @@ import (
 // cmdWhichSource is 'which-source' command handler
 func cmdWhichSource(ctx *context, args options.Arguments) bool {
 	showAll := !options.GetB(OPT_RELEASE) && !options.GetB(OPT_TESTING)
-	searchRequest, err := query.Parse(args.Strings())
-
-	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
-		return false
-	}
-
-	if options.GetB(OPT_DEBUG) {
-		printQueryDebug(searchRequest)
-	}
 
 	if options.GetB(OPT_RELEASE) || showAll {
-		status := findSources(ctx.Repo.Release, searchRequest)
+		status := findSources(ctx.Repo.Release, args)
 
 		if status != true {
 			return false
@@ -46,7 +36,7 @@ func cmdWhichSource(ctx *context, args options.Arguments) bool {
 	}
 
 	if options.GetB(OPT_TESTING) || showAll {
-		status := findSources(ctx.Repo.Testing, searchRequest)
+		status := findSources(ctx.Repo.Testing, args)
 
 		if status != true {
 			return false
@@ -61,11 +51,32 @@ func cmdWhichSource(ctx *context, args options.Arguments) bool {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // findSources tries to find source package name
-func findSources(r *repo.SubRepository, searchRequest *query.Request) bool {
+func findSources(r *repo.SubRepository, args options.Arguments) bool {
+	var err error
+	var searchRequest *query.Request
+	var stack repo.PackageStack
+
+	if isExtendedSearchRequest(args) {
+		searchRequest, err = query.Parse(args.Strings())
+
+		if err != nil {
+			terminal.PrintErrorMessage(err.Error())
+			return false
+		}
+
+		if options.GetB(OPT_DEBUG) {
+			printQueryDebug(searchRequest)
+		}
+	}
+
 	fmtutil.Separator(true, strings.ToUpper(r.Name))
 	fmtc.NewLine()
 
-	stack, err := findPackages(r, searchRequest)
+	if isExtendedSearchRequest(args) {
+		stack, err = findPackages(r, searchRequest)
+	} else {
+		stack, err = r.List(args.Get(0).String(), true)
+	}
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())
@@ -132,6 +143,19 @@ func printPackageStackSources(r *repo.SubRepository, stack repo.PackageStack) {
 			}
 		}
 	}
+}
+
+// isExtendedSearchRequest returns true if arguments contains search query
+func isExtendedSearchRequest(args options.Arguments) bool {
+	if len(args) > 1 {
+		return true
+	}
+
+	if strings.Contains(args.Get(0).String(), ":") {
+		return true
+	}
+
+	return false
 }
 
 // getMaxSourceLengthInStack returns max size of source rpm in stack

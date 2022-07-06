@@ -294,14 +294,15 @@ func helpWhichSource() {
 		shortcut: COMMAND_SHORT_WHICH_SOURCE,
 		info:     genUsage(),
 		examples: []commandExample{
-			{"my-package-1.0-1.el8", "Show name of source package created with the given one"},
+			{"my-package-1.0", "Simple package search"},
+			{"n:my-package v:1.0* d:3w", "Find packages with search query syntax"},
 		},
 		isGlobal: false,
 	}
 
 	help.Usage()
 	help.Paragraph("This command shows the source package used for package building or source package created while package building. This command is very useful for package searching. You may find the source package and use it in the search query ({s}s:{!} or {s}source:{!} query prefix with {y}" + COMMAND_REMOVE + "{!}, {y}" + COMMAND_RELEASE + "{!}, and {y}" + COMMAND_UNRELEASE + "{!} commands).")
-	help.Paragraph("The command uses search query syntax for package selection. For more information about query syntax, see \"rep {y}" + COMMAND_HELP + "{!} {s}" + COMMAND_FIND + "{!}\".")
+	help.Paragraph("You can use search query syntax for package selection. For more information about query syntax, see \"rep {y}" + COMMAND_HELP + "{!} {s}" + COMMAND_FIND + "{!}\".")
 	help.Shortcut()
 	help.Examples()
 	help.Options()
