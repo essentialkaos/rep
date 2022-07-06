@@ -33,6 +33,10 @@ func cmdWhichSource(ctx *context, args options.Arguments) bool {
 		return false
 	}
 
+	if options.GetB(OPT_DEBUG) {
+		printQueryDebug(searchRequest)
+	}
+
 	if options.GetB(OPT_RELEASE) || showAll {
 		status := findSources(ctx.Repo.Release, searchRequest)
 
@@ -92,11 +96,11 @@ func printPackageStackSources(r *repo.SubRepository, stack repo.PackageStack) {
 			case index == 0 && len(bundle) == 1 && hasMultiBundle:
 				pkgInfo += "   "
 			case len(bundle) != 1 && index == 0:
-				pkgInfo += " {s}┌{!} "
+				pkgInfo += " {s-}┌{!} "
 			case len(bundle) != 1 && index == len(bundle)-1:
-				pkgInfo += " {s}└{!} "
+				pkgInfo += " {s-}└{!} "
 			case len(bundle) != 1:
-				pkgInfo += " {s}│{!} "
+				pkgInfo += " {s-}│{!} "
 			default:
 				pkgInfo += " "
 			}
@@ -119,9 +123,12 @@ func printPackageStackSources(r *repo.SubRepository, stack repo.PackageStack) {
 
 			switch index {
 			case 0:
-				fmtc.Printf("[ {*}%s{!} ]"+pkgInfo+"\n", pkg.Src)
+				fmtc.Printf("{s}[{!} {*}%s{!} {s}]{!}"+pkgInfo+"\n", pkg.Src)
 			default:
-				fmtc.Printf("[ {s-}%s{!} ]"+pkgInfo+"\n", pkg.Src)
+				fmtc.Printf(
+					"{s-}[ %s ]{!}"+pkgInfo+"\n",
+					strings.Repeat("∙", len(pkg.Src)),
+				)
 			}
 		}
 	}
