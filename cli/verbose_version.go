@@ -8,11 +8,13 @@ package cli
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"os"
 	"os/exec"
 	"strings"
 
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fmtutil"
+	"github.com/essentialkaos/ek/v12/hash"
 	"github.com/essentialkaos/ek/v12/strutil"
 	"github.com/essentialkaos/ek/v12/system"
 
@@ -24,7 +26,7 @@ import (
 // showVerboseAbout prints verbose info about app
 func showVerboseAbout(gitRev string, gomod []byte) {
 	showApplicationInfo(gitRev)
-	showSystemInfo()
+	showOSInfo()
 	showEnvironmentInfo()
 	showDepsInfo(gomod)
 	fmtutil.Separator(false)
@@ -38,16 +40,27 @@ func showApplicationInfo(gitRev string) {
 	fmtc.Printf("  {*}%-12s{!} %s\n", "Version:", VER)
 
 	if gitRev != "" {
-		if fmtc.IsTrueColorSupported() {
+		if !fmtc.DisableColors && fmtc.IsTrueColorSupported() {
 			fmtc.Printf("  {*}%-12s{!} %s {#"+strutil.Head(gitRev, 6)+"}●{!}\n", "Git SHA:", gitRev)
 		} else {
 			fmtc.Printf("  {*}%-12s{!} %s\n", "Git SHA:", gitRev)
 		}
 	}
+
+	binSHA := hash.FileHash(os.Args[0])
+
+	if binSHA != "" {
+		binSHA = strutil.Head(binSHA, 7)
+		if !fmtc.DisableColors && fmtc.IsTrueColorSupported() {
+			fmtc.Printf("  {*}%-12s{!} %s {#"+strutil.Head(binSHA, 6)+"}●{!}\n", "Bin SHA:", binSHA)
+		} else {
+			fmtc.Printf("  {*}%-12s{!} %s\n", "Bin SHA:", binSHA)
+		}
+	}
 }
 
-// showSystemInfo shows verbose information about system
-func showSystemInfo() {
+// showOSInfo shows verbose information about system
+func showOSInfo() {
 	fmtInfo := func(s string) string {
 		if s == "" {
 			return fmtc.Sprintf("{s}unknown{!}")
@@ -59,10 +72,15 @@ func showSystemInfo() {
 	osInfo, err := system.GetOSInfo()
 
 	if err == nil {
-		fmtutil.Separator(false, "SYSTEM INFO")
-		fmtc.Printf("  {*}%-16s{!} %s\n", "OS Name:", fmtInfo(osInfo.Name))
-		fmtc.Printf("  {*}%-16s{!} %s\n", "OS Version:", fmtInfo(osInfo.VersionID))
-		fmtc.Printf("  {*}%-16s{!} %s\n", "OS ID:", fmtInfo(osInfo.ID))
+		fmtutil.Separator(false, "OS INFO")
+		fmtc.Printf("  {*}%-16s{!} %s\n", "Name:", fmtInfo(osInfo.Name))
+		fmtc.Printf("  {*}%-16s{!} %s\n", "Pretty Name:", fmtInfo(osInfo.PrettyName))
+		fmtc.Printf("  {*}%-16s{!} %s\n", "Version:", fmtInfo(osInfo.VersionID))
+		fmtc.Printf("  {*}%-16s{!} %s\n", "ID:", fmtInfo(osInfo.ID))
+		fmtc.Printf("  {*}%-16s{!} %s\n", "ID Like:", fmtInfo(osInfo.IDLike))
+		fmtc.Printf("  {*}%-16s{!} %s\n", "Version ID:", fmtInfo(osInfo.VersionID))
+		fmtc.Printf("  {*}%-16s{!} %s\n", "Version Code:", fmtInfo(osInfo.VersionCodename))
+		fmtc.Printf("  {*}%-16s{!} %s\n", "CPE:", fmtInfo(osInfo.CPEName))
 	}
 
 	systemInfo, err := system.GetSystemInfo()
@@ -72,8 +90,8 @@ func showSystemInfo() {
 	} else {
 		if osInfo == nil {
 			fmtutil.Separator(false, "SYSTEM INFO")
-			fmtc.Printf("  {*}%-16s{!} %s\n", "OS Name:", fmtInfo(systemInfo.Distribution))
-			fmtc.Printf("  {*}%-16s{!} %s\n", "OS Version:", fmtInfo(systemInfo.Version))
+			fmtc.Printf("  {*}%-16s{!} %s\n", "Name:", fmtInfo(systemInfo.OS))
+			fmtc.Printf("  {*}%-16s{!} %s\n", "Version:", fmtInfo(systemInfo.Version))
 		}
 	}
 
