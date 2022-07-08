@@ -47,7 +47,8 @@ func showApplicationInfo(gitRev string) {
 		}
 	}
 
-	binSHA := hash.FileHash(os.Args[0])
+	bin, _ := os.Executable()
+	binSHA := hash.FileHash(bin)
 
 	if binSHA != "" {
 		binSHA = strutil.Head(binSHA, 7)
