@@ -14,6 +14,7 @@ import (
 
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fmtutil"
+	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/hash"
 	"github.com/essentialkaos/ek/v12/strutil"
 	"github.com/essentialkaos/ek/v12/system"
@@ -98,6 +99,18 @@ func showOSInfo() {
 
 	fmtc.Printf("  {*}%-16s{!} %s\n", "Arch:", fmtInfo(systemInfo.Arch))
 	fmtc.Printf("  {*}%-16s{!} %s\n", "Kernel:", fmtInfo(systemInfo.Kernel))
+
+	containerEngine := "No"
+
+	switch {
+	case fsutil.IsExist("/.dockerenv"):
+		containerEngine = "Yes (Docker)"
+	case fsutil.IsExist("/run/.containerenv"):
+		containerEngine = "Yes (Podman)"
+	}
+
+	fmtc.NewLine()
+	fmtc.Printf("  {*}%-16s{!} %s\n", "Container:", containerEngine)
 }
 
 // showEnvironmentInfo shows info about environment
