@@ -85,6 +85,11 @@ YUM repository management utility.
 %build
 export GOPATH=$(pwd)
 
+if [[ ! -d "%{srcdir}/vendor" ]] ; then
+  echo "This package requires vendored dependencies"
+  exit 1
+fi
+
 pushd %{srcdir}
   %if 0%{?unstable}
     %{__make} %{?_smp_mflags} all GITREV=$(cat .REVISION)

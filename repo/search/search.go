@@ -457,13 +457,13 @@ func genBasicTermCond(term *Term) string {
 	if term.Type == TERM_SOURCE {
 		if term.IsNegative() {
 			return fmt.Sprintf(
-				"(%s %s OR location_href %s OR location_href %s)", column, cond, cond,
-				fmt.Sprintf("NOT LIKE \"%%/%s\"", sanitizeInput(term.Value.(string))),
+				"(%s %s OR location_href %s OR substr(location_href, 3) %s)",
+				column, cond, cond, cond,
 			)
 		} else {
 			return fmt.Sprintf(
-				"(%s %s OR location_href %s OR location_href %s)", column, cond, cond,
-				fmt.Sprintf("LIKE \"%%/%s\"", sanitizeInput(term.Value.(string))),
+				"(%s %s OR location_href %s OR substr(location_href, 3) %s)",
+				column, cond, cond, cond,
 			)
 		}
 	}

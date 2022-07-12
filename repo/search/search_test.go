@@ -126,8 +126,8 @@ func (s *SearchSuite) TestTermToCond(c *C) {
 	c.Assert(tc(TermName("abcd*", TERM_MOD_NEGATIVE)), Equals, "name NOT GLOB \"abcd*\"")
 	c.Assert(tc(TermName("ab|cd")), Equals, "name IN (\"ab\",\"cd\")")
 	c.Assert(tc(TermName("ab|cd", TERM_MOD_NEGATIVE)), Equals, "name NOT IN (\"ab\",\"cd\")")
-	c.Assert(tc(TermSource("abcd")), Equals, "(rpm_sourcerpm = \"abcd\" OR location_href = \"abcd\" OR location_href LIKE \"%/abcd\")")
-	c.Assert(tc(TermSource("abcd", TERM_MOD_NEGATIVE)), Equals, "(rpm_sourcerpm != \"abcd\" OR location_href != \"abcd\" OR location_href NOT LIKE \"%/abcd\")")
+	c.Assert(tc(TermSource("abcd")), Equals, "(rpm_sourcerpm = \"abcd\" OR location_href = \"abcd\" OR substr(location_href, 3) = \"abcd\")")
+	c.Assert(tc(TermSource("abcd", TERM_MOD_NEGATIVE)), Equals, "(rpm_sourcerpm != \"abcd\" OR location_href != \"abcd\" OR substr(location_href, 3) != \"abcd\")")
 	c.Assert(tc(TermSize(0, 100)), Equals, "size_package BETWEEN 0 AND 100")
 	c.Assert(tc(TermSize(0, 100, TERM_MOD_NEGATIVE)), Equals, "size_package NOT BETWEEN 0 AND 100")
 
