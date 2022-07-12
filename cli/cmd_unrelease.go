@@ -50,12 +50,12 @@ func cmdUnrelease(ctx *context, args options.Arguments) bool {
 
 // unreleasePackages removes packages from release sub-repository
 func unreleasePackages(ctx *context, stack repo.PackageStack) bool {
-	printPackageList(ctx.Repo.Release, stack, "")
-
-	fmtutil.Separator(true)
-	fmtc.NewLine()
-
 	if !options.GetB(OPT_FORCE) {
+		printPackageList(ctx.Repo.Release, stack, "")
+
+		fmtutil.Separator(true)
+		fmtc.NewLine()
+
 		ok, err := terminal.ReadAnswer("Do you really want to unrelease these packages?", "n")
 
 		if err != nil || !ok {

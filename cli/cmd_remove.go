@@ -60,18 +60,18 @@ func cmdRemove(ctx *context, args options.Arguments) bool {
 
 // removePackages removes packages from testing or all sub-repositories
 func removePackages(ctx *context, releaseStack, testingStack repo.PackageStack) bool {
-	if !releaseStack.IsEmpty() {
-		printPackageList(ctx.Repo.Release, releaseStack, "")
-	}
-
-	if !testingStack.IsEmpty() {
-		printPackageList(ctx.Repo.Testing, testingStack, "")
-	}
-
-	fmtutil.Separator(true)
-	fmtc.NewLine()
-
 	if !options.GetB(OPT_FORCE) {
+		if !releaseStack.IsEmpty() {
+			printPackageList(ctx.Repo.Release, releaseStack, "")
+		}
+
+		if !testingStack.IsEmpty() {
+			printPackageList(ctx.Repo.Testing, testingStack, "")
+		}
+
+		fmtutil.Separator(true)
+		fmtc.NewLine()
+
 		ok, err := terminal.ReadAnswer("Do you really want to remove these packages?", "n")
 
 		if err != nil || !ok {

@@ -50,12 +50,12 @@ func cmdRelease(ctx *context, args options.Arguments) bool {
 
 // releasePackages copies packages from testing to release repository
 func releasePackages(ctx *context, stack repo.PackageStack) bool {
-	printPackageList(ctx.Repo.Release, stack, "")
-
-	fmtutil.Separator(true)
-	fmtc.NewLine()
-
 	if !options.GetB(OPT_FORCE) {
+		printPackageList(ctx.Repo.Release, stack, "")
+
+		fmtutil.Separator(true)
+		fmtc.NewLine()
+
 		ok, err := terminal.ReadAnswer("Do you really want to release these packages?", "n")
 
 		if err != nil || !ok {
