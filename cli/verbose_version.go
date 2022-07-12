@@ -10,6 +10,7 @@ package cli
 import (
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/essentialkaos/ek/v12/fmtc"
@@ -39,6 +40,12 @@ func showApplicationInfo(gitRev string) {
 
 	fmtc.Printf("  {*}%-12s{!} %s\n", "Name:", APP)
 	fmtc.Printf("  {*}%-12s{!} %s\n", "Version:", VER)
+
+	fmtc.Printf(
+		"  {*}%-12s{!} %s {s}(%s/%s){!}\n", "Go:",
+		strings.TrimLeft(runtime.Version(), "go"),
+		runtime.GOOS, runtime.GOARCH,
+	)
 
 	if gitRev != "" {
 		if !fmtc.DisableColors && fmtc.IsTrueColorSupported() {
