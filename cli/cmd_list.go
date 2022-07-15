@@ -133,9 +133,14 @@ func genListArchInfo(pkg *repo.Package, archList []string) string {
 
 	for _, arch := range archList {
 		tag := archTags[arch]
+		color := archColors[arch]
+
+		if fmtc.Is256ColorsSupported() {
+			color = archColorsExt[arch]
+		}
 
 		if pkg.HasArch(arch) {
-			result += archColors[arch] + tag + "{!} "
+			result += color + tag + "{!} "
 		} else {
 			result += "{s-}" + strings.Repeat("∙", len(tag)) + "{!} "
 		}

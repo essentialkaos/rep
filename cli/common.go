@@ -33,6 +33,19 @@ var archColors = map[string]string{
 	data.ARCH_ARM:     "{b*}",
 }
 
+var archColorsExt = map[string]string{
+	data.ARCH_SRC:     "{*}",
+	data.ARCH_NOARCH:  "{*}{#75}",
+	data.ARCH_I386:    "{*}{#105}",
+	data.ARCH_I586:    "{*}{#144}",
+	data.ARCH_I686:    "{*}{#128}",
+	data.ARCH_X64:     "{*}{#214}",
+	data.ARCH_AARCH64: "{*}{#166}",
+	data.ARCH_PPC64:   "{*}{#99}",
+	data.ARCH_PPC64LE: "{*}{#105}",
+	data.ARCH_ARM:     "{*}{#70}",
+}
+
 var archTags = map[string]string{
 	data.ARCH_SRC:     "src",
 	data.ARCH_NOARCH:  "noarch",
@@ -40,7 +53,7 @@ var archTags = map[string]string{
 	data.ARCH_I586:    "i586",
 	data.ARCH_I686:    "i686",
 	data.ARCH_X64:     "x64",
-	data.ARCH_AARCH64: "a64",
+	data.ARCH_AARCH64: "aa64",
 	data.ARCH_PPC64:   "p64",
 	data.ARCH_PPC64LE: "p64l",
 	data.ARCH_ARM:     "arm",
