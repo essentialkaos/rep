@@ -97,13 +97,13 @@ func removePackagesFiles(ctx *context, releaseFiles, testingFiles []repo.Package
 	for _, file = range releaseFiles {
 		ok := removePackageFile(ctx, ctx.Repo.Release, file.Path)
 
+		if isCanceled {
+			return false
+		}
+
 		if !ok {
 			hasErrors = true
 			continue
-		}
-
-		if isCanceled {
-			return false
 		}
 
 		releaseRemoved = true

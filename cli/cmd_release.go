@@ -77,13 +77,13 @@ func releasePackagesFiles(ctx *context, files []repo.PackageFile) bool {
 	for _, file := range files {
 		ok := releasePackageFile(ctx, file.Path)
 
+		if isCanceled {
+			return false
+		}
+
 		if !ok {
 			hasErrors = true
 			continue
-		}
-
-		if isCanceled {
-			return false
 		}
 
 		released = true

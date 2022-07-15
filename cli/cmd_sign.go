@@ -63,12 +63,12 @@ func signRPMFiles(files []string, ctx *context, privateKey *sign.PrivateKey) boo
 	for _, file := range files {
 		ok := signRPMFile(file, tmpDir, ctx, privateKey)
 
-		if !ok && !hasErrors {
-			hasErrors = true
-		}
-
 		if isCanceled {
 			return false
+		}
+
+		if !ok {
+			hasErrors = true
 		}
 	}
 

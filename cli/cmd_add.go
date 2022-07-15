@@ -90,13 +90,13 @@ func addRPMFiles(ctx *context, files []string, privateKey *sign.PrivateKey) bool
 	for _, file := range files {
 		ok := addRPMFile(ctx, file, tmpDir, privateKey)
 
-		if !ok && !hasErrors {
-			hasErrors = true
-			continue
-		}
-
 		if isCanceled {
 			return false
+		}
+
+		if !ok {
+			hasErrors = true
+			continue
 		}
 
 		hasAdded = true
