@@ -167,9 +167,6 @@ func (s *RepoSuite) TestRepositoryInitialize(c *C) {
 	err = r.Initialize([]string{data.ARCH_X64})
 	c.Assert(err, IsNil)
 
-	err = r.Initialize([]string{data.ARCH_X64})
-	c.Assert(err, NotNil)
-
 	c.Assert(r.HasArch(data.ARCH_X64), Equals, true)
 	c.Assert(r.HasArch(data.ARCH_I686), Equals, false)
 
