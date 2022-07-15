@@ -333,10 +333,6 @@ func (s PackageStack) IsEmpty() bool {
 
 // Initialize initializes the new repository and creates all required directories
 func (r *Repository) Initialize(archList []string) error {
-	if r.storage.IsInitialized() {
-		return fmt.Errorf("Repository already initialized")
-	}
-
 	return r.storage.Initialize(
 		[]string{data.REPO_RELEASE, data.REPO_TESTING},
 		archList,

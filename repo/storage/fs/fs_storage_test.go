@@ -148,16 +148,23 @@ func (s *StorageSuite) TestStorageInitialize(c *C) {
 	c.Assert(fs.IsEmpty(data.REPO_TESTING, data.ARCH_X64), Equals, true)
 	c.Assert(fs.IsEmpty(data.REPO_TESTING, data.ARCH_NOARCH), Equals, true)
 
-	fs, err = NewStorage(genStorageOptions(c, ""), index.DefaultOptions)
+	c.Assert(fsutil.IsExist(fs.dataOptions.DataDir+"/testing/armv7hl"), Equals, false)
 
-	c.Assert(fs, NotNil)
+	err = fs.Initialize(defRepos, append(defArchs, "armv7hl"))
 	c.Assert(err, IsNil)
 
-	os.MkdirAll(fs.dataOptions.DataDir+"/testing", 0755)
-	os.MkdirAll(fs.dataOptions.DataDir+"/release", 0755)
-
-	err = fs.Initialize(defRepos, defArchs)
-	c.Assert(err, ErrorMatches, `Can't initialize the new storage: Storage already initialized`)
+	c.Assert(fsutil.CheckPerms("DWRX", fs.dataOptions.DataDir+"/testing/armv7hl"), Equals, true)
+	c.Assert(fsutil.CheckPerms("DWRX", fs.dataOptions.DataDir+"/testing/x86_64"), Equals, true)
+	c.Assert(fsutil.CheckPerms("DWRX", fs.dataOptions.DataDir+"/testing/SRPMS"), Equals, true)
+	c.Assert(fsutil.CheckPerms("DWRX", fs.dataOptions.DataDir+"/release/armv7hl"), Equals, true)
+	c.Assert(fsutil.CheckPerms("DWRX", fs.dataOptions.DataDir+"/release/x86_64"), Equals, true)
+	c.Assert(fsutil.CheckPerms("DWRX", fs.dataOptions.DataDir+"/release/SRPMS"), Equals, true)
+	c.Assert(fsutil.GetMode(fs.dataOptions.DataDir+"/testing/armv7hl"), Equals, os.FileMode(0750))
+	c.Assert(fsutil.GetMode(fs.dataOptions.DataDir+"/testing/x86_64"), Equals, os.FileMode(0750))
+	c.Assert(fsutil.GetMode(fs.dataOptions.DataDir+"/testing/SRPMS"), Equals, os.FileMode(0750))
+	c.Assert(fsutil.GetMode(fs.dataOptions.DataDir+"/release/armv7hl"), Equals, os.FileMode(0750))
+	c.Assert(fsutil.GetMode(fs.dataOptions.DataDir+"/release/x86_64"), Equals, os.FileMode(0750))
+	c.Assert(fsutil.GetMode(fs.dataOptions.DataDir+"/release/SRPMS"), Equals, os.FileMode(0750))
 
 	fs, err = NewStorage(genStorageOptions(c, ""), index.DefaultOptions)
 

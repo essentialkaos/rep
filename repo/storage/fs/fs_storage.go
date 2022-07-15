@@ -194,8 +194,6 @@ func (s *Storage) Initialize(repoList, archList []string) error {
 			"Can't initialize the new storage: The current user doesn't have enough permissions for creating new directories in %q",
 			dataDirParent,
 		)
-	case s.IsInitialized():
-		return fmt.Errorf("Can't initialize the new storage: Storage already initialized")
 	}
 
 	for _, arch := range archList {
@@ -219,6 +217,10 @@ func (s *Storage) Initialize(repoList, archList []string) error {
 	}
 
 	for _, dir := range dirList {
+		if fsutil.IsExist(dir) {
+			continue
+		}
+
 		err := mkdirFunc(dir, 0700)
 
 		if err != nil {
