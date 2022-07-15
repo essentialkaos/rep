@@ -30,7 +30,8 @@ var archColors = map[string]string{
 	data.ARCH_AARCH64: "{y*}",
 	data.ARCH_PPC64:   "{y*}",
 	data.ARCH_PPC64LE: "{y*}",
-	data.ARCH_ARM:     "{b*}",
+	data.ARCH_ARM:     "{g*}",
+	data.ARCH_ARMV7HL: "{g*}",
 }
 
 var archColorsExt = map[string]string{
@@ -43,7 +44,8 @@ var archColorsExt = map[string]string{
 	data.ARCH_AARCH64: "{*}{#166}",
 	data.ARCH_PPC64:   "{*}{#99}",
 	data.ARCH_PPC64LE: "{*}{#105}",
-	data.ARCH_ARM:     "{*}{#70}",
+	data.ARCH_ARM:     "{*}{#76}",
+	data.ARCH_ARMV7HL: "{*}{#78}",
 }
 
 var archTags = map[string]string{
@@ -57,6 +59,7 @@ var archTags = map[string]string{
 	data.ARCH_PPC64:   "p64",
 	data.ARCH_PPC64LE: "p64l",
 	data.ARCH_ARM:     "arm",
+	data.ARCH_ARMV7HL: "arm7",
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
