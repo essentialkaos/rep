@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/sliceutil"
@@ -140,7 +141,8 @@ func Generate(path string, options *Options, full bool) error {
 	cmd.Stderr = &stdErrBuf
 
 	if cmd.Run() != nil {
-		return fmt.Errorf("Error while executing createrepo_c: %s", stdErrBuf.String())
+		errorMessage := strings.TrimRight(stdErrBuf.String(), "\r\n")
+		return fmt.Errorf("Error while executing createrepo_c: %s", errorMessage)
 	}
 
 	if options.User != "" || options.Group != "" {
