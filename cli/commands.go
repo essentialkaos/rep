@@ -91,7 +91,7 @@ var commands = map[string]command{
 	COMMAND_SHORT_REINDEX:      {cmdReindex, 0, FLAG_REQUIRE_CACHE},
 	COMMAND_SHORT_PURGE_CACHE:  {cmdPurgeCache, 0, FLAG_REQUIRE_LOCK},
 	COMMAND_SHORT_STATS:        {cmdStats, 0, FLAG_REQUIRE_CACHE},
-	COMMAND_SHORT_HELP:         {cmdHelp, 0, FLAG_REQUIRE_CACHE},
+	COMMAND_SHORT_HELP:         {cmdHelp, 0, FLAG_NONE},
 	"":                         {cmdList, 0, FLAG_REQUIRE_CACHE}, // default command
 }
 
