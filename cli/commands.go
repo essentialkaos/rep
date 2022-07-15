@@ -11,10 +11,12 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/knf"
+	"github.com/essentialkaos/ek/v12/lock"
 	"github.com/essentialkaos/ek/v12/options"
 	"github.com/essentialkaos/ek/v12/path"
 	"github.com/essentialkaos/ek/v12/terminal"
@@ -31,15 +33,22 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+const (
+	FLAG_NONE          uint8 = 0
+	FLAG_REQUIRE_CACHE uint8 = 1 << iota // Require cache warming
+	FLAG_REQUIRE_LOCK                    // Create and check lock
+)
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // handler is function which handle CLI command
 type handler func(ctx *context, args options.Arguments) bool
 
-// command contains basic information about command (handler + min num of args)
+// command contains basic information about command (handler + min args + options)
 type command struct {
-	Handler      handler
-	MinArgs      int
-	RequireCache bool
-	AllowRaw     bool
+	Handler handler
+	MinArgs int
+	Flags   uint8
 }
 
 // context is struct which contains all required data for handling CLI command
@@ -51,39 +60,39 @@ type context struct {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// commands is map [long command → {handler + min args}]
+// commands is map [long command → {handler + min args + options}]
 var commands = map[string]command{
-	COMMAND_INIT:               {cmdInit, 1, false, false},
-	COMMAND_GEN_KEY:            {cmdGenKey, 0, false, false},
-	COMMAND_LIST:               {cmdList, 0, true, true},
-	COMMAND_WHICH_SOURCE:       {cmdWhichSource, 1, true, false},
-	COMMAND_FIND:               {cmdFind, 1, true, true},
-	COMMAND_INFO:               {cmdInfo, 1, true, false},
-	COMMAND_PAYLOAD:            {cmdPayload, 1, true, true},
-	COMMAND_SIGN:               {cmdSign, 1, false, false},
-	COMMAND_ADD:                {cmdAdd, 1, false, false},
-	COMMAND_REMOVE:             {cmdRemove, 1, true, false},
-	COMMAND_RELEASE:            {cmdRelease, 1, true, false},
-	COMMAND_UNRELEASE:          {cmdUnrelease, 1, true, false},
-	COMMAND_REINDEX:            {cmdReindex, 0, false, false},
-	COMMAND_PURGE_CACHE:        {cmdPurgeCache, 0, false, false},
-	COMMAND_STATS:              {cmdStats, 0, true, false},
-	COMMAND_HELP:               {cmdHelp, 0, false, false},
-	COMMAND_SHORT_LIST:         {cmdList, 0, true, true},
-	COMMAND_SHORT_WHICH_SOURCE: {cmdWhichSource, 1, true, false},
-	COMMAND_SHORT_FIND:         {cmdFind, 1, true, true},
-	COMMAND_SHORT_INFO:         {cmdInfo, 1, true, false},
-	COMMAND_SHORT_PAYLOAD:      {cmdPayload, 1, true, true},
-	COMMAND_SHORT_SIGN:         {cmdSign, 0, false, false},
-	COMMAND_SHORT_ADD:          {cmdAdd, 1, false, false},
-	COMMAND_SHORT_REMOVE:       {cmdRemove, 1, true, false},
-	COMMAND_SHORT_RELEASE:      {cmdRelease, 1, true, false},
-	COMMAND_SHORT_UNRELEASE:    {cmdUnrelease, 1, true, false},
-	COMMAND_SHORT_REINDEX:      {cmdReindex, 0, true, false},
-	COMMAND_SHORT_PURGE_CACHE:  {cmdPurgeCache, 0, false, false},
-	COMMAND_SHORT_STATS:        {cmdStats, 0, false, false},
-	COMMAND_SHORT_HELP:         {cmdHelp, 0, true, false},
-	"":                         {cmdList, 0, true, false}, // default command
+	COMMAND_INIT:               {cmdInit, 1, FLAG_REQUIRE_LOCK},
+	COMMAND_GEN_KEY:            {cmdGenKey, 0, FLAG_NONE},
+	COMMAND_LIST:               {cmdList, 0, FLAG_REQUIRE_CACHE},
+	COMMAND_WHICH_SOURCE:       {cmdWhichSource, 1, FLAG_REQUIRE_CACHE},
+	COMMAND_FIND:               {cmdFind, 1, FLAG_REQUIRE_CACHE},
+	COMMAND_INFO:               {cmdInfo, 1, FLAG_REQUIRE_CACHE},
+	COMMAND_PAYLOAD:            {cmdPayload, 1, FLAG_REQUIRE_CACHE},
+	COMMAND_SIGN:               {cmdSign, 1, FLAG_NONE},
+	COMMAND_ADD:                {cmdAdd, 1, FLAG_REQUIRE_LOCK},
+	COMMAND_REMOVE:             {cmdRemove, 1, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
+	COMMAND_RELEASE:            {cmdRelease, 1, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
+	COMMAND_UNRELEASE:          {cmdUnrelease, 1, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
+	COMMAND_REINDEX:            {cmdReindex, 0, FLAG_REQUIRE_LOCK},
+	COMMAND_PURGE_CACHE:        {cmdPurgeCache, 0, FLAG_REQUIRE_LOCK},
+	COMMAND_STATS:              {cmdStats, 0, FLAG_REQUIRE_CACHE},
+	COMMAND_HELP:               {cmdHelp, 0, FLAG_NONE},
+	COMMAND_SHORT_LIST:         {cmdList, 0, FLAG_REQUIRE_CACHE},
+	COMMAND_SHORT_WHICH_SOURCE: {cmdWhichSource, 1, FLAG_REQUIRE_CACHE},
+	COMMAND_SHORT_FIND:         {cmdFind, 1, FLAG_REQUIRE_CACHE},
+	COMMAND_SHORT_INFO:         {cmdInfo, 1, FLAG_REQUIRE_CACHE},
+	COMMAND_SHORT_PAYLOAD:      {cmdPayload, 1, FLAG_REQUIRE_CACHE},
+	COMMAND_SHORT_SIGN:         {cmdSign, 0, FLAG_NONE},
+	COMMAND_SHORT_ADD:          {cmdAdd, 1, FLAG_REQUIRE_LOCK},
+	COMMAND_SHORT_REMOVE:       {cmdRemove, 1, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
+	COMMAND_SHORT_RELEASE:      {cmdRelease, 1, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
+	COMMAND_SHORT_UNRELEASE:    {cmdUnrelease, 1, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
+	COMMAND_SHORT_REINDEX:      {cmdReindex, 0, FLAG_REQUIRE_CACHE},
+	COMMAND_SHORT_PURGE_CACHE:  {cmdPurgeCache, 0, FLAG_REQUIRE_LOCK},
+	COMMAND_SHORT_STATS:        {cmdStats, 0, FLAG_NONE},
+	COMMAND_SHORT_HELP:         {cmdHelp, 0, FLAG_REQUIRE_CACHE},
+	"":                         {cmdList, 0, FLAG_REQUIRE_CACHE}, // default command
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -122,11 +131,17 @@ func runCommand(repoCfg *knf.Config, cmdName string, cmdArgs options.Arguments) 
 		}
 	}
 
-	if !cmd.AllowRaw {
-		rawOutput = false
+	if cmd.RequireLock() {
+		if !checkForLock() {
+			terminal.PrintErrorMessage("Can't run command due to lock\n")
+			return false
+		}
+
+		lock.Create(APP)
+		defer lock.Remove(APP)
 	}
 
-	if cmd.RequireCache {
+	if cmd.RequireCache() {
 		warmUpCache(ctx.Repo)
 	}
 
@@ -205,6 +220,26 @@ func warmUpCache(r *repo.Repository) {
 	}
 
 	fmtc.TPrintf("")
+}
+
+// checkForLock check for lock file
+func checkForLock() bool {
+	if !lock.Has(APP) {
+		return true
+	}
+
+	if lock.IsExpired(APP, 5*time.Minute) {
+		lock.Remove(APP) // Remove outdated lock file
+		return true
+	}
+
+	fmtc.TPrintf("{s-}Found lock file, waiting for lock to release…{!}")
+
+	ok := lock.Wait(APP, time.Now().Add(5*time.Minute))
+
+	fmtc.TPrintf("")
+
+	return ok
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -329,4 +364,16 @@ func getCLILogger(repoName string) (*logger.Logger, error) {
 	}
 
 	return l, nil
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// RequireCache returns true if command requires warm cache
+func (c command) RequireCache() bool {
+	return c.Flags&FLAG_REQUIRE_CACHE == FLAG_REQUIRE_CACHE
+}
+
+// RequireLock returns true if command requires lock
+func (c command) RequireLock() bool {
+	return c.Flags&FLAG_REQUIRE_LOCK == FLAG_REQUIRE_LOCK
 }
