@@ -231,9 +231,9 @@ func (s *RepoSuite) TestRepositoryIsPackageReleased(c *C) {
 	err = r.CopyPackage(r.Testing, r.Release, "test-package-1.0.0-0.el7.x86_64.rpm")
 	c.Assert(err, IsNil)
 
-	err = r.Testing.Reindex(false)
+	err = r.Testing.Reindex(false, nil)
 	c.Assert(err, IsNil)
-	err = r.Release.Reindex(false)
+	err = r.Release.Reindex(false, nil)
 	c.Assert(err, IsNil)
 
 	_, _, err = r.IsPackageReleased(nil)
@@ -294,9 +294,9 @@ func (s *RepoSuite) TestRepositoryInfo(c *C) {
 	err = r.CopyPackage(r.Testing, r.Release, "test-package-1.0.0-0.el7.x86_64.rpm")
 	c.Assert(err, IsNil)
 
-	err = r.Testing.Reindex(false)
+	err = r.Testing.Reindex(false, nil)
 	c.Assert(err, IsNil)
-	err = r.Release.Reindex(false)
+	err = r.Release.Reindex(false, nil)
 	c.Assert(err, IsNil)
 
 	_, _, err = r.Info("test.rpm", data.ARCH_X64)
@@ -453,7 +453,7 @@ func (s *RepoSuite) TestSubRepositoryStats(c *C) {
 	err = r.Testing.AddPackage("../testdata/test-package-1.0.0-0.el7.x86_64.rpm")
 	c.Assert(err, IsNil)
 
-	err = r.Testing.Reindex(false)
+	err = r.Testing.Reindex(false, nil)
 	c.Assert(err, IsNil)
 
 	stats, err := r.Testing.Stats()
@@ -483,7 +483,7 @@ func (s *RepoSuite) TestSubRepositoryList(c *C) {
 	c.Assert(err, IsNil)
 	err = r.Testing.AddPackage("../testdata/git-all-2.27.0-0.el7.noarch.rpm")
 	c.Assert(err, IsNil)
-	err = r.Testing.Reindex(false)
+	err = r.Testing.Reindex(false, nil)
 	c.Assert(err, IsNil)
 
 	stk, err := r.Testing.List("", false)
@@ -518,7 +518,7 @@ func (s *RepoSuite) TestSubRepositoryFind(c *C) {
 	c.Assert(err, IsNil)
 	err = r.Testing.AddPackage("../testdata/git-all-2.27.0-0.el7.noarch.rpm")
 	c.Assert(err, IsNil)
-	err = r.Testing.Reindex(false)
+	err = r.Testing.Reindex(false, nil)
 	c.Assert(err, IsNil)
 
 	ps, err := r.Testing.Find(nil)
@@ -546,7 +546,7 @@ func (s *RepoSuite) TestSubRepositoryReindex(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(r, NotNil)
 
-	err = r.Testing.Reindex(false)
+	err = r.Testing.Reindex(false, make(chan string, 99))
 	c.Assert(err, NotNil)
 	c.Assert(err, DeepEquals, ErrNotInitialized)
 
@@ -556,11 +556,11 @@ func (s *RepoSuite) TestSubRepositoryReindex(c *C) {
 	c.Assert(err, IsNil)
 	err = r.Testing.AddPackage("../testdata/git-all-2.27.0-0.el7.noarch.rpm")
 	c.Assert(err, IsNil)
-	err = r.Testing.Reindex(false)
+	err = r.Testing.Reindex(false, make(chan string, 99))
 	c.Assert(err, IsNil)
 
 	r.storage = &FailStorage{}
-	err = r.Testing.Reindex(false)
+	err = r.Testing.Reindex(false, make(chan string, 99))
 	c.Assert(err, NotNil)
 }
 
@@ -577,7 +577,7 @@ func (s *RepoSuite) TestSubRepositoryCaching(c *C) {
 
 	err = r.Testing.AddPackage("../testdata/git-all-2.27.0-0.el7.noarch.rpm")
 	c.Assert(err, IsNil)
-	err = r.Testing.Reindex(true)
+	err = r.Testing.Reindex(true, nil)
 	c.Assert(err, IsNil)
 
 	c.Assert(r.Testing.IsCacheValid(), Equals, false)

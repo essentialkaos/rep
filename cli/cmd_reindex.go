@@ -54,7 +54,11 @@ func reindexRepository(ctx *context, r *repo.SubRepository, full bool) bool {
 
 	isCancelProtected = true
 
-	err := r.Reindex(full)
+	ch := make(chan string, len(data.SupportedArchs))
+
+	go updateReindexStatus(ch, r.Name)
+
+	err := r.Reindex(full, ch)
 
 	if err == nil {
 		spinner.Update("Index for "+colorTagRepository+"%s{!} repository successfully built", r.Name)
@@ -72,4 +76,11 @@ func reindexRepository(ctx *context, r *repo.SubRepository, full bool) bool {
 	}
 
 	return true
+}
+
+// updateReindexStatus updates spinner status
+func updateReindexStatus(ch chan string, name string) {
+	for arch := range ch {
+		spinner.Update("Indexing "+colorTagRepository+"%s{!} {s-}(%s){!} repository", name, arch)
+	}
 }

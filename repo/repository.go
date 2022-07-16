@@ -626,7 +626,7 @@ func (r *SubRepository) Find(query search.Query) (PackageStack, error) {
 }
 
 // Reindex generates repository metadata
-func (r *SubRepository) Reindex(full bool) error {
+func (r *SubRepository) Reindex(full bool, ch chan string) error {
 	if !r.Parent.storage.IsInitialized() {
 		return ErrNotInitialized
 	}
@@ -636,11 +636,19 @@ func (r *SubRepository) Reindex(full bool) error {
 			continue
 		}
 
+		if ch != nil {
+			ch <- arch
+		}
+
 		err := r.Parent.storage.Reindex(r.Name, arch, full)
 
 		if err != nil {
 			return err
 		}
+	}
+
+	if ch != nil {
+		close(ch)
 	}
 
 	return nil
