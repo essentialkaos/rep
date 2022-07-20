@@ -99,9 +99,7 @@ var commands = map[string]command{
 
 // runCommand runs command
 func runCommand(repoCfg *knf.Config, cmdName string, cmdArgs options.Arguments) bool {
-	if !rawOutput {
-		fmtc.NewLine()
-	}
+	fmtc.If(!rawOutput).NewLine()
 
 	if !checkCommand(cmdName, cmdArgs) {
 		return false
@@ -147,18 +145,14 @@ func runCommand(repoCfg *knf.Config, cmdName string, cmdArgs options.Arguments) 
 
 	ok = cmd.Handler(ctx, cmdArgs)
 
-	if !rawOutput {
-		fmtc.NewLine()
-	}
+	fmtc.If(!rawOutput).NewLine()
 
 	return ok
 }
 
 // runSimpleCommand runs some simple commands like help or gen-key
 func runSimpleCommand(cmdName string, cmdArgs options.Arguments) bool {
-	if !rawOutput {
-		fmtc.NewLine()
-	}
+	fmtc.If(!rawOutput).NewLine()
 
 	if !checkCommand(cmdName, cmdArgs) {
 		return false
@@ -167,9 +161,7 @@ func runSimpleCommand(cmdName string, cmdArgs options.Arguments) bool {
 	cmd := commands[cmdName]
 	ok := cmd.Handler(nil, cmdArgs)
 
-	if !rawOutput {
-		fmtc.NewLine()
-	}
+	fmtc.If(!rawOutput).NewLine()
 
 	return ok
 }
@@ -210,12 +202,12 @@ func warmUpCache(r *repo.Repository) {
 	}
 
 	if warmupTesting {
-		fmtc.TPrintf("{s-}Warming up testing cache (it can take a while)…{!}")
+		fmtc.If(!rawOutput).TPrintf("{s-}Warming up testing cache (it can take a while)…{!}")
 		r.Testing.WarmupCache()
 	}
 
 	if warmupRelease {
-		fmtc.TPrintf("{s-}Warming up release cache (it can take a while)…{!}")
+		fmtc.If(!rawOutput).TPrintf("{s-}Warming up release cache (it can take a while)…{!}")
 		r.Release.WarmupCache()
 	}
 
@@ -233,11 +225,11 @@ func checkForLock() bool {
 		return true
 	}
 
-	fmtc.TPrintf("{s-}Found lock file, waiting for lock to release…{!}")
+	fmtc.If(!rawOutput).TPrintf("{s-}Found lock file, waiting for lock to release…{!}")
 
 	ok := lock.Wait(APP, time.Now().Add(5*time.Minute))
 
-	fmtc.TPrintf("")
+	fmtc.If(!rawOutput).TPrintf("")
 
 	return ok
 }
