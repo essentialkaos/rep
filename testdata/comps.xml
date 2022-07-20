@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE comps PUBLIC "-//CentOS//DTD Comps info//EN" "comps.dtd">
+<comps>
+  <group>
+    <id>additional-devel</id>
+    <name>Additional Development</name>
+    <name xml:lang="es">Desarrollo adicional</name>
+    <description>Additional development headers and libraries for building open-source applications.</description>
+    <description xml:lang="pl">Dodatkowe nagłówki i biblioteki do rozwijania aplikacji open source.</description>
+    <default>true</default>
+    <uservisible>true</uservisible>
+    <packagelist>
+      <packagereq type="mandatory" arch="i686,s390">alsa-lib-devel</packagereq>
+      <packagereq type="default" basearchonly="true">grub2</packagereq>
+      <packagereq type="optional">flatpak</packagereq>
+      <packagereq type="optional">flatpak2</packagereq>
+      <packagereq type="conditional" requires="ruby">rubygem-abrt</packagereq>
+    </packagelist>
+  </group>
+  <group>
+    <id>base</id>
+    <name>Base</name>
+    <description>The basic installation of CentOS Linux.</description>
+    <default>false</default>
+    <uservisible>false</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">acl</packagereq>
+    </packagelist>
+  </group>
+  <category>
+    <id>applications</id>
+    <name>Applications</name>
+    <name xml:lang="ru">Приложения</name>
+    <description>End-user applications.</description>
+    <description xml:lang="ru">Приложения пользователя.</description>
+    <grouplist>
+      <groupid>emacs</groupid>
+      <groupid>gnome-apps</groupid>
+      <groupid>graphics</groupid>
+    </grouplist>
+  </category>
+  <category>
+    <id>resilient-storage</id>
+    <name>Resilient Storage</name>
+    <description>Clustered storage, including the GFS2 file system.</description>
+    <grouplist>
+      <groupid>resilient-storage</groupid>
+    </grouplist>
+  </category>
+  <environment>
+    <id>developer-workstation-environment</id>
+    <name>Development and Creative Workstation</name>
+    <description>Workstation for software, hardware, graphics, or content development.</description>
+    <display_order>90</display_order>
+    <grouplist>
+      <groupid>base</groupid>
+    </grouplist>
+    <optionlist>
+      <groupid>additional-devel</groupid>
+    </optionlist>
+  </environment>
+  <environment>
+    <id>minimal</id>
+    <name>Minimal Install</name>
+    <name xml:lang="it">Installazione minima</name>
+    <description>Basic functionality.</description>
+    <description xml:lang="zh_CN">基本功能。</description>
+    <description xml:lang="zh_TW">基本功能。</description>
+    <display_order>23</display_order>
+    <grouplist>
+      <groupid>base</groupid>
+      <groupid>core</groupid>
+      <groupid>virtualization-hypervisor</groupid>
+      <groupid>virtualization-tools</groupid>
+    </grouplist>
+    <optionlist>
+      <groupid>debugging</groupid>
+      <groupid>network-file-system-client</groupid>
+      <groupid>remote-system-management</groupid>
+    </optionlist>
+  </environment>
+  <langpacks>
+    <match install="autocorr-%s" name="autocorr-en"/>
+    <match install="firefox-langpack-%s" name="firefox"/>
+    <match install="gimp-help-%s" name="gimp-help"/>
+  </langpacks>
+</comps>
