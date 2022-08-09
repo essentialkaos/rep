@@ -63,16 +63,16 @@ func findSources(r *repo.SubRepository, args options.Arguments) bool {
 			terminal.PrintErrorMessage(err.Error())
 			return false
 		}
-
-		if options.GetB(OPT_DEBUG) {
-			printQueryDebug(searchRequest)
-		}
 	}
 
 	fmtutil.Separator(true, strings.ToUpper(r.Name))
 	fmtc.NewLine()
 
 	if isExtendedSearchRequest(args) {
+		if options.GetB(OPT_DEBUG) {
+			printQueryDebug(searchRequest)
+		}
+
 		stack, err = findPackages(r, searchRequest)
 	} else {
 		stack, err = r.List(args.Get(0).String(), true)
@@ -101,6 +101,10 @@ func printPackageStackSources(r *repo.SubRepository, stack repo.PackageStack) {
 
 	for _, bundle := range stack {
 		for index, pkg := range bundle {
+			if pkg == nil {
+				continue
+			}
+
 			pkgInfo := strings.Repeat(" ", maxSrcSize-len(pkg.Src))
 
 			switch {
@@ -164,6 +168,10 @@ func getMaxSourceLengthInStack(stack repo.PackageStack) int {
 
 	for _, bundle := range stack {
 		for _, pkg := range bundle {
+			if pkg == nil {
+				continue
+			}
+
 			size = mathutil.Max(size, len(pkg.Src))
 		}
 	}

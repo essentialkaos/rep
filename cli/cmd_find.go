@@ -126,12 +126,14 @@ func filterPackagesByReleaseStatus(r *repo.SubRepository, stack repo.PackageStac
 	for _, bundle := range stack {
 		if bundle != nil {
 			for index, pkg := range bundle {
-				if pkg != nil {
-					isReleased, _, err := r.Parent.IsPackageReleased(pkg)
+				if pkg == nil {
+					continue
+				}
 
-					if err == nil && isReleased != released {
-						bundle[index] = nil
-					}
+				isReleased, _, err := r.Parent.IsPackageReleased(pkg)
+
+				if err == nil && isReleased != released {
+					bundle[index] = nil
 				}
 			}
 		}
