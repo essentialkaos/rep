@@ -49,6 +49,7 @@ Official Docker images with `rep`:
 ### Usage
 
 ```
+
 Usage: rep {options} {command}
 
 Notice that if you have more than one repository you should define its name as
@@ -58,6 +59,7 @@ examples using help command.
 Commands
 
   init arch…              Initialize new repository
+  gen-key                 Generate keys for signing packages
   list filter             List latest versions of packages within repository
   find query…             Search packages
   which-source query…     Show source package name
@@ -75,20 +77,21 @@ Commands
 
 Options
 
-  --release, -r       Run command only on release (stable) repository
-  --testing, -t       Run command only on testing (unstable) repository
-  --all, -a           Run command on all repositories
-  --arch, -aa arch    Package architecture (helpful with "info" and "payload" commands)
-  --move, -m          Move (remove after successful action) packages (helpful with "add" command)
-  --no-source, -ns    Ignore source packages (helpful with "add" command)
-  --force, -f         Answer "yes" for all questions
-  --full, -F          Full reindex (helpful with "reindex" command)
-  --show-all, -A      Show all versions of packages (helpful with "list" command)
-  --status, -S        Show package status (released or not)
-  --epoch, -E         Show epoch info (helpful with "list" and "which-source" commands)
-  --no-color, -nc     Disable colors in output
-  --help, -h          Show this help message
-  --version, -v       Show version
+  --release, -r           Run command only on release (stable) repository
+  --testing, -t           Run command only on testing (unstable) repository
+  --all, -a               Run command on all repositories
+  --arch, -aa arch        Package architecture (helpful with "info" and "payload" commands)
+  --move, -m              Move (remove after successful action) packages (helpful with "add" command)
+  --no-source, -ns        Ignore source packages (helpful with "add" command)
+  --ignore-filter, -if    Ignore repository file filter (helpful with "add" and "sign" commands)
+  --force, -f             Answer "yes" for all questions
+  --full, -F              Full reindex (helpful with "reindex" command)
+  --show-all, -A          Show all versions of packages (helpful with "list" command)
+  --status, -S            Show package status (released or not)
+  --epoch, -E             Show epoch info (helpful with "list" and "which-source" commands)
+  --no-color, -nc         Disable colors in output
+  --help, -h              Show this help message
+  --version, -v           Show version
 ```
 
 ### CI Status
