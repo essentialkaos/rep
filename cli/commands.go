@@ -202,12 +202,12 @@ func warmUpCache(r *repo.Repository) {
 	}
 
 	if warmupTesting {
-		fmtc.If(!rawOutput).TPrintf("{s-}Warming up testing cache (it can take a while)…{!}")
+		fmtc.If(!rawOutput).TPrintf("{s-}Warming up testing repository cache (it can take a while)…{!}")
 		r.Testing.WarmupCache()
 	}
 
 	if warmupRelease {
-		fmtc.If(!rawOutput).TPrintf("{s-}Warming up release cache (it can take a while)…{!}")
+		fmtc.If(!rawOutput).TPrintf("{s-}Warming up release repository cache (it can take a while)…{!}")
 		r.Release.WarmupCache()
 	}
 
