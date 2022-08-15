@@ -8,11 +8,15 @@ package cli
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"strings"
+
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fsutil"
+	"github.com/essentialkaos/ek/v12/options"
 	"github.com/essentialkaos/ek/v12/secstr"
 	"github.com/essentialkaos/ek/v12/terminal"
 
+	"github.com/essentialkaos/rep/cli/query"
 	"github.com/essentialkaos/rep/repo"
 	"github.com/essentialkaos/rep/repo/data"
 	"github.com/essentialkaos/rep/repo/sign"
@@ -140,4 +144,52 @@ func getRepoPrivateKey(r *repo.Repository) (*sign.PrivateKey, bool) {
 	}
 
 	return privateKey, true
+}
+
+// smartPackageSearch uses queary search or simple search based on given command
+// arguments
+func smartPackageSearch(r *repo.SubRepository, args options.Arguments) (repo.PackageStack, error) {
+	var err error
+	var searchRequest *query.Request
+	var stack repo.PackageStack
+
+	if isExtendedSearchRequest(args) {
+		searchRequest, err = query.Parse(args.Strings())
+
+		if err != nil {
+			return nil, err
+		}
+
+		stack, err = findPackages(r, searchRequest)
+	} else {
+		stack, err = r.List(args.Get(0).String(), true)
+	}
+
+	return stack, err
+}
+
+// isExtendedSearchRequest returns true if arguments contains search query
+func isExtendedSearchRequest(args options.Arguments) bool {
+	if len(args) > 1 {
+		return true
+	}
+
+	if strings.Contains(args.Get(0).String(), ":") {
+		return true
+	}
+
+	return false
+}
+
+// printQueryDebug prints debug search query info
+func printQueryDebug(searchRequest *query.Request) {
+	for index, term := range searchRequest.Query {
+		db, qrs := term.SQL()
+
+		for _, qr := range qrs {
+			fmtc.Printf("{s-}{%d|%s} %s → %s{!}\n", index, db, term, qr)
+		}
+	}
+
+	fmtc.NewLine()
 }

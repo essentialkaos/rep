@@ -10,7 +10,6 @@ package cli
 import (
 	"fmt"
 
-	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fmtutil"
 	"github.com/essentialkaos/ek/v12/options"
 	"github.com/essentialkaos/ek/v12/terminal"
@@ -98,19 +97,6 @@ func findAndShowPackages(r *repo.SubRepository, searchRequest *query.Request) bo
 	printPackageList(r, stack, "")
 
 	return true
-}
-
-// printQueryDebug prints debug search query info
-func printQueryDebug(searchRequest *query.Request) {
-	for index, term := range searchRequest.Query {
-		db, qrs := term.SQL()
-
-		for _, qr := range qrs {
-			fmtc.Printf("{s-}{%d|%s} %s → %s{!}\n", index, db, term, qr)
-		}
-	}
-
-	fmtc.NewLine()
 }
 
 // filterPackagesByReleaseStatus filters given package stack by released status

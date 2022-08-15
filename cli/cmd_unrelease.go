@@ -15,7 +15,6 @@ import (
 	"github.com/essentialkaos/ek/v12/spinner"
 	"github.com/essentialkaos/ek/v12/terminal"
 
-	"github.com/essentialkaos/rep/cli/query"
 	"github.com/essentialkaos/rep/repo"
 	"github.com/essentialkaos/rep/repo/data"
 )
@@ -24,14 +23,7 @@ import (
 
 // cmdUnrelease is 'unrelease' command handler
 func cmdUnrelease(ctx *context, args options.Arguments) bool {
-	searchRequest, err := query.Parse(args.Strings())
-
-	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
-		return false
-	}
-
-	stack, err := findPackages(ctx.Repo.Release, searchRequest)
+	stack, err := smartPackageSearch(ctx.Repo.Release, args)
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())

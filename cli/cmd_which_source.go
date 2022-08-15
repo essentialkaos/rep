@@ -16,7 +16,6 @@ import (
 	"github.com/essentialkaos/ek/v12/options"
 	"github.com/essentialkaos/ek/v12/terminal"
 
-	"github.com/essentialkaos/rep/cli/query"
 	"github.com/essentialkaos/rep/repo"
 	"github.com/essentialkaos/rep/repo/data"
 )
@@ -52,31 +51,10 @@ func cmdWhichSource(ctx *context, args options.Arguments) bool {
 
 // findSources tries to find source package name
 func findSources(r *repo.SubRepository, args options.Arguments) bool {
-	var err error
-	var searchRequest *query.Request
-	var stack repo.PackageStack
-
-	if isExtendedSearchRequest(args) {
-		searchRequest, err = query.Parse(args.Strings())
-
-		if err != nil {
-			terminal.PrintErrorMessage(err.Error())
-			return false
-		}
-	}
-
 	fmtutil.Separator(true, strings.ToUpper(r.Name))
 	fmtc.NewLine()
 
-	if isExtendedSearchRequest(args) {
-		if options.GetB(OPT_DEBUG) {
-			printQueryDebug(searchRequest)
-		}
-
-		stack, err = findPackages(r, searchRequest)
-	} else {
-		stack, err = r.List(args.Get(0).String(), true)
-	}
+	stack, err := smartPackageSearch(r, args)
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())
@@ -147,19 +125,6 @@ func printPackageStackSources(r *repo.SubRepository, stack repo.PackageStack) {
 			}
 		}
 	}
-}
-
-// isExtendedSearchRequest returns true if arguments contains search query
-func isExtendedSearchRequest(args options.Arguments) bool {
-	if len(args) > 1 {
-		return true
-	}
-
-	if strings.Contains(args.Get(0).String(), ":") {
-		return true
-	}
-
-	return false
 }
 
 // getMaxSourceLengthInStack returns max size of source rpm in stack

@@ -15,7 +15,6 @@ import (
 	"github.com/essentialkaos/ek/v12/spinner"
 	"github.com/essentialkaos/ek/v12/terminal"
 
-	"github.com/essentialkaos/rep/cli/query"
 	"github.com/essentialkaos/rep/repo"
 )
 
@@ -23,16 +22,10 @@ import (
 
 // cmdRemove is 'remove' command handler
 func cmdRemove(ctx *context, args options.Arguments) bool {
-	searchRequest, err := query.Parse(args.Strings())
-
-	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
-		return false
-	}
-
+	var err error
 	var testingStack, releaseStack repo.PackageStack
 
-	testingStack, err = findPackages(ctx.Repo.Testing, searchRequest)
+	testingStack, err = smartPackageSearch(ctx.Repo.Testing, args)
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())
@@ -40,7 +33,7 @@ func cmdRemove(ctx *context, args options.Arguments) bool {
 	}
 
 	if options.GetB(OPT_ALL) {
-		releaseStack, err = findPackages(ctx.Repo.Release, searchRequest)
+		releaseStack, err = smartPackageSearch(ctx.Repo.Release, args)
 
 		if err != nil {
 			terminal.PrintErrorMessage(err.Error())
