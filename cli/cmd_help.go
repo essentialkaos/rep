@@ -241,7 +241,11 @@ func helpInit() {
 	help.Paragraph("You must define at least one architecture for repository. List of supported architectures:")
 
 	for _, arch := range sliceutil.Exclude(data.ArchList, data.ARCH_NOARCH) {
-		fmtc.Printf("    {s-}•{!} {m}%s{!}\n", arch)
+		if fmtc.Is256ColorsSupported() {
+			fmtc.Printf("    {s-}•{!} "+archColorsExt[arch]+"%s{!}\n", arch)
+		} else {
+			fmtc.Printf("    {s-}•{!} "+archColors[arch]+"%s{!}\n", arch)
+		}
 	}
 
 	fmtc.NewLine()
