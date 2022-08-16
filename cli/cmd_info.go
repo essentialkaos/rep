@@ -8,6 +8,7 @@ package cli
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -270,13 +271,16 @@ func formatDepName(dep data.Dependency, pretty bool) string {
 
 // getDaysSinceDate formats duration
 func getDaysSinceDate(d time.Time) string {
-	days := timeutil.PrettyDurationInDays(time.Since(d))
+	dur := time.Since(d)
 
-	if strings.Contains(days, " day") {
-		return days + " ago"
+	switch {
+	case dur <= time.Minute:
+		return "just now"
+	case !d.Before(timeutil.StartOfDay(time.Now())):
+		return "today"
 	}
 
-	return days
+	return fmt.Sprintf("%s ago", timeutil.PrettyDurationInDays(dur))
 }
 
 // formatPayloadPath formats payload path
