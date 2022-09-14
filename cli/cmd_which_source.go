@@ -54,7 +54,7 @@ func findSources(r *repo.SubRepository, args options.Arguments) bool {
 	fmtutil.Separator(true, strings.ToUpper(r.Name))
 	fmtc.NewLine()
 
-	stack, err := smartPackageSearch(r, args)
+	stack, _, err := smartPackageSearch(r, args)
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())

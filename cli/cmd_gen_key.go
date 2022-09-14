@@ -75,7 +75,6 @@ func cmdGenKey(ctx *context, args options.Arguments) bool {
 
 	fmtc.NewLine()
 
-	// TODO: Check password strength
 	password, err := terminal.ReadPasswordSecure("Passphrase", true)
 
 	if err != nil {

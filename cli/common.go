@@ -148,24 +148,26 @@ func getRepoPrivateKey(r *repo.Repository) (*sign.PrivateKey, bool) {
 
 // smartPackageSearch uses queary search or simple search based on given command
 // arguments
-func smartPackageSearch(r *repo.SubRepository, args options.Arguments) (repo.PackageStack, error) {
+func smartPackageSearch(r *repo.SubRepository, args options.Arguments) (repo.PackageStack, string, error) {
 	var err error
 	var searchRequest *query.Request
 	var stack repo.PackageStack
+	var filter string
 
 	if isExtendedSearchRequest(args) {
 		searchRequest, err = query.Parse(args.Strings())
 
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
 
 		stack, err = findPackages(r, searchRequest)
 	} else {
-		stack, err = r.List(args.Get(0).String(), true)
+		filter = args.Get(0).String()
+		stack, err = r.List(filter, true)
 	}
 
-	return stack, err
+	return stack, filter, err
 }
 
 // isExtendedSearchRequest returns true if arguments contains search query

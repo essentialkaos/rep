@@ -23,7 +23,7 @@ import (
 
 // cmdUnrelease is 'unrelease' command handler
 func cmdUnrelease(ctx *context, args options.Arguments) bool {
-	stack, err := smartPackageSearch(ctx.Repo.Release, args)
+	stack, filter, err := smartPackageSearch(ctx.Repo.Release, args)
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())
@@ -35,15 +35,15 @@ func cmdUnrelease(ctx *context, args options.Arguments) bool {
 		return false
 	}
 
-	return unreleasePackages(ctx, stack)
+	return unreleasePackages(ctx, stack, filter)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // unreleasePackages removes packages from release sub-repository
-func unreleasePackages(ctx *context, stack repo.PackageStack) bool {
+func unreleasePackages(ctx *context, stack repo.PackageStack, filter string) bool {
 	if !options.GetB(OPT_FORCE) {
-		printPackageList(ctx.Repo.Release, stack, "")
+		printPackageList(ctx.Repo.Release, stack, filter)
 
 		fmtutil.Separator(true)
 		fmtc.NewLine()

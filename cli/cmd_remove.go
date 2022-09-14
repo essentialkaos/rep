@@ -23,9 +23,10 @@ import (
 // cmdRemove is 'remove' command handler
 func cmdRemove(ctx *context, args options.Arguments) bool {
 	var err error
+	var filter string
 	var testingStack, releaseStack repo.PackageStack
 
-	testingStack, err = smartPackageSearch(ctx.Repo.Testing, args)
+	testingStack, filter, err = smartPackageSearch(ctx.Repo.Testing, args)
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())
@@ -33,7 +34,7 @@ func cmdRemove(ctx *context, args options.Arguments) bool {
 	}
 
 	if options.GetB(OPT_ALL) {
-		releaseStack, err = smartPackageSearch(ctx.Repo.Release, args)
+		releaseStack, _, err = smartPackageSearch(ctx.Repo.Release, args)
 
 		if err != nil {
 			terminal.PrintErrorMessage(err.Error())
@@ -46,20 +47,20 @@ func cmdRemove(ctx *context, args options.Arguments) bool {
 		return false
 	}
 
-	return removePackages(ctx, releaseStack, testingStack)
+	return removePackages(ctx, releaseStack, testingStack, filter)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // removePackages removes packages from testing or all sub-repositories
-func removePackages(ctx *context, releaseStack, testingStack repo.PackageStack) bool {
+func removePackages(ctx *context, releaseStack, testingStack repo.PackageStack, filter string) bool {
 	if !options.GetB(OPT_FORCE) {
 		if !releaseStack.IsEmpty() {
-			printPackageList(ctx.Repo.Release, releaseStack, "")
+			printPackageList(ctx.Repo.Release, releaseStack, filter)
 		}
 
 		if !testingStack.IsEmpty() {
-			printPackageList(ctx.Repo.Testing, testingStack, "")
+			printPackageList(ctx.Repo.Testing, testingStack, filter)
 		}
 
 		fmtutil.Separator(true)

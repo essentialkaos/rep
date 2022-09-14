@@ -23,8 +23,7 @@ import (
 
 // cmdRelease is 'release' command handler
 func cmdRelease(ctx *context, args options.Arguments) bool {
-	// TODO: Find filter an use it for printPackageList
-	stack, err := smartPackageSearch(ctx.Repo.Testing, args)
+	stack, filter, err := smartPackageSearch(ctx.Repo.Testing, args)
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())
@@ -36,15 +35,15 @@ func cmdRelease(ctx *context, args options.Arguments) bool {
 		return false
 	}
 
-	return releasePackages(ctx, stack)
+	return releasePackages(ctx, stack, filter)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // releasePackages copies packages from testing to release repository
-func releasePackages(ctx *context, stack repo.PackageStack) bool {
+func releasePackages(ctx *context, stack repo.PackageStack, filter string) bool {
 	if !options.GetB(OPT_FORCE) {
-		printPackageList(ctx.Repo.Release, stack, "")
+		printPackageList(ctx.Repo.Release, stack, filter)
 
 		fmtutil.Separator(true)
 		fmtc.NewLine()
