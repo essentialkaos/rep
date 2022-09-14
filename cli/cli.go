@@ -18,6 +18,7 @@ import (
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/knf"
 	"github.com/essentialkaos/ek/v12/options"
+	"github.com/essentialkaos/ek/v12/progress"
 	"github.com/essentialkaos/ek/v12/signal"
 	"github.com/essentialkaos/ek/v12/system"
 	"github.com/essentialkaos/ek/v12/terminal"
@@ -57,6 +58,7 @@ const (
 	COMMAND_INFO         = "info"
 	COMMAND_PAYLOAD      = "payload"
 	COMMAND_SIGN         = "sign"
+	COMMAND_RESIGN       = "resign"
 	COMMAND_ADD          = "add"
 	COMMAND_REMOVE       = "remove"
 	COMMAND_RELEASE      = "release"
@@ -77,6 +79,7 @@ const (
 	COMMAND_SHORT_INFO         = "i"
 	COMMAND_SHORT_PAYLOAD      = "p"
 	COMMAND_SHORT_SIGN         = "s"
+	COMMAND_SHORT_RESIGN       = "rs"
 	COMMAND_SHORT_ADD          = "a"
 	COMMAND_SHORT_REMOVE       = "rm"
 	COMMAND_SHORT_RELEASE      = "r"
@@ -284,9 +287,18 @@ func configureUI() {
 	terminal.MaskSymbolColorTag = "{s-}"
 	terminal.TitleColorTag = "{s}"
 
+	progress.DefaultSettings.NameColorTag = "{*}"
+	progress.DefaultSettings.PercentColorTag = "{*}"
+	progress.DefaultSettings.ProgressColorTag = "{s}"
+	progress.DefaultSettings.SpeedColorTag = "{s}"
+	progress.DefaultSettings.RemainingColorTag = ""
+	progress.DefaultSettings.BarFgColorTag = "{c}"
+	progress.DefaultSettings.IsSize = false
+
 	if fmtc.Is256ColorsSupported() {
 		colorTagPackage = "{#108}"
 		colorTagRepository = "{*}{#33}"
+		progress.DefaultSettings.BarFgColorTag = "{#33}"
 	}
 
 	if term != "" {
@@ -579,6 +591,7 @@ func genUsage() *usage.Info {
 	info.AddCommand(COMMAND_INFO, "Show info about package", "package")
 	info.AddCommand(COMMAND_PAYLOAD, "Show package payload", "package", "?type")
 	info.AddCommand(COMMAND_SIGN, "Sign one or more packages", "file…")
+	info.AddCommand(COMMAND_RESIGN, "Resign all packages in reposotory")
 	info.AddCommand(COMMAND_ADD, "Add one or more packages to testing repository", "file…")
 	info.AddCommand(COMMAND_REMOVE, "Remove package or packages from repository", "query…")
 	info.AddCommand(COMMAND_RELEASE, "Copy package or packages from testing to release repository", "query…")
@@ -627,6 +640,7 @@ func genUsage() *usage.Info {
 	info.BoundOptions(COMMAND_REMOVE, OPT_ALL)
 	info.BoundOptions(COMMAND_REMOVE, OPT_FORCE)
 	info.BoundOptions(COMMAND_SIGN, OPT_IGNORE_FILTER)
+	info.BoundOptions(COMMAND_RESIGN, OPT_FORCE)
 	info.BoundOptions(COMMAND_STATS, OPT_RELEASE)
 	info.BoundOptions(COMMAND_STATS, OPT_TESTING)
 	info.BoundOptions(COMMAND_UNRELEASE, OPT_FORCE)

@@ -23,6 +23,7 @@ import (
 
 // cmdRelease is 'release' command handler
 func cmdRelease(ctx *context, args options.Arguments) bool {
+	// TODO: Find filter an use it for printPackageList
 	stack, err := smartPackageSearch(ctx.Repo.Testing, args)
 
 	if err != nil {

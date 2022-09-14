@@ -117,6 +117,8 @@ func removePackagesFiles(ctx *context, releaseFiles, testingFiles []repo.Package
 		testingRemoved = true
 	}
 
+	isCancelProtected = false
+
 	if releaseRemoved || testingRemoved {
 		fmtc.NewLine()
 
@@ -128,8 +130,6 @@ func removePackagesFiles(ctx *context, releaseFiles, testingFiles []repo.Package
 			reindexRepository(ctx, ctx.Repo.Testing, false)
 		}
 	}
-
-	isCancelProtected = false
 
 	return hasErrors == false
 }

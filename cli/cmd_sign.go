@@ -52,7 +52,7 @@ func signRPMFiles(files []string, ctx *context, privateKey *sign.PrivateKey) boo
 	tmpDir, err := ctx.Temp.MkDir("rep")
 
 	if err != nil {
-		terminal.PrintErrorMessage("Can't create temporary directore: %v", err)
+		terminal.PrintErrorMessage("Can't create temporary directory: %v", err)
 		return false
 	}
 

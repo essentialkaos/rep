@@ -176,6 +176,9 @@ func cmdHelp(ctx *context, args options.Arguments) bool {
 	case COMMAND_SIGN, COMMAND_SHORT_SIGN:
 		helpSign()
 
+	case COMMAND_RESIGN, COMMAND_SHORT_RESIGN:
+		helpResign()
+
 	case COMMAND_ADD, COMMAND_SHORT_ADD:
 		helpAdd()
 
@@ -479,6 +482,23 @@ func helpSign() {
 
 	help.Usage()
 	help.Paragraph("Add GPG signature to RPM file or files.")
+	help.Shortcut()
+	help.Examples()
+}
+
+// helpSign shows help content about "resign" command
+func helpResign() {
+	help := &commandHelp{
+		command:  COMMAND_RESIGN,
+		shortcut: COMMAND_SHORT_RESIGN,
+		info:     genUsage(),
+		examples: []commandExample{
+			{"", "Re-sign all packages"},
+		},
+	}
+
+	help.Usage()
+	help.Paragraph("Re-sign all packages in testing and release repositories.")
 	help.Shortcut()
 	help.Examples()
 }

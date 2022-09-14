@@ -3,13 +3,13 @@ module github.com/essentialkaos/rep
 go 1.17
 
 require (
-	github.com/ProtonMail/go-crypto v0.0.0-20220812175011-7fcef0dbe794
+	github.com/ProtonMail/go-crypto v0.0.0-20220824120805-4b6e5c587895
 	github.com/essentialkaos/check v1.3.0
 	github.com/essentialkaos/depsy v1.0.0
 	github.com/essentialkaos/ek/v12 v12.54.0
 	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/sassoftware/go-rpmutils v0.2.0
-	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
+	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90
 )
 
 require (
@@ -22,5 +22,5 @@ require (
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
-	golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab // indirect
+	golang.org/x/sys v0.0.0-20220909162455-aba9fc2a8ff2 // indirect
 )
