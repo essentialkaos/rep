@@ -123,9 +123,9 @@ func printPackageBasicInfo(r *repo.Repository, pkg *repo.Package, releaseDate ti
 
 	fmtc.NewLine()
 
-	// TODO: Show package checksum
 	if len(pkg.Files) != 0 {
 		fmtc.Printf("{*}%-16s{!}%s\n", "RPM File", pkg.Files[0].Path)
+		fmtc.Printf("{*}%-16s{!}%s\n", "Checksum", strutil.Head(pkg.Info.Checksum, 7))
 		fmtc.NewLine()
 	}
 

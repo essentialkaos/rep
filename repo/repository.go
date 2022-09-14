@@ -103,6 +103,7 @@ type PackageInfo struct {
 	Packager      string            // Packager
 	Group         string            // Group
 	License       string            // License
+	Checksum      string            // Checksum
 	SizePackage   uint64            // Size of package in bytes
 	SizeInstalled uint64            // Size of installed data in bytes
 	DateAdded     time.Time         // Add date as unix timestamp
@@ -1028,6 +1029,7 @@ func (r *SubRepository) collectPackageBasicInfo(name, arch string) (*Package, st
 			License:       pkgLic.String,
 			Vendor:        pkgVend.String,
 			Group:         pkgGroup.String,
+			Checksum:      pkgID.String,
 			SizePackage:   uint64(pkgSize.Int64),
 			SizeInstalled: uint64(pkgSizeInst.Int64),
 			DateAdded:     time.Unix(pkgAddTS.Int64, 0),
