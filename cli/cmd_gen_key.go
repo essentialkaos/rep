@@ -32,6 +32,9 @@ var outputPrivKeyFile = "key.private"
 // repoKeyNameValidator is regex pattern for repository key name validation
 var repoKeyNameValidator = regexp.MustCompile(`^[A-Za-z0-9_\-\ ]+$`)
 
+// emailValidator is regex for email validation
+var emailValidator = regexp.MustCompile(`^[^@]+@[^@]+\.[^@]+(;[^@]+@[^@]+\.[^@]+)*$`)
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // cmdGenKey is 'gen-key' command handler
@@ -43,7 +46,7 @@ func cmdGenKey(ctx *context, args options.Arguments) bool {
 
 	var err error
 	var password *secstr.String
-	var name, outputPubKeyFile string
+	var name, email, outputPubKeyFile string
 
 	for {
 		name, err = terminal.ReadUI("Key name", true)
@@ -69,10 +72,19 @@ func cmdGenKey(ctx *context, args options.Arguments) bool {
 
 	fmtc.NewLine()
 
-	email, err := terminal.ReadUI("Email address", true)
+	for {
+		email, err = terminal.ReadUI("Email address", true)
 
-	if err != nil {
-		return false
+		if err != nil {
+			return false
+		}
+
+		if !emailValidator.MatchString(email) {
+			terminal.PrintErrorMessage("\nGiven email address is invalid\n")
+			continue
+		}
+
+		break
 	}
 
 	fmtc.NewLine()
