@@ -16,6 +16,7 @@ import (
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/options"
+	"github.com/essentialkaos/ek/v12/passwd"
 	"github.com/essentialkaos/ek/v12/secstr"
 	"github.com/essentialkaos/ek/v12/spinner"
 	"github.com/essentialkaos/ek/v12/terminal"
@@ -41,6 +42,7 @@ func cmdGenKey(ctx *context, args options.Arguments) bool {
 	}
 
 	var err error
+	var password *secstr.String
 	var name, outputPubKeyFile string
 
 	for {
@@ -75,13 +77,29 @@ func cmdGenKey(ctx *context, args options.Arguments) bool {
 
 	fmtc.NewLine()
 
-	password, err := terminal.ReadPasswordSecure("Passphrase", true)
+	for {
+		password, err = terminal.ReadPasswordSecure("Passphrase", true)
 
-	if err != nil {
-		return false
+		if err != nil {
+			return false
+		}
+
+		fmtc.NewLine()
+
+		if passwd.GetPasswordBytesStrength(password.Data) < passwd.STRENGTH_MEDIUM {
+			terminal.PrintWarnMessage("Given passphrase is not strong enough.\n")
+
+			ok, _ := terminal.ReadAnswer("Use this passphrase anyway?", "n")
+
+			fmtc.NewLine()
+
+			if ok {
+				break
+			}
+		} else {
+			break
+		}
 	}
-
-	fmtc.NewLine()
 
 	return generateKeys(name, email, password, outputPubKeyFile)
 }
