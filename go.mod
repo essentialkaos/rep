@@ -6,7 +6,7 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20220824120805-4b6e5c587895
 	github.com/essentialkaos/check v1.3.0
 	github.com/essentialkaos/depsy v1.0.0
-	github.com/essentialkaos/ek/v12 v12.54.0
+	github.com/essentialkaos/ek/v12 v12.55.0
 	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/sassoftware/go-rpmutils v0.2.0
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90
@@ -16,11 +16,11 @@ require (
 	github.com/DataDog/zstd v1.5.2 // indirect
 	github.com/cloudflare/circl v1.2.0 // indirect
 	github.com/essentialkaos/go-linenoise/v3 v3.4.0 // indirect
-	github.com/klauspost/compress v1.15.9 // indirect
+	github.com/klauspost/compress v1.15.10 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
-	golang.org/x/sys v0.0.0-20220909162455-aba9fc2a8ff2 // indirect
+	golang.org/x/sys v0.0.0-20220915200043-7b5979e65e41 // indirect
 )
