@@ -62,23 +62,24 @@ type context struct {
 
 // commands is map [long command → {handler + min args + options}]
 var commands = map[string]command{
-	COMMAND_INIT:               {cmdInit, 1, FLAG_REQUIRE_LOCK},
-	COMMAND_GEN_KEY:            {cmdGenKey, 0, FLAG_NONE},
-	COMMAND_LIST:               {cmdList, 0, FLAG_REQUIRE_CACHE},
-	COMMAND_WHICH_SOURCE:       {cmdWhichSource, 1, FLAG_REQUIRE_CACHE},
-	COMMAND_FIND:               {cmdFind, 1, FLAG_REQUIRE_CACHE},
-	COMMAND_INFO:               {cmdInfo, 1, FLAG_REQUIRE_CACHE},
-	COMMAND_PAYLOAD:            {cmdPayload, 1, FLAG_REQUIRE_CACHE},
-	COMMAND_SIGN:               {cmdSign, 1, FLAG_NONE},
-	COMMAND_RESIGN:             {cmdResign, 0, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
-	COMMAND_ADD:                {cmdAdd, 1, FLAG_REQUIRE_LOCK},
-	COMMAND_REMOVE:             {cmdRemove, 1, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
-	COMMAND_RELEASE:            {cmdRelease, 1, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
-	COMMAND_UNRELEASE:          {cmdUnrelease, 1, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
-	COMMAND_REINDEX:            {cmdReindex, 0, FLAG_REQUIRE_LOCK},
-	COMMAND_PURGE_CACHE:        {cmdPurgeCache, 0, FLAG_REQUIRE_LOCK},
-	COMMAND_STATS:              {cmdStats, 0, FLAG_REQUIRE_CACHE},
-	COMMAND_HELP:               {cmdHelp, 0, FLAG_NONE},
+	COMMAND_INIT:         {cmdInit, 1, FLAG_REQUIRE_LOCK},
+	COMMAND_GEN_KEY:      {cmdGenKey, 0, FLAG_NONE},
+	COMMAND_LIST:         {cmdList, 0, FLAG_REQUIRE_CACHE},
+	COMMAND_WHICH_SOURCE: {cmdWhichSource, 1, FLAG_REQUIRE_CACHE},
+	COMMAND_FIND:         {cmdFind, 1, FLAG_REQUIRE_CACHE},
+	COMMAND_INFO:         {cmdInfo, 1, FLAG_REQUIRE_CACHE},
+	COMMAND_PAYLOAD:      {cmdPayload, 1, FLAG_REQUIRE_CACHE},
+	COMMAND_SIGN:         {cmdSign, 1, FLAG_NONE},
+	COMMAND_RESIGN:       {cmdResign, 0, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
+	COMMAND_ADD:          {cmdAdd, 1, FLAG_REQUIRE_LOCK},
+	COMMAND_REMOVE:       {cmdRemove, 1, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
+	COMMAND_RELEASE:      {cmdRelease, 1, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
+	COMMAND_UNRELEASE:    {cmdUnrelease, 1, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
+	COMMAND_REINDEX:      {cmdReindex, 0, FLAG_REQUIRE_LOCK},
+	COMMAND_PURGE_CACHE:  {cmdPurgeCache, 0, FLAG_REQUIRE_LOCK},
+	COMMAND_STATS:        {cmdStats, 0, FLAG_REQUIRE_CACHE},
+	COMMAND_HELP:         {cmdHelp, 0, FLAG_NONE},
+
 	COMMAND_SHORT_LIST:         {cmdList, 0, FLAG_REQUIRE_CACHE},
 	COMMAND_SHORT_WHICH_SOURCE: {cmdWhichSource, 1, FLAG_REQUIRE_CACHE},
 	COMMAND_SHORT_FIND:         {cmdFind, 1, FLAG_REQUIRE_CACHE},
@@ -90,11 +91,12 @@ var commands = map[string]command{
 	COMMAND_SHORT_REMOVE:       {cmdRemove, 1, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
 	COMMAND_SHORT_RELEASE:      {cmdRelease, 1, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
 	COMMAND_SHORT_UNRELEASE:    {cmdUnrelease, 1, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
-	COMMAND_SHORT_REINDEX:      {cmdReindex, 0, FLAG_REQUIRE_CACHE},
+	COMMAND_SHORT_REINDEX:      {cmdReindex, 0, FLAG_REQUIRE_LOCK},
 	COMMAND_SHORT_PURGE_CACHE:  {cmdPurgeCache, 0, FLAG_REQUIRE_LOCK},
 	COMMAND_SHORT_STATS:        {cmdStats, 0, FLAG_REQUIRE_CACHE},
 	COMMAND_SHORT_HELP:         {cmdHelp, 0, FLAG_NONE},
-	"":                         {cmdList, 0, FLAG_REQUIRE_CACHE}, // default command
+
+	"": {cmdList, 0, FLAG_REQUIRE_CACHE}, // default command
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
