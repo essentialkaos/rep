@@ -206,16 +206,16 @@ func warmUpCache(r *repo.Repository) {
 	}
 
 	if warmupTesting {
-		fmtc.If(!rawOutput).TPrintf("{s-}Warming up testing repository cache (it can take a while)…{!}")
+		fmtc.If(!rawOutput && !options.GetB(OPT_PAGER)).TPrintf("{s-}Warming up testing repository cache (it can take a while)…{!}")
 		r.Testing.WarmupCache()
 	}
 
 	if warmupRelease {
-		fmtc.If(!rawOutput).TPrintf("{s-}Warming up release repository cache (it can take a while)…{!}")
+		fmtc.If(!rawOutput && !options.GetB(OPT_PAGER)).TPrintf("{s-}Warming up release repository cache (it can take a while)…{!}")
 		r.Release.WarmupCache()
 	}
 
-	fmtc.TPrintf("")
+	fmtc.If(!rawOutput && !options.GetB(OPT_PAGER)).TPrintf("")
 }
 
 // checkForLock check for lock file

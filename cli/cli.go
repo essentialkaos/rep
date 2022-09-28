@@ -150,6 +150,7 @@ const (
 	OPT_SHOW_ALL      = "A:show-all"
 	OPT_EPOCH         = "E:epoch"
 	OPT_STATUS        = "S:status"
+	OPT_PAGER         = "P:pager"
 	OPT_NO_COLOR      = "nc:no-color"
 	OPT_HELP          = "h:help"
 	OPT_VER           = "v:version"
@@ -185,6 +186,7 @@ var optMap = options.Map{
 	OPT_SHOW_ALL:      {Type: options.BOOL},
 	OPT_EPOCH:         {Type: options.BOOL},
 	OPT_STATUS:        {Type: options.BOOL},
+	OPT_PAGER:         {Type: options.BOOL},
 	OPT_NO_COLOR:      {Type: options.BOOL},
 	OPT_HELP:          {Type: options.BOOL, Alias: "u:usage"},
 	OPT_VER:           {Type: options.BOOL, Alias: "ver"},
@@ -314,9 +316,11 @@ func configureUI() {
 		fmtc.DisableColors = true
 	}
 
-	if !fsutil.IsCharacterDevice("/dev/stdout") && envVars.GetS("FAKETTY") == "" {
-		fmtc.DisableColors = true
-		rawOutput = true
+	if !options.GetB(OPT_PAGER) {
+		if !fsutil.IsCharacterDevice("/dev/stdout") && envVars.GetS("FAKETTY") == "" {
+			fmtc.DisableColors = true
+			rawOutput = true
+		}
 	}
 }
 
@@ -613,6 +617,7 @@ func genUsage() *usage.Info {
 	info.AddOption(OPT_SHOW_ALL, "Show all versions of packages {s-}(helpful with \"list\" command){!}")
 	info.AddOption(OPT_STATUS, "Show package status {s-}(released or not){!}")
 	info.AddOption(OPT_EPOCH, "Show epoch info {s-}(helpful with \"list\" and \"which-source\" commands){!}")
+	info.AddOption(OPT_PAGER, "Run command in \"pager\" mode {s-}(i.e. don't disable colors and don't show raw output){!}")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")
 	info.AddOption(OPT_VER, "Show version")
@@ -624,13 +629,17 @@ func genUsage() *usage.Info {
 	info.BoundOptions(COMMAND_FIND, OPT_RELEASE)
 	info.BoundOptions(COMMAND_FIND, OPT_STATUS)
 	info.BoundOptions(COMMAND_FIND, OPT_TESTING)
+	info.BoundOptions(COMMAND_FIND, OPT_PAGER)
 	info.BoundOptions(COMMAND_INFO, OPT_ARCH)
+	info.BoundOptions(COMMAND_INFO, OPT_PAGER)
 	info.BoundOptions(COMMAND_LIST, OPT_EPOCH)
 	info.BoundOptions(COMMAND_LIST, OPT_RELEASE)
 	info.BoundOptions(COMMAND_LIST, OPT_SHOW_ALL)
 	info.BoundOptions(COMMAND_LIST, OPT_STATUS)
 	info.BoundOptions(COMMAND_LIST, OPT_TESTING)
+	info.BoundOptions(COMMAND_LIST, OPT_PAGER)
 	info.BoundOptions(COMMAND_PAYLOAD, OPT_ARCH)
+	info.BoundOptions(COMMAND_PAYLOAD, OPT_PAGER)
 	info.BoundOptions(COMMAND_PURGE_CACHE, OPT_RELEASE)
 	info.BoundOptions(COMMAND_PURGE_CACHE, OPT_TESTING)
 	info.BoundOptions(COMMAND_REINDEX, OPT_FULL)
@@ -643,10 +652,12 @@ func genUsage() *usage.Info {
 	info.BoundOptions(COMMAND_RESIGN, OPT_FORCE)
 	info.BoundOptions(COMMAND_STATS, OPT_RELEASE)
 	info.BoundOptions(COMMAND_STATS, OPT_TESTING)
+	info.BoundOptions(COMMAND_STATS, OPT_PAGER)
 	info.BoundOptions(COMMAND_UNRELEASE, OPT_FORCE)
 	info.BoundOptions(COMMAND_WHICH_SOURCE, OPT_EPOCH)
 	info.BoundOptions(COMMAND_WHICH_SOURCE, OPT_RELEASE)
 	info.BoundOptions(COMMAND_WHICH_SOURCE, OPT_TESTING)
+	info.BoundOptions(COMMAND_WHICH_SOURCE, OPT_PAGER)
 
 	return info
 }
