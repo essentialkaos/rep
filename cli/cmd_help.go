@@ -282,6 +282,7 @@ func helpList() {
 			{"my-package", "Show a list of all versions of the package with the given name"},
 			{info.GetOption(OPT_TESTING).String() + " my-package", "Show a list of all package versions with the given name only in the testing repository"},
 			{"| grep my-package | grep -v '.src.'", "Show a list of packages files and filter it with grep"},
+			{info.GetOption(OPT_PAGER).String() + " | more", "View long list of packages with some pager utility (more/less)"},
 		},
 		isGlobal: false,
 	}
