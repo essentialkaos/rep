@@ -166,8 +166,36 @@ func genListPkgName(r *repo.SubRepository, pkg *repo.Package, filter string) str
 	}
 
 	if filter != "" {
-		pkgName = strings.ReplaceAll(pkgName, filter, "{_}"+filter+"{!_}")
+		pkgName = getPkgNameWithFilter(pkgName, filter)
 	}
 
 	return pkgName
+}
+
+// getPkgNameWithFilter returns package name with underlined filter parts
+func getPkgNameWithFilter(pkgName, filter string) string {
+	pkgNameNorm := strings.ToLower(pkgName)
+	filterNorm := strings.ToLower(filter)
+	pkgNameNorm = strings.ReplaceAll(pkgNameNorm, filterNorm, "["+filter+"]")
+
+	if len(pkgNameNorm) == len(pkgName) {
+		return pkgName
+	}
+
+	var b strings.Builder
+	var j int
+
+	for i := 0; i < len(pkgNameNorm); i++ {
+		switch pkgNameNorm[i] {
+		case '[':
+			b.WriteString("{_}")
+		case ']':
+			b.WriteString("{!_}")
+		default:
+			b.WriteByte(pkgName[j])
+			j++
+		}
+	}
+
+	return b.String()
 }
