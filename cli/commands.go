@@ -108,6 +108,10 @@ var commandsShortcurts = map[string]string{
 func runCommand(repoCfg *knf.Config, cmdName string, cmdArgs options.Arguments) bool {
 	fmtc.If(!rawOutput).NewLine()
 
+	if commandsShortcurts[cmdName] != "" {
+		cmdName = commandsShortcurts[cmdName]
+	}
+
 	if !checkCommand(cmdName, cmdArgs) {
 		return false
 	}
@@ -175,10 +179,6 @@ func runSimpleCommand(cmdName string, cmdArgs options.Arguments) bool {
 
 // checkCommand checks command before execution
 func checkCommand(cmdName string, args options.Arguments) bool {
-	if commandsShortcurts[cmdName] != "" {
-		cmdName = commandsShortcurts[cmdName]
-	}
-
 	cmd, ok := commands[cmdName]
 
 	if !ok {
