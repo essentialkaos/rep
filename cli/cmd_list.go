@@ -9,6 +9,7 @@ package cli
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/essentialkaos/ek/v12/fmtc"
@@ -22,9 +23,19 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// filterValidationRegex is regex for filter value validation
+var filterValidationRegex = regexp.MustCompile(`^[\w\-\.+]+$`)
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // cmdList is 'list' command handler
 func cmdList(ctx *context, args options.Arguments) bool {
 	filter := args.Get(0).String()
+
+	if !isFilterValueValid(filter) {
+		return false
+	}
+
 	showAll := !options.GetB(OPT_RELEASE) && !options.GetB(OPT_TESTING)
 
 	if showAll || options.GetB(OPT_RELEASE) {
@@ -198,4 +209,19 @@ func getPkgNameWithFilter(pkgName, filter string) string {
 	}
 
 	return b.String()
+}
+
+// isFilterValueValid returns true if filter value is valid
+func isFilterValueValid(filter string) bool {
+	if filter != "" && len(filter) < 3 {
+		terminal.PrintErrorMessage("Filter must be at least 3 symbols long")
+		return false
+	}
+
+	if filter != "" && !filterValidationRegex.MatchString(filter) {
+		terminal.PrintErrorMessage("Filter contains invalid symbols")
+		return false
+	}
+
+	return true
 }
