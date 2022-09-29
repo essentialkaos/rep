@@ -248,6 +248,14 @@ func (s *QueryParserSuite) TestDepNameParser(c *C) {
 	c.Assert(err, NotNil)
 }
 
+func (s *QueryParserSuite) TestArchFormatter(c *C) {
+	c.Assert(formatArchValue("unknown"), Equals, "unknown")
+	c.Assert(formatArchValue("x32"), Equals, "i386")
+	c.Assert(formatArchValue("ppc64le"), Equals, "ppc64le")
+	c.Assert(formatArchValue("arm"), Equals, "arm")
+	c.Assert(formatArchValue("src"), Equals, "src")
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 func checkTermParser(c *C, term string, termType uint8) {

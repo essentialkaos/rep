@@ -87,6 +87,7 @@ type ArchFlag uint16
 // ArchInfo contains info about specific arch
 type ArchInfo struct {
 	Dir  string
+	Tag  string
 	Flag ArchFlag
 }
 
@@ -94,17 +95,17 @@ type ArchInfo struct {
 
 // SupportedArchs is a slice with info about supported archs
 var SupportedArchs = map[string]ArchInfo{
-	ARCH_SRC:     {"SRPMS", ARCH_FLAG_SRC},
-	ARCH_NOARCH:  {"", ARCH_FLAG_NOARCH},
-	ARCH_I386:    {"i386", ARCH_FLAG_I386},
-	ARCH_I586:    {"i586", ARCH_FLAG_I586},
-	ARCH_I686:    {"i686", ARCH_FLAG_I686},
-	ARCH_X64:     {"x86_64", ARCH_FLAG_X64},
-	ARCH_AARCH64: {"aarch64", ARCH_FLAG_AARCH64},
-	ARCH_PPC64:   {"ppc64", ARCH_FLAG_PPC64},
-	ARCH_PPC64LE: {"ppc64le", ARCH_FLAG_PPC64LE},
-	ARCH_ARM:     {"arm", ARCH_FLAG_ARM},
-	ARCH_ARMV7HL: {"armv7hl", ARCH_FLAG_ARMV7HL},
+	ARCH_SRC:     {"SRPMS", "src", ARCH_FLAG_SRC},
+	ARCH_NOARCH:  {"", "noarch", ARCH_FLAG_NOARCH},
+	ARCH_I386:    {"i386", "x32", ARCH_FLAG_I386},
+	ARCH_I586:    {"i586", "i586", ARCH_FLAG_I586},
+	ARCH_I686:    {"i686", "i686", ARCH_FLAG_I686},
+	ARCH_X64:     {"x86_64", "x64", ARCH_FLAG_X64},
+	ARCH_AARCH64: {"aarch64", "aa64", ARCH_FLAG_AARCH64},
+	ARCH_PPC64:   {"ppc64", "p64", ARCH_FLAG_PPC64},
+	ARCH_PPC64LE: {"ppc64le", "p64l", ARCH_FLAG_PPC64LE},
+	ARCH_ARM:     {"arm", "arm", ARCH_FLAG_ARM},
+	ARCH_ARMV7HL: {"armv7hl", "arm7", ARCH_FLAG_ARMV7HL},
 }
 
 // ArchList is a slice with supported archs

@@ -52,20 +52,6 @@ var archColorsExt = map[string]string{
 	data.ARCH_ARMV7HL: "{*}{#78}",
 }
 
-var archTags = map[string]string{
-	data.ARCH_SRC:     "src",
-	data.ARCH_NOARCH:  "noarch",
-	data.ARCH_I386:    "x32",
-	data.ARCH_I586:    "i586",
-	data.ARCH_I686:    "i686",
-	data.ARCH_X64:     "x64",
-	data.ARCH_AARCH64: "aa64",
-	data.ARCH_PPC64:   "p64",
-	data.ARCH_PPC64LE: "p64l",
-	data.ARCH_ARM:     "arm",
-	data.ARCH_ARMV7HL: "arm7",
-}
-
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // checkRPMFiles checks if we have enough permissions to manipulate with RPM files

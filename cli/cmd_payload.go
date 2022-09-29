@@ -62,7 +62,7 @@ func printPackagePayload(pkg *repo.Package, payloadType string) {
 		fmtutil.Separator(true)
 		fmtc.NewLine()
 
-		tag := archTags[pkg.ArchFlags.String()]
+		tag := data.SupportedArchs[pkg.ArchFlags.String()].Tag
 		color := archColors[pkg.ArchFlags.String()]
 		archColoredTag := color + "[" + tag + "]{!}"
 

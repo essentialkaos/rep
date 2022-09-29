@@ -143,7 +143,7 @@ func genListArchInfo(pkg *repo.Package, archList []string) string {
 	result := "{s}[{!} "
 
 	for _, arch := range archList {
-		tag := archTags[arch]
+		tag := data.SupportedArchs[arch].Tag
 		color := archColors[arch]
 
 		if fmtc.Is256ColorsSupported() {

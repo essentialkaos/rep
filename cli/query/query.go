@@ -219,9 +219,7 @@ func parseTerm(rawTerm string) (*search.Term, error) {
 	case search.TERM_EPOCH:
 		return search.TermEpoch(value, mod), nil
 	case search.TERM_ARCH:
-		value = strings.ReplaceAll(value, "x64", "x86_64")
-		value = strings.ReplaceAll(value, "x32", "i386")
-		return search.TermArch(value, mod), nil
+		return search.TermArch(formatArchValue(value), mod), nil
 	case search.TERM_REQUIRES:
 		return parseDepTermValue(search.TERM_REQUIRES, value, mod)
 	case search.TERM_PROVIDES:
@@ -392,6 +390,23 @@ func extractTermInfo(rawTerm string) (string, string, bool) {
 	}
 
 	return name, value, isNegative
+}
+
+// formatArchValue formats arch term value and converts tags into
+// full arch name
+func formatArchValue(arch string) string {
+	arch = strings.ToLower(arch)
+
+	for i := len(data.ArchList) - 1; i > 0; i-- {
+		archName := data.ArchList[i]
+		archInfo := data.SupportedArchs[archName]
+
+		if strings.Contains(arch, archInfo.Tag) && archInfo.Dir != "" {
+			arch = strings.ReplaceAll(arch, archInfo.Tag, archName)
+		}
+	}
+
+	return arch
 }
 
 // condToFlag transforms conditional to flag
