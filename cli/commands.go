@@ -80,23 +80,26 @@ var commands = map[string]command{
 	COMMAND_STATS:        {cmdStats, 0, FLAG_REQUIRE_CACHE},
 	COMMAND_HELP:         {cmdHelp, 0, FLAG_NONE},
 
-	COMMAND_SHORT_LIST:         {cmdList, 0, FLAG_REQUIRE_CACHE},
-	COMMAND_SHORT_WHICH_SOURCE: {cmdWhichSource, 1, FLAG_REQUIRE_CACHE},
-	COMMAND_SHORT_FIND:         {cmdFind, 1, FLAG_REQUIRE_CACHE},
-	COMMAND_SHORT_INFO:         {cmdInfo, 1, FLAG_REQUIRE_CACHE},
-	COMMAND_SHORT_PAYLOAD:      {cmdPayload, 1, FLAG_REQUIRE_CACHE},
-	COMMAND_SHORT_SIGN:         {cmdSign, 0, FLAG_NONE},
-	COMMAND_SHORT_RESIGN:       {cmdResign, 0, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
-	COMMAND_SHORT_ADD:          {cmdAdd, 1, FLAG_REQUIRE_LOCK},
-	COMMAND_SHORT_REMOVE:       {cmdRemove, 1, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
-	COMMAND_SHORT_RELEASE:      {cmdRelease, 1, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
-	COMMAND_SHORT_UNRELEASE:    {cmdUnrelease, 1, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
-	COMMAND_SHORT_REINDEX:      {cmdReindex, 0, FLAG_REQUIRE_LOCK},
-	COMMAND_SHORT_PURGE_CACHE:  {cmdPurgeCache, 0, FLAG_REQUIRE_LOCK},
-	COMMAND_SHORT_STATS:        {cmdStats, 0, FLAG_REQUIRE_CACHE},
-	COMMAND_SHORT_HELP:         {cmdHelp, 0, FLAG_NONE},
-
 	"": {cmdList, 0, FLAG_REQUIRE_CACHE}, // default command
+}
+
+// commandsShortcurts is map [shortcut → long command]
+var commandsShortcurts = map[string]string{
+	COMMAND_SHORT_LIST:         COMMAND_LIST,
+	COMMAND_SHORT_WHICH_SOURCE: COMMAND_WHICH_SOURCE,
+	COMMAND_SHORT_FIND:         COMMAND_FIND,
+	COMMAND_SHORT_INFO:         COMMAND_INFO,
+	COMMAND_SHORT_PAYLOAD:      COMMAND_PAYLOAD,
+	COMMAND_SHORT_SIGN:         COMMAND_SIGN,
+	COMMAND_SHORT_RESIGN:       COMMAND_RESIGN,
+	COMMAND_SHORT_ADD:          COMMAND_ADD,
+	COMMAND_SHORT_REMOVE:       COMMAND_REMOVE,
+	COMMAND_SHORT_RELEASE:      COMMAND_RELEASE,
+	COMMAND_SHORT_UNRELEASE:    COMMAND_UNRELEASE,
+	COMMAND_SHORT_REINDEX:      COMMAND_REINDEX,
+	COMMAND_SHORT_PURGE_CACHE:  COMMAND_PURGE_CACHE,
+	COMMAND_SHORT_STATS:        COMMAND_STATS,
+	COMMAND_SHORT_HELP:         COMMAND_HELP,
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -172,6 +175,10 @@ func runSimpleCommand(cmdName string, cmdArgs options.Arguments) bool {
 
 // checkCommand checks command before execution
 func checkCommand(cmdName string, args options.Arguments) bool {
+	if commandsShortcurts[cmdName] != "" {
+		cmdName = commandsShortcurts[cmdName]
+	}
+
 	cmd, ok := commands[cmdName]
 
 	if !ok {
@@ -179,7 +186,7 @@ func checkCommand(cmdName string, args options.Arguments) bool {
 	}
 
 	if len(args) < cmd.MinArgs {
-		terminal.PrintErrorMessage("Command %s requires more arguments (at least %d)\n", cmdName, cmd.MinArgs)
+		terminal.PrintErrorMessage("Command '%s' requires more arguments (at least %d)\n", cmdName, cmd.MinArgs)
 		return false
 	}
 
