@@ -215,14 +215,14 @@ func warmUpCache(r *repo.Repository) {
 	if warmupTesting {
 		fmtc.If(!rawOutput && !options.GetB(OPT_PAGER)).TPrintf("{s-}Warming up testing repository cache (it can take a while)…{!}")
 		r.Testing.WarmupCache()
+		fmtc.If(!rawOutput && !options.GetB(OPT_PAGER)).TPrintf("")
 	}
 
 	if warmupRelease {
 		fmtc.If(!rawOutput && !options.GetB(OPT_PAGER)).TPrintf("{s-}Warming up release repository cache (it can take a while)…{!}")
 		r.Release.WarmupCache()
+		fmtc.If(!rawOutput && !options.GetB(OPT_PAGER)).TPrintf("")
 	}
-
-	fmtc.If(!rawOutput && !options.GetB(OPT_PAGER)).TPrintf("")
 }
 
 // checkForLock check for lock file
@@ -236,11 +236,11 @@ func checkForLock() bool {
 		return true
 	}
 
-	fmtc.If(!rawOutput).TPrintf("{s-}Found lock file, waiting for lock to release…{!}")
+	fmtc.If(!rawOutput && !options.GetB(OPT_PAGER)).TPrintf("{s-}Found lock file, waiting for lock to release…{!}")
 
 	ok := lock.Wait(APP, time.Now().Add(5*time.Minute))
 
-	fmtc.If(!rawOutput).TPrintf("")
+	fmtc.If(!rawOutput && !options.GetB(OPT_PAGER)).TPrintf("")
 
 	return ok
 }
