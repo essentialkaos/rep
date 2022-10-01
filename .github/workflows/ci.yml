@@ -19,7 +19,7 @@ concurrency:
 
 env:
   CR_REPO: rpm-software-management/createrepo_c
-  CR_VERSION: 0.15.11
+  CR_VERSION: 0.20.1
 
 jobs:
   BuildCreaterepo:
