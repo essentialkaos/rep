@@ -3,7 +3,7 @@ module github.com/essentialkaos/rep
 go 1.17
 
 require (
-	github.com/ProtonMail/go-crypto v0.0.0-20220824120805-4b6e5c587895
+	github.com/ProtonMail/go-crypto v0.0.0-20220930113650-c6815a8c17ad
 	github.com/essentialkaos/check v1.3.0
 	github.com/essentialkaos/depsy v1.0.0
 	github.com/essentialkaos/ek/v12 v12.55.2
