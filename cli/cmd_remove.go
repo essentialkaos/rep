@@ -16,6 +16,7 @@ import (
 	"github.com/essentialkaos/ek/v12/terminal"
 
 	"github.com/essentialkaos/rep/repo"
+	"github.com/essentialkaos/rep/repo/data"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -89,7 +90,7 @@ func removePackagesFiles(ctx *context, releaseFiles, testingFiles []repo.Package
 	isCancelProtected = true
 
 	for _, file = range releaseFiles {
-		ok := removePackageFile(ctx, ctx.Repo.Release, file.Path)
+		ok := removePackageFile(ctx, ctx.Repo.Release, file)
 
 		if isCanceled {
 			return false
@@ -104,7 +105,7 @@ func removePackagesFiles(ctx *context, releaseFiles, testingFiles []repo.Package
 	}
 
 	for _, file = range testingFiles {
-		ok := removePackageFile(ctx, ctx.Repo.Testing, file.Path)
+		ok := removePackageFile(ctx, ctx.Repo.Testing, file)
 
 		if !ok {
 			hasErrors = true
@@ -136,30 +137,38 @@ func removePackagesFiles(ctx *context, releaseFiles, testingFiles []repo.Package
 }
 
 // removePackageFile removes package file from repository
-func removePackageFile(ctx *context, r *repo.SubRepository, file string) bool {
-	fileName := path.Base(file)
+func removePackageFile(ctx *context, r *repo.SubRepository, file repo.PackageFile) bool {
+	fileName := path.Base(file.Path)
+	repoArch := file.BaseArchFlag.String()
+	archTag := fmtc.If(file.ArchFlag == data.ARCH_FLAG_NOARCH).Sprintf(" {s-}[%s]{!}", repoArch)
 
-	spinner.Show("Removing "+colorTagPackage+"%s{!}", fileName)
+	spinner.Show("Removing {?package}%s{!}%s", fileName, archTag)
 
 	err := r.RemovePackage(file)
 
 	if err != nil {
 		spinner.Update(
-			"Can't remove "+colorTagPackage+"%s{!} from "+colorTagRepository+"%s{!}",
-			fileName, r.Name,
+			"Can't remove {?package}%s{!}%s from {*}{?repo}%s{!}",
+			fileName, archTag, r.Name,
 		)
+
 		spinner.Done(false)
 		terminal.PrintErrorMessage("   %v", err)
 		return false
 	}
 
 	spinner.Update(
-		"Package "+colorTagPackage+"%s{!} removed from "+colorTagRepository+"%s{!}",
-		fileName, r.Name,
+		"Package {?package}%s{!}%s removed from {*}{?repo}%s{!}",
+		fileName, archTag, r.Name,
 	)
+
 	spinner.Done(true)
 
-	ctx.Logger.Get(r.Name).Print("Removed package %s", fileName)
+	if file.ArchFlag == data.ARCH_FLAG_NOARCH {
+		ctx.Logger.Get(r.Name).Print("Removed package %s (%s)", fileName, repoArch)
+	} else {
+		ctx.Logger.Get(r.Name).Print("Removed package %s", fileName)
+	}
 
 	return true
 }

@@ -39,6 +39,13 @@ var defArchs = []string{data.ARCH_SRC, data.ARCH_X64}
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+func (s *StorageSuite) SetUpSuite(c *C) {
+	metaDate := time.Unix(1644506277, 0)
+	metaFile := dataDir + "/release/x86_64/repodata/repomd.xml"
+
+	os.Chtimes(metaFile, metaDate, metaDate)
+}
+
 func (s *StorageSuite) TestNewStorage(c *C) {
 	fs, err := NewStorage(genStorageOptions(c, dataDir), index.DefaultOptions)
 
@@ -50,9 +57,10 @@ func (s *StorageSuite) TestNewStorage(c *C) {
 	c.Assert(db, NotNil)
 	c.Assert(err, IsNil)
 
-	mtime := fs.GetModTime(data.REPO_RELEASE, data.ARCH_X64)
+	mtime, err := fs.GetModTime(data.REPO_RELEASE, data.ARCH_X64)
 
 	c.Assert(mtime.IsZero(), Equals, false)
+	c.Assert(err, IsNil)
 
 	c.Assert(fs.HasRepo(data.REPO_RELEASE), Equals, true)
 	c.Assert(fs.HasRepo("unknown"), Equals, false)
@@ -273,10 +281,13 @@ func (s *StorageSuite) TestRemovePackage(c *C) {
 
 	c.Assert(err, IsNil)
 
-	c.Assert(fs.RemovePackage("", "/path/to/file"), ErrorMatches, `Can't remove package from storage: Repository name can't be empty`)
-	c.Assert(fs.RemovePackage(data.REPO_TESTING, ""), ErrorMatches, `Can't remove package from storage: Path to file can't be empty`)
-	c.Assert(fs.RemovePackage(data.REPO_TESTING, "/path/to/file"), ErrorMatches, `Can't remove package from storage: Unknown RPM package architecture`)
-	c.Assert(fs.RemovePackage("unknown", "test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't remove package from storage: Repository "unknown" doesn't exist`)
+	c.Assert(fs.RemovePackage("", data.ARCH_X64, "test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't remove package from storage: Repository name can't be empty`)
+	c.Assert(fs.RemovePackage(data.REPO_TESTING, data.ARCH_X64, ""), ErrorMatches, `Can't remove package from storage: Path to file can't be empty`)
+	c.Assert(fs.RemovePackage(data.REPO_TESTING, "", "test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't remove package from storage: Arch name can't be empty`)
+	c.Assert(fs.RemovePackage(data.REPO_TESTING, "unknown", "test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't remove package from storage: Unknown or unsupported architecture`)
+	c.Assert(fs.RemovePackage("unknown", data.ARCH_X64, "test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't remove package from storage: Repository "unknown" doesn't exist`)
+	c.Assert(fs.RemovePackage(data.REPO_TESTING, data.ARCH_I386, "test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't remove package from storage: Repository "testing" doesn't support "i386" architecture`)
+	c.Assert(fs.RemovePackage(data.REPO_TESTING, data.ARCH_NOARCH, "test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't remove package from storage: Noarch is pseudo architecture and can't be used`)
 
 	dp := fs.GetDepot(data.REPO_RELEASE, data.ARCH_X64)
 
@@ -285,15 +296,15 @@ func (s *StorageSuite) TestRemovePackage(c *C) {
 
 	fsutil.TouchFile(dp.dataDir+"/test-package-1.0.0-0.el7.x86_64.rpm", 0644)
 
-	c.Assert(fs.RemovePackage(data.REPO_RELEASE, "test-package-1.0.0-0.el7.x86_64.rpm"), IsNil)
+	c.Assert(fs.RemovePackage(data.REPO_RELEASE, data.ARCH_X64, "test-package-1.0.0-0.el7.x86_64.rpm"), IsNil)
 	c.Assert(fsutil.IsExist(dp.dataDir+"/test-package-1.0.0-0.el7.x86_64.rpm"), Equals, false)
 
 	fsutil.TouchFile(dp.dataDir+"/test-package-1.0.0-0.el7.noarch.rpm", 0644)
 
-	c.Assert(fs.RemovePackage(data.REPO_RELEASE, "test-package-1.0.0-0.el7.noarch.rpm"), IsNil)
+	c.Assert(fs.RemovePackage(data.REPO_RELEASE, data.ARCH_X64, "test-package-1.0.0-0.el7.noarch.rpm"), IsNil)
 	c.Assert(fsutil.IsExist(dp.dataDir+"/test-package-1.0.0-0.el7.noarch.rpm"), Equals, false)
 
-	c.Assert(fs.RemovePackage(data.REPO_RELEASE, "test-package-1.0.1-0.el7.noarch.rpm"), ErrorMatches, `Can't remove package from storage depot: File .*.rpm doesn't exist or not accessible`)
+	c.Assert(fs.RemovePackage(data.REPO_RELEASE, data.ARCH_X64, "test-package-1.0.1-0.el7.noarch.rpm"), ErrorMatches, `Can't remove package from storage depot: File .*.rpm doesn't exist or not accessible`)
 
 	opts.SplitFiles = true
 
@@ -301,10 +312,10 @@ func (s *StorageSuite) TestRemovePackage(c *C) {
 	fsutil.TouchFile(dp.dataDir+"/t/test-package-1.0.0-0.el7.x86_64.rpm", 0644)
 	fsutil.TouchFile(dp.dataDir+"/t/test-package-1.0.1-0.el7.x86_64.rpm", 0644)
 
-	c.Assert(fs.RemovePackage(data.REPO_RELEASE, "t/test-package-1.0.0-0.el7.x86_64.rpm"), IsNil)
+	c.Assert(fs.RemovePackage(data.REPO_RELEASE, data.ARCH_X64, "t/test-package-1.0.0-0.el7.x86_64.rpm"), IsNil)
 	c.Assert(fsutil.IsExist(dp.dataDir+"/t/test-package-1.0.0-0.el7.x86_64.rpm"), Equals, false)
 	c.Assert(fsutil.IsExist(dp.dataDir+"/t"), Equals, true)
-	c.Assert(fs.RemovePackage(data.REPO_RELEASE, "t/test-package-1.0.1-0.el7.x86_64.rpm"), IsNil)
+	c.Assert(fs.RemovePackage(data.REPO_RELEASE, data.ARCH_X64, "t/test-package-1.0.1-0.el7.x86_64.rpm"), IsNil)
 	c.Assert(fsutil.IsExist(dp.dataDir+"/t/test-package-1.0.1-0.el7.x86_64.rpm"), Equals, false)
 	c.Assert(fsutil.IsExist(dp.dataDir+"/t"), Equals, false)
 
@@ -313,7 +324,7 @@ func (s *StorageSuite) TestRemovePackage(c *C) {
 	removeFunc = func(path string) error { return fmt.Errorf("ERROR") }
 	opts.SplitFiles = false
 	fsutil.TouchFile(dp.dataDir+"/test-package-1.0.0-0.el7.x86_64.rpm", 0644)
-	err = fs.RemovePackage(data.REPO_RELEASE, "test-package-1.0.0-0.el7.x86_64.rpm")
+	err = fs.RemovePackage(data.REPO_RELEASE, data.ARCH_X64, "test-package-1.0.0-0.el7.x86_64.rpm")
 	c.Assert(err, NotNil)
 	c.Assert(err, ErrorMatches, `.*: ERROR`)
 	removeFunc = os.Remove
@@ -330,23 +341,25 @@ func (s *StorageSuite) TestCopyPackage(c *C) {
 
 	c.Assert(err, IsNil)
 
-	c.Assert(fs.CopyPackage("", "", ""), ErrorMatches, `Can't copy package in storage: Source repository name is empty`)
-	c.Assert(fs.CopyPackage(data.REPO_TESTING, "", ""), ErrorMatches, `Can't copy package in storage: Target repository name is empty`)
-	c.Assert(fs.CopyPackage(data.REPO_TESTING, data.REPO_RELEASE, ""), ErrorMatches, `Can't copy package in storage: Path to file can't be empty`)
-	c.Assert(fs.CopyPackage(data.REPO_TESTING, data.REPO_RELEASE, "test-package-1.0.1-0.el7.ABCD.rpm"), ErrorMatches, `Can't copy package in storage: Unknown RPM package architecture`)
-	c.Assert(fs.CopyPackage("unknown", data.REPO_RELEASE, "test-package-1.0.1-0.el7.x86_64.rpm"), ErrorMatches, `Can't copy package in storage: Source repository "unknown" doesn't exist`)
-	c.Assert(fs.CopyPackage(data.REPO_TESTING, "unknown", "test-package-1.0.1-0.el7.x86_64.rpm"), ErrorMatches, `Can't copy package in storage: Target repository "unknown" doesn't exist`)
+	c.Assert(fs.CopyPackage("", "", "", ""), ErrorMatches, `Can't copy package in storage: Source repository name is empty`)
+	c.Assert(fs.CopyPackage(data.REPO_TESTING, "", "", ""), ErrorMatches, `Can't copy package in storage: Target repository name is empty`)
+	c.Assert(fs.CopyPackage(data.REPO_TESTING, data.REPO_RELEASE, data.ARCH_X64, ""), ErrorMatches, `Can't copy package in storage: Path to file can't be empty`)
+	c.Assert(fs.CopyPackage(data.REPO_TESTING, data.REPO_RELEASE, "", "test-package-1.0.1-0.el7.x86_64.rpm"), ErrorMatches, `Can't copy package in storage: Arch name can't be empty`)
+	c.Assert(fs.CopyPackage(data.REPO_TESTING, data.REPO_RELEASE, "unknown", "test-package-1.0.1-0.el7.x86_64.rpm"), ErrorMatches, `Can't copy package in storage: Unknown or unsupported architecture`)
+	c.Assert(fs.CopyPackage("unknown", data.REPO_RELEASE, data.ARCH_X64, "test-package-1.0.1-0.el7.x86_64.rpm"), ErrorMatches, `Can't copy package in storage: Source repository "unknown" doesn't exist`)
+	c.Assert(fs.CopyPackage(data.REPO_TESTING, "unknown", data.ARCH_X64, "test-package-1.0.1-0.el7.x86_64.rpm"), ErrorMatches, `Can't copy package in storage: Target repository "unknown" doesn't exist`)
+	c.Assert(fs.CopyPackage(data.REPO_TESTING, data.REPO_RELEASE, data.ARCH_NOARCH, "test-package-1.0.1-0.el7.x86_64.rpm"), ErrorMatches, `Can't remove package from storage: Noarch is pseudo architecture and can't be used`)
 
 	c.Assert(fs.AddPackage(data.REPO_TESTING, "../../../testdata/test-package-1.0.0-0.el7.x86_64.rpm"), IsNil)
 	c.Assert(fs.AddPackage(data.REPO_TESTING, "../../../testdata/git-all-2.27.0-0.el7.noarch.rpm"), IsNil)
-	c.Assert(fs.CopyPackage(data.REPO_TESTING, data.REPO_RELEASE, "test-package-1.0.0-0.el7.x86_64.rpm"), IsNil)
-	c.Assert(fs.CopyPackage(data.REPO_TESTING, data.REPO_RELEASE, "git-all-2.27.0-0.el7.noarch.rpm"), IsNil)
+	c.Assert(fs.CopyPackage(data.REPO_TESTING, data.REPO_RELEASE, data.ARCH_X64, "test-package-1.0.0-0.el7.x86_64.rpm"), IsNil)
+	c.Assert(fs.CopyPackage(data.REPO_TESTING, data.REPO_RELEASE, data.ARCH_X64, "git-all-2.27.0-0.el7.noarch.rpm"), IsNil)
 	c.Assert(fsutil.IsExist(fs.dataOptions.DataDir+"/testing/x86_64/test-package-1.0.0-0.el7.x86_64.rpm"), Equals, true)
 	c.Assert(fsutil.IsExist(fs.dataOptions.DataDir+"/testing/x86_64/git-all-2.27.0-0.el7.noarch.rpm"), Equals, true)
 
-	c.Assert(fs.CopyPackage(data.REPO_TESTING, data.REPO_RELEASE, "test-package-1.0.1-0.el7.i386.rpm"), ErrorMatches, `Can't copy package in storage: Source repository "testing" don't support "i386" architecture`)
+	c.Assert(fs.CopyPackage(data.REPO_TESTING, data.REPO_RELEASE, "i386", "test-package-1.0.1-0.el7.i386.rpm"), ErrorMatches, `Can't copy package in storage: Source repository "testing" doesn't support "i386" architecture`)
 	c.Assert(os.Mkdir(fs.dataOptions.DataDir+"/testing/i386", 0755), IsNil)
-	c.Assert(fs.CopyPackage(data.REPO_TESTING, data.REPO_RELEASE, "test-package-1.0.1-0.el7.i386.rpm"), ErrorMatches, `Can't copy package in storage: Target repository "release" don't support "i386" architecture`)
+	c.Assert(fs.CopyPackage(data.REPO_TESTING, data.REPO_RELEASE, "i386", "test-package-1.0.1-0.el7.i386.rpm"), ErrorMatches, `Can't copy package in storage: Target repository "release" doesn't support "i386" architecture`)
 }
 
 func (s *StorageSuite) TestHasPackage(c *C) {
@@ -358,7 +371,7 @@ func (s *StorageSuite) TestHasPackage(c *C) {
 	c.Assert(fs, NotNil)
 	c.Assert(err, IsNil)
 
-	c.Assert(fs.HasPackage(data.REPO_TESTING, "test-package-1.0.0-0.el7.x86_64.rpm"), Equals, false)
+	c.Assert(fs.HasPackage(data.REPO_TESTING, data.ARCH_X64, "test-package-1.0.0-0.el7.x86_64.rpm"), Equals, false)
 
 	err = fs.Initialize(defRepos, []string{data.ARCH_X64})
 
@@ -367,15 +380,19 @@ func (s *StorageSuite) TestHasPackage(c *C) {
 	c.Assert(fs.AddPackage(data.REPO_TESTING, "../../../testdata/test-package-1.0.0-0.el7.x86_64.rpm"), IsNil)
 	c.Assert(fs.AddPackage(data.REPO_TESTING, "../../../testdata/git-all-2.27.0-0.el7.noarch.rpm"), IsNil)
 
-	c.Assert(fs.HasPackage("", "test-package-1.0.0-0.el7.x86_64.rpm"), Equals, false)
-	c.Assert(fs.HasPackage(data.REPO_TESTING, ""), Equals, false)
-	c.Assert(fs.HasPackage("unknown", "test-package-1.0.0-0.el7.x86_64.rpm"), Equals, false)
+	c.Assert(fs.HasPackage("", data.ARCH_X64, "test-package-1.0.0-0.el7.x86_64.rpm"), Equals, false)
+	c.Assert(fs.HasPackage(data.REPO_TESTING, data.ARCH_X64, ""), Equals, false)
+	c.Assert(fs.HasPackage(data.REPO_TESTING, "", ""), Equals, false)
+	c.Assert(fs.HasPackage("unknown", data.ARCH_X64, "test-package-1.0.0-0.el7.x86_64.rpm"), Equals, false)
+	c.Assert(fs.HasPackage(data.REPO_TESTING, data.ARCH_NOARCH, "test-package-1.0.0-0.el7.x86_64.rpm"), Equals, false)
+	c.Assert(fs.HasPackage(data.REPO_TESTING, data.ARCH_I586, "test-package-1.0.0-0.el7.x86_64.rpm"), Equals, false)
+	c.Assert(fs.HasPackage(data.REPO_TESTING, "unknown", "test-package-1.0.0-0.el7.x86_64.rpm"), Equals, false)
 
-	c.Assert(fs.HasPackage(data.REPO_TESTING, "test-package-1.0.0-0.el7.x86_64.rpm"), Equals, true)
-	c.Assert(fs.HasPackage(data.REPO_TESTING, "git-all-2.27.0-0.el7.noarch.rpm"), Equals, true)
-	c.Assert(fs.HasPackage(data.REPO_TESTING, "test-package-2.0.0-0.el7.x86_64.rpm"), Equals, false)
-	c.Assert(fs.HasPackage(data.REPO_TESTING, "test-package-2.0.0-0.el7.i386.rpm"), Equals, false)
-	c.Assert(fs.HasPackage(data.REPO_TESTING, "git-all-2.28.0-0.el7.noarch.rpm"), Equals, false)
+	c.Assert(fs.HasPackage(data.REPO_TESTING, data.ARCH_X64, "test-package-1.0.0-0.el7.x86_64.rpm"), Equals, true)
+	c.Assert(fs.HasPackage(data.REPO_TESTING, data.ARCH_X64, "git-all-2.27.0-0.el7.noarch.rpm"), Equals, true)
+	c.Assert(fs.HasPackage(data.REPO_TESTING, data.ARCH_X64, "test-package-2.0.0-0.el7.x86_64.rpm"), Equals, false)
+	c.Assert(fs.HasPackage(data.REPO_TESTING, data.ARCH_X64, "test-package-2.0.0-0.el7.i386.rpm"), Equals, false)
+	c.Assert(fs.HasPackage(data.REPO_TESTING, data.ARCH_X64, "git-all-2.28.0-0.el7.noarch.rpm"), Equals, false)
 
 	dp := fs.GetDepot(data.REPO_TESTING, data.ARCH_X64)
 
@@ -439,6 +456,7 @@ func (s *StorageSuite) TestStorageReindex(c *C) {
 	c.Assert(fs.Reindex(data.REPO_TESTING, data.ARCH_NOARCH, false), ErrorMatches, `Can't generate index: Unsupported architecture "noarch"`)
 	c.Assert(fs.Reindex(data.REPO_TESTING, "src", false), ErrorMatches, `Can't generate index: Repository "testing" doesn't contain "src" architecture`)
 	c.Assert(fs.Reindex("unknown", data.ARCH_X64, false), ErrorMatches, `Can't generate index: Repository "unknown" doesn't exist`)
+	c.Assert(fs.Reindex(data.REPO_TESTING, "unknown", false), ErrorMatches, `Can't generate index: Unknown or unsupported architecture`)
 
 	err = fs.Reindex(data.REPO_TESTING, data.ARCH_X64, false)
 	c.Assert(err, IsNil)
@@ -461,6 +479,7 @@ func (s *StorageSuite) TestStorageIsEmpty(c *C) {
 	c.Assert(fs.IsEmpty("unknown", ""), Equals, true)
 	c.Assert(fs.IsEmpty(data.REPO_RELEASE, data.ARCH_NOARCH), Equals, true)
 	c.Assert(fs.IsEmpty("unknown", data.ARCH_X64), Equals, true)
+	c.Assert(fs.IsEmpty(data.REPO_RELEASE, "unknown"), Equals, true)
 
 	c.Assert(fs.IsEmpty(data.REPO_RELEASE, data.ARCH_X64), Equals, false)
 	c.Assert(fs.IsEmpty(data.REPO_TESTING, data.ARCH_X64), Equals, true)
@@ -512,7 +531,11 @@ func (s *StorageSuite) TestStorageErrorsNotInitialized(c *C) {
 
 	c.Assert(err, ErrorMatches, `Can't find DB connection: Repository storage is not initialized`)
 
-	c.Assert(fs.GetModTime(data.REPO_RELEASE, data.ARCH_X64).IsZero(), Equals, true)
+	modTime, err := fs.GetModTime(data.REPO_RELEASE, data.ARCH_X64)
+
+	c.Assert(modTime.IsZero(), Equals, true)
+	c.Assert(err, ErrorMatches, `Can't check repository index modification date: Repository storage is not initialized`)
+
 	c.Assert(fs.InvalidateCache(), ErrorMatches, `Can't invalidate cache: Repository storage is not initialized`)
 	c.Assert(fs.WarmupCache(data.REPO_RELEASE, data.ARCH_X64), ErrorMatches, `Can't warmup cache: Repository storage is not initialized`)
 	c.Assert(fs.HasArch(data.REPO_RELEASE, data.ARCH_X64), Equals, false)
@@ -542,6 +565,11 @@ func (s *StorageSuite) TestStorageGetPackagePath(c *C) {
 
 	c.Assert(
 		fs.GetPackagePath(data.REPO_RELEASE, "", "test-package-1.0.0-0.el7.x86_64.rpm"),
+		Equals, "",
+	)
+
+	c.Assert(
+		fs.GetPackagePath(data.REPO_RELEASE, "unknown", "test-package-1.0.0-0.el7.x86_64.rpm"),
 		Equals, "",
 	)
 
@@ -611,6 +639,10 @@ func (s *StorageSuite) TestStorageGetDB(c *C) {
 	c.Assert(dbc, IsNil)
 	c.Assert(err, NotNil)
 
+	dbc, err = fs.GetDB(data.REPO_RELEASE, "unknown", data.DB_PRIMARY)
+	c.Assert(dbc, IsNil)
+	c.Assert(err, NotNil)
+
 	dbc, err = fs.GetDB(data.REPO_RELEASE, data.ARCH_X64, "")
 	c.Assert(dbc, IsNil)
 	c.Assert(err, NotNil)
@@ -626,10 +658,42 @@ func (s *StorageSuite) TestStorageGetModTime(c *C) {
 	c.Assert(fs, NotNil)
 	c.Assert(err, IsNil)
 
-	c.Assert(fs.GetModTime("", data.ARCH_X64).IsZero(), Equals, true)
-	c.Assert(fs.GetModTime(data.REPO_RELEASE, "").IsZero(), Equals, true)
+	modTime, err := fs.GetModTime("", data.ARCH_X64)
 
-	c.Assert(fs.GetModTime(data.REPO_RELEASE, data.ARCH_X64).IsZero(), Equals, false)
+	c.Assert(modTime.IsZero(), Equals, true)
+	c.Assert(err, ErrorMatches, `Can't check repository index modification date: Repository name can't be empty`)
+
+	modTime, err = fs.GetModTime(data.REPO_RELEASE, "")
+
+	c.Assert(modTime.IsZero(), Equals, true)
+	c.Assert(err, ErrorMatches, `Can't check repository index modification date: Arch name can't be empty`)
+
+	modTime, err = fs.GetModTime(data.REPO_RELEASE, "unknown")
+
+	c.Assert(modTime.IsZero(), Equals, true)
+	c.Assert(err, ErrorMatches, `Can't check repository index modification date: Unknown or unsupported architecture`)
+
+	modTime, err = fs.GetModTime(data.REPO_RELEASE, data.ARCH_X64)
+
+	c.Assert(modTime.IsZero(), Equals, false)
+	c.Assert(err, IsNil)
+
+	fs, err = NewStorage(genStorageOptions(c, ""), index.DefaultOptions)
+	c.Assert(fs, NotNil)
+	c.Assert(err, IsNil)
+
+	err = fs.Initialize(defRepos, []string{data.ARCH_X64})
+	c.Assert(err, IsNil)
+
+	err = fs.Reindex(data.REPO_TESTING, data.ARCH_X64, false)
+	c.Assert(err, IsNil)
+
+	os.Remove(joinPath(fs.dataOptions.DataDir, data.REPO_TESTING, data.ARCH_X64, "/repodata/repomd.xml"))
+
+	modTime, err = fs.GetModTime(data.REPO_RELEASE, data.ARCH_X64)
+
+	c.Assert(modTime.IsZero(), Equals, true)
+	c.Assert(err, ErrorMatches, `Can't check repository index modification date: Can't get file info for .*`)
 }
 
 func (s *StorageSuite) TestStorageWarmupCache(c *C) {
@@ -640,6 +704,7 @@ func (s *StorageSuite) TestStorageWarmupCache(c *C) {
 
 	c.Assert(fs.WarmupCache("", data.ARCH_X64), NotNil)
 	c.Assert(fs.WarmupCache(data.REPO_RELEASE, ""), NotNil)
+	c.Assert(fs.WarmupCache(data.REPO_RELEASE, "unknown"), NotNil)
 
 	c.Assert(fs.WarmupCache(data.REPO_RELEASE, data.ARCH_X64), IsNil)
 }
@@ -718,14 +783,14 @@ func (s *StorageSuite) TestDepotIsCacheValid(c *C) {
 	dp.dbs["test1"] = nil
 	c.Assert(dp.CheckCache(), IsNil)
 	c.Assert(dp.IsCacheValid(), Equals, true)
-	c.Assert(fs.IsCacheValid("release", "x86_64"), Equals, true)
+	c.Assert(fs.IsCacheValid("release", data.ARCH_X64), Equals, true)
 	delete(dp.dbs, "test1")
 
 	origDataDir := dp.dataDir
 	dp.dataDir = "/_unknown_"
 	c.Assert(dp.CheckCache(), NotNil)
 	c.Assert(dp.IsCacheValid(), Equals, false)
-	c.Assert(fs.IsCacheValid("release", "x86_64"), Equals, false)
+	c.Assert(fs.IsCacheValid("release", data.ARCH_X64), Equals, false)
 	dp.dataDir = origDataDir
 
 	origDataDir = dp.dataDir

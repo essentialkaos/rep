@@ -50,7 +50,7 @@ func cmdReindex(ctx *context, args options.Arguments) bool {
 
 // reindexRepository starts repository reindex
 func reindexRepository(ctx *context, r *repo.SubRepository, full bool) bool {
-	spinner.Show("Indexing "+colorTagRepository+"%s{!} repository", r.Name)
+	spinner.Show("Indexing {*}{?repo}%s{!} repository", r.Name)
 
 	isCancelProtected = true
 
@@ -61,9 +61,9 @@ func reindexRepository(ctx *context, r *repo.SubRepository, full bool) bool {
 	err := r.Reindex(full, ch)
 
 	if err == nil {
-		spinner.Update("Index for "+colorTagRepository+"%s{!} repository successfully built", r.Name)
+		spinner.Update("Index for {*}{?repo}%s{!} repository successfully built", r.Name)
 	} else {
-		spinner.Update("Can't create index for "+colorTagRepository+"%s{!} repository", r.Name)
+		spinner.Update("Can't create index for {*}{?repo}%s{!} repository", r.Name)
 	}
 
 	spinner.Done(err == nil)
@@ -81,6 +81,6 @@ func reindexRepository(ctx *context, r *repo.SubRepository, full bool) bool {
 // updateReindexStatus updates spinner status
 func updateReindexStatus(ch chan string, name string) {
 	for arch := range ch {
-		spinner.Update("Indexing "+colorTagRepository+"%s{!} {s-}(%s){!} repository", name, arch)
+		spinner.Update("Indexing {*}{?repo}%s{!} {s-}(%s){!} repository", name, arch)
 	}
 }

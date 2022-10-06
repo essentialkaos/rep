@@ -9,7 +9,6 @@ package cli
 
 import (
 	"strings"
-	"time"
 
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fmtutil"
@@ -85,9 +84,15 @@ func printRepoStats(r *repo.SubRepository, stats *repo.RepositoryStats) {
 			continue
 		}
 
+		color := archColors[arch]
+
+		if fmtc.Is256ColorsSupported() {
+			color = archColorsExt[arch]
+		}
+
 		fmtc.Printf(
-			"{*}%-9s{!}  %s {s}(%s){!}\n", arch+":",
-			fmtutil.PrettyNum(stats.Packages[arch]),
+			color+"%-9s{!}  %s {s}(%s){!}\n",
+			arch, fmtutil.PrettyNum(stats.Packages[arch]),
 			fmtutil.PrettySize(stats.Sizes[arch]),
 		)
 	}
@@ -95,8 +100,7 @@ func printRepoStats(r *repo.SubRepository, stats *repo.RepositoryStats) {
 	fmtc.NewLine()
 
 	fmtc.Printf(
-		"{*}Updated:{!}   %s {s-}(%s ago){!}\n",
+		"{*}Updated:{!}   %s\n",
 		timeutil.Format(stats.Updated, "%Y/%m/%d %H:%M"),
-		timeutil.PrettyDuration(time.Since(stats.Updated)),
 	)
 }

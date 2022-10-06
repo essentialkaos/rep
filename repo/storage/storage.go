@@ -33,11 +33,11 @@ type Storage interface {
 
 	// RemovePackage removes package with given relative path from the given repository
 	// Important: This method DO NOT run repository reindex
-	RemovePackage(repo, rpmFileRelPath string) error
+	RemovePackage(repo, arch, rpmFileRelPath string) error
 
 	// CopyPackage copies file from one repository to another
 	// Important: This method DO NOT run repository reindex
-	CopyPackage(fromRepo, toRepo, rpmFileRelPath string) error
+	CopyPackage(fromRepo, toRepo, arch, rpmFileRelPath string) error
 
 	// IsInitialized returns true if the repository already initialized and ready for work
 	IsInitialized() bool
@@ -52,7 +52,7 @@ type Storage interface {
 	HasArch(repo, arch string) bool
 
 	// HasPackage checks if repository contains file with given name
-	HasPackage(repo, rpmFileName string) bool
+	HasPackage(repo, arch, rpmFileName string) bool
 
 	// GetPackagePath returns path to package file
 	GetPackagePath(repo, arch, pkg string) string
@@ -66,7 +66,7 @@ type Storage interface {
 	GetDB(repo, arch, dbType string) (*sql.DB, error)
 
 	// GetModTime returns date of repository index modification
-	GetModTime(repo, arch string) time.Time
+	GetModTime(repo, arch string) (time.Time, error)
 
 	// InvalidateCache invalidates cache
 	InvalidateCache() error

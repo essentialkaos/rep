@@ -81,7 +81,8 @@ var (
 	ErrEmptyRepoName  = fmt.Errorf("Repository name can't be empty")
 	ErrEmptyPath      = fmt.Errorf("Path to file can't be empty")
 	ErrEmptyArchName  = fmt.Errorf("Arch name can't be empty")
-	ErrUnknownArch    = fmt.Errorf("Unknown RPM package architecture")
+	ErrUnknownArch    = fmt.Errorf("Unknown or unsupported architecture")
+	ErrPseudoArch     = fmt.Errorf("Noarch is pseudo architecture and can't be used")
 	ErrNilDepot       = fmt.Errorf("Can't find depot for given repository or architecture")
 )
 
@@ -290,44 +291,30 @@ func (s *Storage) AddPackage(repo, rpmFilePath string) error {
 
 // RemovePackage removes package with given relative path from the given repository
 // Important: This method DO NOT run repository reindex
-func (s *Storage) RemovePackage(repo, rpmFileRelPath string) error {
-	arch := helpers.GuessFileArch(rpmFileRelPath)
-
+func (s *Storage) RemovePackage(repo, arch, rpmFileRelPath string) error {
 	switch {
 	case repo == "":
 		return fmt.Errorf("Can't remove package from storage: %w", ErrEmptyRepoName)
 	case rpmFileRelPath == "":
 		return fmt.Errorf("Can't remove package from storage: %w", ErrEmptyPath)
 	case arch == "":
+		return fmt.Errorf("Can't remove package from storage: %w", ErrEmptyArchName)
+	case data.SupportedArchs[arch].Flag == data.ARCH_FLAG_UNKNOWN:
 		return fmt.Errorf("Can't remove package from storage: %w", ErrUnknownArch)
+	case arch == data.ARCH_NOARCH:
+		return fmt.Errorf("Can't remove package from storage: %w", ErrPseudoArch)
 	case !s.HasRepo(repo):
 		return fmt.Errorf("Can't remove package from storage: Repository %q doesn't exist", repo)
+	case !s.HasArch(repo, arch):
+		return fmt.Errorf("Can't remove package from storage: Repository %q doesn't support %q architecture", repo, arch)
 	}
 
-	if arch != data.ARCH_NOARCH {
-		return s.GetDepot(repo, arch).RemovePackage(rpmFileRelPath)
-	}
-
-	for _, a := range data.BinArchList {
-		if !s.HasArch(repo, a) {
-			continue
-		}
-
-		err := s.GetDepot(repo, a).RemovePackage(rpmFileRelPath)
-
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return s.GetDepot(repo, arch).RemovePackage(rpmFileRelPath)
 }
 
 // CopyPackage copies file from one repository to another
 // Important: This method DO NOT run repository reindex
-func (s *Storage) CopyPackage(fromRepo, toRepo, rpmFileRelPath string) error {
-	arch := helpers.GuessFileArch(rpmFileRelPath)
-
+func (s *Storage) CopyPackage(fromRepo, toRepo, arch, rpmFileRelPath string) error {
 	switch {
 	case fromRepo == "":
 		return fmt.Errorf("Can't copy package in storage: Source repository name is empty")
@@ -336,26 +323,22 @@ func (s *Storage) CopyPackage(fromRepo, toRepo, rpmFileRelPath string) error {
 	case rpmFileRelPath == "":
 		return fmt.Errorf("Can't copy package in storage: %w", ErrEmptyPath)
 	case arch == "":
+		return fmt.Errorf("Can't copy package in storage: %w", ErrEmptyArchName)
+	case data.SupportedArchs[arch].Flag == data.ARCH_FLAG_UNKNOWN:
 		return fmt.Errorf("Can't copy package in storage: %w", ErrUnknownArch)
+	case arch == data.ARCH_NOARCH:
+		return fmt.Errorf("Can't remove package from storage: %w", ErrPseudoArch)
 	case !s.HasRepo(fromRepo):
 		return fmt.Errorf("Can't copy package in storage: Source repository %q doesn't exist", fromRepo)
 	case !s.HasRepo(toRepo):
 		return fmt.Errorf("Can't copy package in storage: Target repository %q doesn't exist", toRepo)
-	case arch != data.ARCH_NOARCH && !s.HasArch(fromRepo, arch):
-		return fmt.Errorf("Can't copy package in storage: Source repository %q don't support %q architecture", fromRepo, arch)
-	case arch != data.ARCH_NOARCH && !s.HasArch(toRepo, arch):
-		return fmt.Errorf("Can't copy package in storage: Target repository %q don't support %q architecture", toRepo, arch)
+	case !s.HasArch(fromRepo, arch):
+		return fmt.Errorf("Can't copy package in storage: Source repository %q doesn't support %q architecture", fromRepo, arch)
+	case !s.HasArch(toRepo, arch):
+		return fmt.Errorf("Can't copy package in storage: Target repository %q doesn't support %q architecture", toRepo, arch)
 	}
 
-	var depot *Depot
-
-	if arch != data.ARCH_NOARCH {
-		depot = s.GetDepot(fromRepo, arch)
-	} else {
-		depot = s.GetBinDepot(fromRepo)
-	}
-
-	return s.AddPackage(toRepo, depot.GetPackagePath(rpmFileRelPath))
+	return s.AddPackage(toRepo, s.GetDepot(fromRepo, arch).GetPackagePath(rpmFileRelPath))
 }
 
 // Reindex generates index metadata for the given repository and arch
@@ -365,6 +348,8 @@ func (s *Storage) Reindex(repo, arch string, full bool) error {
 		return fmt.Errorf("Can't generate index: %w", ErrEmptyRepoName)
 	case arch == "":
 		return fmt.Errorf("Can't generate index: %w", ErrEmptyArchName)
+	case data.SupportedArchs[arch].Flag == data.ARCH_FLAG_UNKNOWN:
+		return fmt.Errorf("Can't generate index: %w", ErrUnknownArch)
 	case arch == data.ARCH_NOARCH:
 		return fmt.Errorf("Can't generate index: Unsupported architecture %q", arch)
 	case !s.HasRepo(repo):
@@ -385,6 +370,8 @@ func (s *Storage) IsInitialized() bool {
 func (s *Storage) IsEmpty(repo, arch string) bool {
 	switch {
 	case repo == "", arch == "":
+		return true
+	case data.SupportedArchs[arch].Flag == data.ARCH_FLAG_UNKNOWN:
 		return true
 	case arch == data.ARCH_NOARCH:
 		return true
@@ -408,6 +395,8 @@ func (s *Storage) HasRepo(repo string) bool {
 func (s *Storage) HasArch(repo, arch string) bool {
 	switch {
 	case repo == "", arch == "":
+		return false
+	case data.SupportedArchs[arch].Flag == data.ARCH_FLAG_UNKNOWN:
 		return false
 	case !s.HasRepo(repo):
 		return false
@@ -440,35 +429,31 @@ func (s *Storage) HasArch(repo, arch string) bool {
 }
 
 // HasPackage checks if repository contains file with given name
-func (s *Storage) HasPackage(repo, rpmFileName string) bool {
-	arch := helpers.GuessFileArch(rpmFileName)
-
+func (s *Storage) HasPackage(repo, arch, rpmFileName string) bool {
 	switch {
 	case repo == "", rpmFileName == "", arch == "":
+		return false
+	case arch == data.ARCH_NOARCH:
+		return false
+	case data.SupportedArchs[arch].Flag == data.ARCH_FLAG_UNKNOWN:
 		return false
 	case !s.IsInitialized():
 		return false
 	case !s.HasRepo(repo):
 		return false
-	case arch != data.ARCH_NOARCH && !s.HasArch(repo, arch):
+	case !s.HasArch(repo, arch):
 		return false
 	}
 
-	var depot *Depot
-
-	if arch != data.ARCH_NOARCH {
-		depot = s.GetDepot(repo, arch)
-	} else {
-		depot = s.GetBinDepot(repo)
-	}
-
-	return depot.HasPackage(rpmFileName)
+	return s.GetDepot(repo, arch).HasPackage(rpmFileName)
 }
 
 // GetPackagePath returns full path to package RPM file
 func (s *Storage) GetPackagePath(repo, arch, rpmFileRelPath string) string {
 	switch {
 	case repo == "", arch == "", rpmFileRelPath == "":
+		return ""
+	case data.SupportedArchs[arch].Flag == data.ARCH_FLAG_UNKNOWN:
 		return ""
 	case !strings.HasSuffix(rpmFileRelPath, ".rpm"):
 		return ""
@@ -498,6 +483,8 @@ func (s *Storage) GetDB(repo, arch, dbType string) (*sql.DB, error) {
 		return nil, fmt.Errorf("Can't find DB connection: %w", ErrEmptyRepoName)
 	case arch == "":
 		return nil, fmt.Errorf("Can't find DB connection: %w", ErrEmptyArchName)
+	case data.SupportedArchs[arch].Flag == data.ARCH_FLAG_UNKNOWN:
+		return nil, fmt.Errorf("Can't find DB connection: %w", ErrUnknownArch)
 	case dbType == "":
 		return nil, fmt.Errorf("Can't find DB connection: DB type can't be empty")
 	case !s.IsInitialized():
@@ -509,7 +496,7 @@ func (s *Storage) GetDB(repo, arch, dbType string) (*sql.DB, error) {
 
 // GetDepot creates new depot or returns one from the cache
 func (s *Storage) GetDepot(repo, arch string) *Depot {
-	if repo == "" || arch == "" {
+	if repo == "" || arch == "" || data.SupportedArchs[arch].Flag == data.ARCH_FLAG_UNKNOWN {
 		return nil
 	}
 
@@ -547,20 +534,26 @@ func (s *Storage) GetBinDepot(repo string) *Depot {
 }
 
 // GetModTime returns date of repository index modification
-func (s *Storage) GetModTime(repo, arch string) time.Time {
+func (s *Storage) GetModTime(repo, arch string) (time.Time, error) {
 	switch {
 	case repo == "":
-		return time.Time{}
+		return time.Time{}, fmt.Errorf("Can't check repository index modification date: %w", ErrEmptyRepoName)
 	case arch == "":
-		return time.Time{}
+		return time.Time{}, fmt.Errorf("Can't check repository index modification date: %w", ErrEmptyArchName)
+	case data.SupportedArchs[arch].Flag == data.ARCH_FLAG_UNKNOWN:
+		return time.Time{}, fmt.Errorf("Can't check repository index modification date: %w", ErrUnknownArch)
 	case !s.IsInitialized():
-		return time.Time{}
+		return time.Time{}, fmt.Errorf("Can't check repository index modification date: %w", ErrNotInitialized)
 	}
 
-	indexFile := joinPath(s.dataOptions.DataDir, repo, arch, "/repodata/repomd.xml")
-	mTime, _ := fsutil.GetMTime(indexFile)
+	indexFile := joinPath(s.dataOptions.DataDir, repo, data.SupportedArchs[arch].Dir, "/repodata/repomd.xml")
+	mTime, err := fsutil.GetMTime(indexFile)
 
-	return mTime
+	if err != nil {
+		return time.Time{}, fmt.Errorf("Can't check repository index modification date: %w", err)
+	}
+
+	return mTime, nil
 }
 
 // InvalidateCache invalidates cache and removes SQLite files from cache directory
@@ -615,6 +608,8 @@ func (s *Storage) WarmupCache(repo, arch string) error {
 		return fmt.Errorf("Can't warmup cache: %w", ErrEmptyRepoName)
 	case arch == "":
 		return fmt.Errorf("Can't warmup cache: %w", ErrEmptyArchName)
+	case data.SupportedArchs[arch].Flag == data.ARCH_FLAG_UNKNOWN:
+		return fmt.Errorf("Can't warmup cache: %w", ErrUnknownArch)
 	case !s.IsInitialized():
 		return fmt.Errorf("Can't warmup cache: %w", ErrNotInitialized)
 	}

@@ -84,7 +84,7 @@ func resignRepoPackages(ctx *context, privateKey *sign.PrivateKey, r *repo.SubRe
 	}
 
 	if stack.IsEmpty() {
-		fmtc.Printf("There are no packages in "+colorTagRepository+"%s{!} repository. Nothing to re-sign.\n", r.Name)
+		fmtc.Printf("There are no packages in {*}{?repo}%s{!} repository. Nothing to re-sign.\n", r.Name)
 		return true
 	}
 
@@ -98,7 +98,7 @@ func resignRepoPackages(ctx *context, privateKey *sign.PrivateKey, r *repo.SubRe
 	files := stack.FlattenFiles()
 
 	fmtc.Printf(
-		"Re-signing %s %s in "+colorTagRepository+"%s{!} repository…\n",
+		"Re-signing %s %s in {*}{?repo}%s{!} repository…\n",
 		fmtutil.PrettyNum(len(files)),
 		pluralize.Pluralize(len(files), "package", "packages"),
 		r.Name,

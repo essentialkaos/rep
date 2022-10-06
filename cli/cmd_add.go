@@ -68,7 +68,7 @@ func cmdAdd(ctx *context, args options.Arguments) bool {
 func printFilesList(files []string) {
 	for _, file := range files {
 		filename := path.Base(file)
-		fmtc.Printf("{s-}•{!} "+colorTagPackage+"%s{!}\n", filename)
+		fmtc.Printf("{s-}•{!} {?package}%s{!}\n", filename)
 	}
 
 	fmtc.NewLine()
@@ -119,9 +119,9 @@ func addRPMFile(ctx *context, file, tmpDir string, privateKey *sign.PrivateKey) 
 	fileName := path.Base(file)
 
 	if options.GetB(OPT_MOVE) {
-		spinner.Show("Moving "+colorTagPackage+"%s{!}", fileName)
+		spinner.Show("Moving {?package}%s{!}", fileName)
 	} else {
-		spinner.Show("Copying "+colorTagPackage+"%s{!}", fileName)
+		spinner.Show("Copying {?package}%s{!}", fileName)
 	}
 
 	if !options.GetB(OPT_IGNORE_FILTER) {
@@ -170,7 +170,7 @@ func addRPMFile(ctx *context, file, tmpDir string, privateKey *sign.PrivateKey) 
 		}
 
 		if !isSigned {
-			spinner.Update("Signing "+colorTagPackage+"%s{!}", fileName)
+			spinner.Update("Signing {?package}%s{!}", fileName)
 
 			pkgFile = path.Join(tmpDir, fileName)
 			err = sign.Sign(file, pkgFile, privateKey)
@@ -199,10 +199,10 @@ func addRPMFile(ctx *context, file, tmpDir string, privateKey *sign.PrivateKey) 
 			return false
 		}
 
-		spinner.Update("Package "+colorTagPackage+"%s{!} moved to "+colorTagRepository+"%s{!}", fileName, data.REPO_TESTING)
+		spinner.Update("Package {?package}%s{!} moved to {*}{?repo}%s{!}", fileName, data.REPO_TESTING)
 		spinner.Done(true)
 	} else {
-		spinner.Update("Package "+colorTagPackage+"%s{!} added to "+colorTagRepository+"%s{!}", fileName, data.REPO_TESTING)
+		spinner.Update("Package {?package}%s{!} added to {*}{?repo}%s{!}", fileName, data.REPO_TESTING)
 		spinner.Done(true)
 	}
 
@@ -213,7 +213,7 @@ func addRPMFile(ctx *context, file, tmpDir string, privateKey *sign.PrivateKey) 
 
 // printSpinnerAddError stops spinner and shows given error
 func printSpinnerAddError(fileName string, err string) {
-	spinner.Update("Can't add "+colorTagPackage+"%s{!}", fileName)
+	spinner.Update("Can't add {?package}%s{!}", fileName)
 	spinner.Done(false)
 	terminal.PrintErrorMessage("   %v", err)
 }

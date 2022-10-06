@@ -83,7 +83,7 @@ func signRPMFile(file, tmpDir string, ctx *context, privateKey *sign.PrivateKey)
 
 	fileName := path.Base(file)
 
-	spinner.Show("Signing "+colorTagPackage+"%s{!}", file)
+	spinner.Show("Signing {?package}%s{!}", file)
 
 	if !options.GetB(OPT_IGNORE_FILTER) {
 		matchFilePattern, err := path.Match(ctx.Repo.FileFilter, fileName)
@@ -112,7 +112,7 @@ func signRPMFile(file, tmpDir string, ctx *context, privateKey *sign.PrivateKey)
 	}
 
 	if isSigned {
-		spinner.Update("Package "+colorTagPackage+"%s{!} already signed with this key", file)
+		spinner.Update("Package {?package}%s{!} already signed with this key", file)
 		spinner.Done(true)
 		return true
 	}
@@ -132,7 +132,7 @@ func signRPMFile(file, tmpDir string, ctx *context, privateKey *sign.PrivateKey)
 		return false
 	}
 
-	spinner.Update("Package "+colorTagPackage+"%s{!} signed", file)
+	spinner.Update("Package {?package}%s{!} signed", file)
 	spinner.Done(true)
 
 	return true
@@ -157,7 +157,7 @@ func replaceSignedRPMFile(original, signed string) error {
 
 // printSpinnerSignError stops spinner and shows given error
 func printSpinnerSignError(fileName string, err string) {
-	spinner.Update("Can't sign "+colorTagPackage+"%s{!}", fileName)
+	spinner.Update("Can't sign {?package}%s{!}", fileName)
 	spinner.Done(false)
 	terminal.PrintErrorMessage("   %v", err)
 }

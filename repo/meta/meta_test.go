@@ -11,7 +11,9 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
+	"os"
 	"testing"
+	"time"
 
 	. "github.com/essentialkaos/check"
 )
@@ -37,6 +39,10 @@ var metaFile = "../../testdata/testrepo/release/x86_64/repodata/repomd.xml"
 
 func (s *MetaSuite) SetUpSuite(c *C) {
 	s.TmpDir = c.MkDir()
+
+	metaDate := time.Unix(1644506277, 0)
+
+	os.Chtimes(metaFile, metaDate, metaDate)
 }
 
 func (s *MetaSuite) TestReadingErrors(c *C) {

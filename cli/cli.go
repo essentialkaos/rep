@@ -203,14 +203,6 @@ var repoNamePattern = `[0-9a-zA-Z_\-]+`
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// colorTagPackage is fmtc color tag used for coloring package names
-var colorTagPackage = "{m}"
-
-// colorTagRepository is fmtc color tag used for coloring repository names
-var colorTagRepository = "{c*}"
-
-// ////////////////////////////////////////////////////////////////////////////////// //
-
 // configs contains repositories configs
 var configs map[string]*knf.Config
 
@@ -297,9 +289,12 @@ func configureUI() {
 	progress.DefaultSettings.BarFgColorTag = "{c}"
 	progress.DefaultSettings.IsSize = false
 
+	fmtc.NameColor("package", "{m}")
+	fmtc.NameColor("repo", "{c}")
+
 	if fmtc.Is256ColorsSupported() {
-		colorTagPackage = "{#108}"
-		colorTagRepository = "{*}{#33}"
+		fmtc.NameColor("package", "{#108}")
+		fmtc.NameColor("repo", "{#33}")
 		progress.DefaultSettings.BarFgColorTag = "{#33}"
 	}
 

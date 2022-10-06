@@ -69,7 +69,7 @@ func unreleasePackagesFiles(ctx *context, files []repo.PackageFile) bool {
 	isCancelProtected = true
 
 	for _, file := range files {
-		ok, testingRestored := unreleasePackageFile(ctx, file.Path)
+		ok, testingRestored := unreleasePackageFile(ctx, file)
 
 		if isCanceled {
 			return false
@@ -103,24 +103,26 @@ func unreleasePackagesFiles(ctx *context, files []repo.PackageFile) bool {
 }
 
 // unreleasePackageFile removes package file from repository
-func unreleasePackageFile(ctx *context, file string) (bool, bool) {
+func unreleasePackageFile(ctx *context, file repo.PackageFile) (bool, bool) {
 	var err error
 	var restored bool
 
-	fileName := path.Base(file)
+	fileName := path.Base(file.Path)
+	repoArch := file.BaseArchFlag.String()
+	archTag := fmtc.If(file.ArchFlag == data.ARCH_FLAG_NOARCH).Sprintf(" {s-}[%s]{!}", repoArch)
 
-	spinner.Show("Unreleasing "+colorTagPackage+"%s{!}", fileName)
+	spinner.Show("Unreleasing {?package}%s{!}", fileName)
 
 	if !ctx.Repo.Testing.HasPackageFile(fileName) {
 		spinner.Show(
-			"Moving "+colorTagPackage+"%s{!} to "+colorTagRepository+"%s{!}",
-			fileName, data.REPO_TESTING,
+			"Moving {?package}%s{!}%s to {*}{?repo}%s{!}",
+			fileName, archTag, data.REPO_TESTING,
 		)
 
 		err = ctx.Repo.CopyPackage(ctx.Repo.Release, ctx.Repo.Testing, file)
 
 		if err != nil {
-			printSpinnerUnreleaseError(fileName, err.Error())
+			printSpinnerUnreleaseError(file, err.Error())
 			return false, false
 		}
 
@@ -130,7 +132,7 @@ func unreleasePackageFile(ctx *context, file string) (bool, bool) {
 	err = ctx.Repo.Release.RemovePackage(file)
 
 	if err != nil {
-		printSpinnerUnreleaseError(fileName, err.Error())
+		printSpinnerUnreleaseError(file, err.Error())
 		return false, false
 	}
 
@@ -138,25 +140,31 @@ func unreleasePackageFile(ctx *context, file string) (bool, bool) {
 
 	if restored {
 		spinner.Update(
-			"Package "+colorTagPackage+"%s{!} moved from "+colorTagRepository+"%s{!} to "+colorTagRepository+"%s{!}",
-			fileName, data.REPO_RELEASE, data.REPO_TESTING,
+			"Package {?package}%s{!}%s moved from {*}{?repo}%s{!} to {*}{?repo}%s{!}",
+			fileName, archTag, data.REPO_RELEASE, data.REPO_TESTING,
 		)
 		ctx.Logger.Get(data.REPO_TESTING).Print("Restored package %s", fileName)
 	} else {
 		spinner.Update(
-			"Package "+colorTagPackage+"%s{!} removed from "+colorTagRepository+"%s{!}",
-			fileName, data.REPO_RELEASE,
+			"Package {?package}%s{!}%s removed from {*}{?repo}%s{!}",
+			fileName, archTag, data.REPO_RELEASE,
 		)
 	}
 
 	spinner.Done(true)
 
+	if file.ArchFlag == data.ARCH_FLAG_NOARCH {
+		ctx.Logger.Get(data.REPO_RELEASE).Print("Unreleased package %s (%s)", fileName, repoArch)
+	} else {
+		ctx.Logger.Get(data.REPO_RELEASE).Print("Unreleased package %s", fileName)
+	}
+
 	return true, restored
 }
 
 // printSpinnerUnreleaseError stops spinner and shows given error
-func printSpinnerUnreleaseError(fileName string, err string) {
-	spinner.Update("Can't unrelease "+colorTagPackage+"%s{!}", fileName)
+func printSpinnerUnreleaseError(file repo.PackageFile, err string) {
+	spinner.Update("Can't unrelease {?package}%s{!}", path.Base(file.Path))
 	spinner.Done(false)
 	terminal.PrintErrorMessage("   %v", err)
 }

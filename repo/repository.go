@@ -22,6 +22,7 @@ import (
 	"github.com/essentialkaos/ek/v12/version"
 
 	"github.com/essentialkaos/rep/repo/data"
+	"github.com/essentialkaos/rep/repo/helpers"
 	"github.com/essentialkaos/rep/repo/rpm"
 	"github.com/essentialkaos/rep/repo/search"
 	"github.com/essentialkaos/rep/repo/sign"
@@ -125,8 +126,9 @@ type PackageChangelog struct {
 
 // PackageFile contains info about package file
 type PackageFile struct {
-	Arch string
-	Path string
+	Path         string        // Path to file
+	ArchFlag     data.ArchFlag // Package arch flag
+	BaseArchFlag data.ArchFlag // Sub-repo (i.e. directory arch) flag
 }
 
 // PayloadObject contains info about file or directory
@@ -227,7 +229,7 @@ func (p *Package) HasArch(arch string) bool {
 // HasArch returns true if slice contains given arch
 func (p PackageFiles) HasArch(arch string) bool {
 	for _, pf := range p {
-		if pf.Arch == arch {
+		if arch != "" && pf.ArchFlag.Has(data.SupportedArchs[arch].Flag) {
 			return true
 		}
 	}
@@ -376,7 +378,7 @@ func (r *Repository) Info(name, arch string) (*Package, time.Time, error) {
 }
 
 // CopyPackage copies packages between sub-repositories
-func (r *Repository) CopyPackage(source, target *SubRepository, rpmFileRelPath string) error {
+func (r *Repository) CopyPackage(source, target *SubRepository, packageFile PackageFile) error {
 	if !r.storage.IsInitialized() {
 		return ErrNotInitialized
 	}
@@ -386,11 +388,14 @@ func (r *Repository) CopyPackage(source, target *SubRepository, rpmFileRelPath s
 		return fmt.Errorf("Source sub-repository is nil")
 	case target == nil:
 		return fmt.Errorf("Target sub-repository is nil")
-	case rpmFileRelPath == "":
+	case packageFile.Path == "":
 		return ErrEmptyPath
 	}
 
-	return r.storage.CopyPackage(source.Name, target.Name, rpmFileRelPath)
+	return r.storage.CopyPackage(
+		source.Name, target.Name,
+		packageFile.BaseArchFlag.String(), packageFile.Path,
+	)
 }
 
 // IsPackageReleased checks if package was released
@@ -511,27 +516,48 @@ func (r *SubRepository) AddPackage(rpmFilePath string) error {
 
 // RemovePackage removes package with given relative path from sub-repository storage
 // Important: This method DO NOT run repository reindex
-func (r *SubRepository) RemovePackage(rpmFileRelPath string) error {
+func (r *SubRepository) RemovePackage(packageFile PackageFile) error {
 	switch {
-	case rpmFileRelPath == "":
+	case packageFile.Path == "":
 		return fmt.Errorf("Can't remove package from repository: %w", ErrEmptyPath)
 	case !r.Parent.storage.IsInitialized():
 		return fmt.Errorf("Can't remove package from repository: %w", ErrNotInitialized)
 	}
 
-	return r.Parent.storage.RemovePackage(r.Name, rpmFileRelPath)
+	return r.Parent.storage.RemovePackage(
+		r.Name, packageFile.BaseArchFlag.String(),
+		packageFile.Path,
+	)
 }
 
 // HasPackageFile returns true if sub-repository contains file with given name
 func (r *SubRepository) HasPackageFile(rpmFileName string) bool {
+	arch := helpers.GuessFileArch(rpmFileName)
+
 	switch {
 	case rpmFileName == "":
+		return false
+	case arch == "":
 		return false
 	case !r.Parent.storage.IsInitialized():
 		return false
 	}
 
-	return r.Parent.storage.HasPackage(r.Name, rpmFileName)
+	if arch != data.ARCH_NOARCH {
+		return r.Parent.storage.HasPackage(r.Name, arch, rpmFileName)
+	}
+
+	for _, arch = range data.ArchList {
+		if !r.HasArch(arch) || data.SupportedArchs[arch].Dir == "" || r.IsEmpty(arch) {
+			continue
+		}
+
+		if r.Parent.storage.HasPackage(r.Name, arch, rpmFileName) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // Stats returns stats for sub-repository
@@ -562,7 +588,11 @@ func (r *SubRepository) Stats() (*RepositoryStats, error) {
 		stats.Packages[arch] = count
 		stats.Sizes[arch] = size
 
-		modTime := r.Parent.storage.GetModTime(r.Name, data.SupportedArchs[arch].Dir)
+		modTime, err := r.Parent.storage.GetModTime(r.Name, arch)
+
+		if err != nil {
+			return nil, err
+		}
 
 		if !modTime.IsZero() && modTime.Unix() > stats.Updated.Unix() {
 			stats.Updated = modTime
@@ -697,7 +727,7 @@ func (r *SubRepository) WarmupCache() error {
 
 // GetFullPackagePath returns full path to package
 func (r *SubRepository) GetFullPackagePath(pkg PackageFile) string {
-	return r.Parent.storage.GetPackagePath(r.Name, pkg.Arch, pkg.Path)
+	return r.Parent.storage.GetPackagePath(r.Name, pkg.BaseArchFlag.String(), pkg.Path)
 }
 
 // HasArch returns true if sub-repository contains packages with given arch
@@ -810,7 +840,11 @@ ROWSLOOP:
 					pkg.Release == pkgRel.String &&
 					pkg.Epoch == pkgEpc.String {
 					pkg.ArchFlags |= data.SupportedArchs[pkgArch.String].Flag
-					pkg.Files = append(pkg.Files, PackageFile{arch, pkgHREF.String})
+					pkg.Files = append(pkg.Files, PackageFile{
+						pkgHREF.String,
+						data.SupportedArchs[pkgArch.String].Flag,
+						data.SupportedArchs[arch].Flag,
+					})
 					continue ROWSLOOP
 				}
 			}
@@ -825,7 +859,11 @@ ROWSLOOP:
 				Epoch:     pkgEpc.String,
 				ArchFlags: data.SupportedArchs[pkgArch.String].Flag,
 				Src:       sourceRPM,
-				Files:     PackageFiles{PackageFile{arch, pkgHREF.String}},
+				Files: PackageFiles{PackageFile{
+					pkgHREF.String,
+					data.SupportedArchs[pkgArch.String].Flag,
+					data.SupportedArchs[arch].Flag,
+				}},
 			},
 		)
 	}
@@ -1021,7 +1059,11 @@ func (r *SubRepository) collectPackageBasicInfo(name, arch string) (*Package, st
 		Epoch:     pkgEpc.String,
 		ArchFlags: data.SupportedArchs[pkgArch.String].Flag,
 		Src:       pkgSrc.String,
-		Files:     PackageFiles{PackageFile{arch, pkgHREF.String}},
+		Files: PackageFiles{PackageFile{
+			pkgHREF.String,
+			data.SupportedArchs[pkgArch.String].Flag,
+			data.SupportedArchs[arch].Flag,
+		}},
 		Info: &PackageInfo{
 			Summary:       pkgSum.String,
 			Desc:          pkgDesc.String,

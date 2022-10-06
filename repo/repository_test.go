@@ -71,8 +71,8 @@ func (s *RepoSuite) TestPackage(c *C) {
 
 func (s *RepoSuite) TestPackageFiles(c *C) {
 	pf := PackageFiles{
-		PackageFile{data.ARCH_SRC, "test-package-1.0.0-0.el7.src.rpm"},
-		PackageFile{data.ARCH_X64, "test-package-1.0.0-0.el7.x86_64.rpm"},
+		PackageFile{"test-package-1.0.0-0.el7.src.rpm", data.ARCH_FLAG_SRC, data.ARCH_FLAG_SRC},
+		PackageFile{"test-package-1.0.0-0.el7.x86_64.rpm", data.ARCH_FLAG_X64, data.ARCH_FLAG_X64},
 	}
 
 	c.Assert(pf.HasArch(data.ARCH_SRC), Equals, true)
@@ -98,8 +98,8 @@ func (s *RepoSuite) TestPackageStack(c *C) {
 				Release:   "0.el7",
 				ArchFlags: data.ARCH_FLAG_X64 | data.ARCH_FLAG_SRC,
 				Files: PackageFiles{
-					PackageFile{data.ARCH_SRC, "test-package-1.0.0-0.el7.src.rpm"},
-					PackageFile{data.ARCH_X64, "test-package-1.0.0-0.el7.x86_64.rpm"},
+					PackageFile{"test-package-1.0.0-0.el7.src.rpm", data.ARCH_FLAG_SRC, data.ARCH_FLAG_SRC},
+					PackageFile{"test-package-1.0.0-0.el7.x86_64.rpm", data.ARCH_FLAG_X64, data.ARCH_FLAG_X64},
 				},
 			},
 			&Package{
@@ -108,7 +108,7 @@ func (s *RepoSuite) TestPackageStack(c *C) {
 				Release:   "0.el7",
 				ArchFlags: data.ARCH_FLAG_X64,
 				Files: PackageFiles{
-					PackageFile{data.ARCH_X64, "test-package-1.0.1-0.el7.x86_64.rpm"},
+					PackageFile{"test-package-1.0.1-0.el7.x86_64.rpm", data.ARCH_FLAG_X64, data.ARCH_FLAG_X64},
 				},
 			},
 		},
@@ -118,9 +118,9 @@ func (s *RepoSuite) TestPackageStack(c *C) {
 	c.Assert(ps.GetArchsFlag(), Equals, data.ARCH_FLAG_X64|data.ARCH_FLAG_SRC)
 	c.Assert(ps.GetArchs(), DeepEquals, []string{"src", "x86_64"})
 	c.Assert(ps.FlattenFiles(), DeepEquals, PackageFiles{
-		PackageFile{data.ARCH_SRC, "test-package-1.0.0-0.el7.src.rpm"},
-		PackageFile{data.ARCH_X64, "test-package-1.0.0-0.el7.x86_64.rpm"},
-		PackageFile{data.ARCH_X64, "test-package-1.0.1-0.el7.x86_64.rpm"},
+		PackageFile{"test-package-1.0.0-0.el7.src.rpm", data.ARCH_FLAG_SRC, data.ARCH_FLAG_SRC},
+		PackageFile{"test-package-1.0.0-0.el7.x86_64.rpm", data.ARCH_FLAG_X64, data.ARCH_FLAG_X64},
+		PackageFile{"test-package-1.0.1-0.el7.x86_64.rpm", data.ARCH_FLAG_X64, data.ARCH_FLAG_X64},
 	})
 
 	ps = PackageStack{
@@ -179,29 +179,34 @@ func (s *RepoSuite) TestRepositoryCopyPackage(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(r, NotNil)
 
-	err = r.CopyPackage(r.Testing, r.Release, "test-package-1.0.0-0.el7.x86_64.rpm")
+	pkgFile := PackageFile{
+		"test-package-1.0.0-0.el7.x86_64.rpm",
+		data.ARCH_FLAG_X64, data.ARCH_FLAG_X64,
+	}
+
+	err = r.CopyPackage(r.Testing, r.Release, pkgFile)
 	c.Assert(err, NotNil)
 	c.Assert(err, DeepEquals, ErrNotInitialized)
 
 	err = r.Initialize([]string{data.ARCH_X64})
 	c.Assert(err, IsNil)
 
-	err = r.CopyPackage(nil, r.Release, "test-package-1.0.0-0.el7.x86_64.rpm")
+	err = r.CopyPackage(nil, r.Release, pkgFile)
 	c.Assert(err, NotNil)
 	c.Assert(err, ErrorMatches, `Source sub-repository is nil`)
 
-	err = r.CopyPackage(r.Testing, nil, "test-package-1.0.0-0.el7.x86_64.rpm")
+	err = r.CopyPackage(r.Testing, nil, pkgFile)
 	c.Assert(err, NotNil)
 	c.Assert(err, ErrorMatches, `Target sub-repository is nil`)
 
-	err = r.CopyPackage(r.Testing, r.Release, "")
+	err = r.CopyPackage(r.Testing, r.Release, PackageFile{})
 	c.Assert(err, NotNil)
 	c.Assert(err, Equals, ErrEmptyPath)
 
 	err = r.Testing.AddPackage("../testdata/test-package-1.0.0-0.el7.x86_64.rpm")
 	c.Assert(err, IsNil)
 
-	err = r.CopyPackage(r.Testing, r.Release, "test-package-1.0.0-0.el7.x86_64.rpm")
+	err = r.CopyPackage(r.Testing, r.Release, pkgFile)
 	c.Assert(err, IsNil)
 }
 
@@ -217,18 +222,23 @@ func (s *RepoSuite) TestRepositoryIsPackageReleased(c *C) {
 	err = r.Initialize([]string{data.ARCH_X64})
 	c.Assert(err, IsNil)
 
-	err = r.CopyPackage(nil, r.Release, "test-package-1.0.0-0.el7.x86_64.rpm")
+	pkgFile := PackageFile{
+		"test-package-1.0.0-0.el7.x86_64.rpm",
+		data.ARCH_FLAG_X64, data.ARCH_FLAG_X64,
+	}
+
+	err = r.CopyPackage(nil, r.Release, pkgFile)
 	c.Assert(err, NotNil)
 	c.Assert(err, ErrorMatches, `Source sub-repository is nil`)
 
-	err = r.CopyPackage(r.Testing, nil, "test-package-1.0.0-0.el7.x86_64.rpm")
+	err = r.CopyPackage(r.Testing, nil, pkgFile)
 	c.Assert(err, NotNil)
 	c.Assert(err, ErrorMatches, `Target sub-repository is nil`)
 
 	err = r.Testing.AddPackage("../testdata/test-package-1.0.0-0.el7.x86_64.rpm")
 	c.Assert(err, IsNil)
 
-	err = r.CopyPackage(r.Testing, r.Release, "test-package-1.0.0-0.el7.x86_64.rpm")
+	err = r.CopyPackage(r.Testing, r.Release, pkgFile)
 	c.Assert(err, IsNil)
 
 	err = r.Testing.Reindex(false, nil)
@@ -280,18 +290,23 @@ func (s *RepoSuite) TestRepositoryInfo(c *C) {
 	c.Assert(err, NotNil)
 	c.Assert(err, DeepEquals, ErrEmptyRepo)
 
-	err = r.CopyPackage(nil, r.Release, "test-package-1.0.0-0.el7.x86_64.rpm")
+	pkgFile := PackageFile{
+		"test-package-1.0.0-0.el7.x86_64.rpm",
+		data.ARCH_FLAG_X64, data.ARCH_FLAG_X64,
+	}
+
+	err = r.CopyPackage(nil, r.Release, pkgFile)
 	c.Assert(err, NotNil)
 	c.Assert(err, ErrorMatches, `Source sub-repository is nil`)
 
-	err = r.CopyPackage(r.Testing, nil, "test-package-1.0.0-0.el7.x86_64.rpm")
+	err = r.CopyPackage(r.Testing, nil, pkgFile)
 	c.Assert(err, NotNil)
 	c.Assert(err, ErrorMatches, `Target sub-repository is nil`)
 
 	err = r.Testing.AddPackage("../testdata/test-package-1.0.0-0.el7.x86_64.rpm")
 	c.Assert(err, IsNil)
 
-	err = r.CopyPackage(r.Testing, r.Release, "test-package-1.0.0-0.el7.x86_64.rpm")
+	err = r.CopyPackage(r.Testing, r.Release, pkgFile)
 	c.Assert(err, IsNil)
 
 	err = r.Testing.Reindex(false, nil)
@@ -401,11 +416,11 @@ func (s *RepoSuite) TestSubRepositoryRemovePackage(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(r, NotNil)
 
-	err = r.Testing.RemovePackage("")
+	err = r.Testing.RemovePackage(PackageFile{})
 	c.Assert(err, NotNil)
 	c.Assert(err, ErrorMatches, `Can't remove package from repository: Path to file is empty`)
 
-	err = r.Testing.RemovePackage("test.rpm")
+	err = r.Testing.RemovePackage(PackageFile{Path: "test.rpm"})
 	c.Assert(err, NotNil)
 	c.Assert(err, ErrorMatches, `Can't remove package from repository: Repository is not initialized`)
 
@@ -415,7 +430,12 @@ func (s *RepoSuite) TestSubRepositoryRemovePackage(c *C) {
 	err = r.Testing.AddPackage("../testdata/test-package-1.0.0-0.el7.x86_64.rpm")
 	c.Assert(err, IsNil)
 
-	err = r.Testing.RemovePackage("test-package-1.0.0-0.el7.x86_64.rpm")
+	pkgFile := PackageFile{
+		"test-package-1.0.0-0.el7.x86_64.rpm",
+		data.ARCH_FLAG_X64, data.ARCH_FLAG_X64,
+	}
+
+	err = r.Testing.RemovePackage(pkgFile)
 	c.Assert(err, IsNil)
 }
 
@@ -597,7 +617,7 @@ func (s *RepoSuite) TestSubRepositoryGetFullPackagePath(c *C) {
 	err = r.Initialize([]string{data.ARCH_X64})
 	c.Assert(err, IsNil)
 
-	pkg := PackageFile{Arch: "x86_64", Path: "test-package-1.0.0-0.el7.x86_64.rpm"}
+	pkg := PackageFile{"test-package-1.0.0-0.el7.x86_64.rpm", data.ARCH_FLAG_X64, data.ARCH_FLAG_X64}
 	c.Assert(r.Testing.GetFullPackagePath(pkg), Matches, `.*/testing/x86_64/test-package-1.0.0-0.el7.x86_64.rpm`)
 }
 
@@ -643,11 +663,11 @@ func (s *FailStorage) AddPackage(repo, rpmFilePath string) error {
 	return fmt.Errorf("ERROR")
 }
 
-func (s *FailStorage) RemovePackage(repo, rpmFileRelPath string) error {
+func (s *FailStorage) RemovePackage(repo, arch, rpmFileRelPath string) error {
 	return fmt.Errorf("ERROR")
 }
 
-func (s *FailStorage) CopyPackage(fromRepo, toRepo, rpmFileRelPath string) error {
+func (s *FailStorage) CopyPackage(fromRepo, toRepo, arch, rpmFileRelPath string) error {
 	return fmt.Errorf("ERROR")
 }
 
@@ -667,7 +687,7 @@ func (s *FailStorage) HasArch(repo, arch string) bool {
 	return true
 }
 
-func (s *FailStorage) HasPackage(repo, rpmFileName string) bool {
+func (s *FailStorage) HasPackage(repo, arch, rpmFileName string) bool {
 	return false
 }
 
@@ -683,8 +703,8 @@ func (s *FailStorage) GetDB(repo, arch, dbType string) (*sql.DB, error) {
 	return nil, fmt.Errorf("ERROR")
 }
 
-func (s *FailStorage) GetModTime(repo, arch string) time.Time {
-	return time.Time{}
+func (s *FailStorage) GetModTime(repo, arch string) (time.Time, error) {
+	return time.Time{}, nil
 }
 
 func (s *FailStorage) InvalidateCache() error {

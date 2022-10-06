@@ -6,10 +6,10 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20220930113650-c6815a8c17ad
 	github.com/essentialkaos/check v1.3.0
 	github.com/essentialkaos/depsy v1.0.0
-	github.com/essentialkaos/ek/v12 v12.55.2
+	github.com/essentialkaos/ek/v12 v12.56.0
 	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/sassoftware/go-rpmutils v0.2.0
-	golang.org/x/crypto v0.0.0-20220926161630-eccd6366d1be
+	golang.org/x/crypto v0.0.0-20221005025214-4161e89ecf1b
 )
 
 require (

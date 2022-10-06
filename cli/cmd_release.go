@@ -67,7 +67,7 @@ func releasePackagesFiles(ctx *context, files []repo.PackageFile) bool {
 	isCancelProtected = true
 
 	for _, file := range files {
-		ok := releasePackageFile(ctx, file.Path)
+		ok := releasePackageFile(ctx, file)
 
 		if isCanceled {
 			return false
@@ -92,24 +92,33 @@ func releasePackagesFiles(ctx *context, files []repo.PackageFile) bool {
 }
 
 // releasePackageFile copies package file from testing to release repository
-func releasePackageFile(ctx *context, file string) bool {
-	fileName := path.Base(file)
+func releasePackageFile(ctx *context, file repo.PackageFile) bool {
+	fileName := path.Base(file.Path)
+	repoArch := file.BaseArchFlag.String()
+	archTag := fmtc.If(file.ArchFlag == data.ARCH_FLAG_NOARCH).Sprintf(" {s-}[%s]{!}", repoArch)
 
-	spinner.Show("Releasing "+colorTagPackage+"%s{!}", fileName)
+	spinner.Show("Releasing {?package}%s{!}%s", fileName, archTag)
 
 	err := ctx.Repo.CopyPackage(ctx.Repo.Testing, ctx.Repo.Release, file)
 
 	if err != nil {
-		spinner.Update("Can't release "+colorTagPackage+"%s{!}", fileName)
+		spinner.Update("Can't release {?package}%s{!}%s", fileName, archTag)
+
 		spinner.Done(false)
 		terminal.PrintErrorMessage("   %v", err)
+
 		return false
 	}
 
-	spinner.Update("Package "+colorTagPackage+"%s{!} released", fileName)
+	spinner.Update("Package {?package}%s{!}%s released", fileName, archTag)
+
 	spinner.Done(true)
 
-	ctx.Logger.Get(data.REPO_RELEASE).Print("Released package %s", fileName)
+	if file.ArchFlag == data.ARCH_FLAG_NOARCH {
+		ctx.Logger.Get(data.REPO_RELEASE).Print("Released package %s (%s)", fileName, repoArch)
+	} else {
+		ctx.Logger.Get(data.REPO_RELEASE).Print("Released package %s", fileName)
+	}
 
 	return true
 }
