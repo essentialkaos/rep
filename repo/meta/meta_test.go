@@ -41,8 +41,11 @@ func (s *MetaSuite) SetUpSuite(c *C) {
 	s.TmpDir = c.MkDir()
 
 	metaDate := time.Unix(1644506277, 0)
+	err := os.Chtimes(metaFile, metaDate, metaDate)
 
-	os.Chtimes(metaFile, metaDate, metaDate)
+	if err != nil {
+		c.Fatalf("Can't set metadata mtime: %v", err)
+	}
 }
 
 func (s *MetaSuite) TestReadingErrors(c *C) {

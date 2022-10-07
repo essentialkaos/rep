@@ -43,7 +43,11 @@ func (s *StorageSuite) SetUpSuite(c *C) {
 	metaDate := time.Unix(1644506277, 0)
 	metaFile := dataDir + "/release/x86_64/repodata/repomd.xml"
 
-	os.Chtimes(metaFile, metaDate, metaDate)
+	err := os.Chtimes(metaFile, metaDate, metaDate)
+
+	if err != nil {
+		c.Fatalf("Can't set metadata mtime: %v", err)
+	}
 }
 
 func (s *StorageSuite) TestNewStorage(c *C) {

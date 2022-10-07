@@ -140,7 +140,7 @@ func removePackagesFiles(ctx *context, releaseFiles, testingFiles []repo.Package
 func removePackageFile(ctx *context, r *repo.SubRepository, file repo.PackageFile) bool {
 	fileName := path.Base(file.Path)
 	repoArch := file.BaseArchFlag.String()
-	archTag := fmtc.If(file.ArchFlag == data.ARCH_FLAG_NOARCH).Sprintf(" {s-}[%s]{!}", repoArch)
+	archTag := fmtc.If(file.ArchFlag == data.ARCH_FLAG_NOARCH).Sprintf(" {s}[%s]{!}", repoArch)
 
 	spinner.Show("Removing {?package}%s{!}%s", fileName, archTag)
 

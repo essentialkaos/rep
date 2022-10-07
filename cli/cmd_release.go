@@ -95,7 +95,7 @@ func releasePackagesFiles(ctx *context, files []repo.PackageFile) bool {
 func releasePackageFile(ctx *context, file repo.PackageFile) bool {
 	fileName := path.Base(file.Path)
 	repoArch := file.BaseArchFlag.String()
-	archTag := fmtc.If(file.ArchFlag == data.ARCH_FLAG_NOARCH).Sprintf(" {s-}[%s]{!}", repoArch)
+	archTag := fmtc.If(file.ArchFlag == data.ARCH_FLAG_NOARCH).Sprintf(" {s}[%s]{!}", repoArch)
 
 	spinner.Show("Releasing {?package}%s{!}%s", fileName, archTag)
 

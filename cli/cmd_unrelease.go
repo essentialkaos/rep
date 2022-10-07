@@ -109,7 +109,7 @@ func unreleasePackageFile(ctx *context, file repo.PackageFile) (bool, bool) {
 
 	fileName := path.Base(file.Path)
 	repoArch := file.BaseArchFlag.String()
-	archTag := fmtc.If(file.ArchFlag == data.ARCH_FLAG_NOARCH).Sprintf(" {s-}[%s]{!}", repoArch)
+	archTag := fmtc.If(file.ArchFlag == data.ARCH_FLAG_NOARCH).Sprintf(" {s}[%s]{!}", repoArch)
 
 	spinner.Show("Unreleasing {?package}%s{!}", fileName)
 
