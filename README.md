@@ -53,7 +53,6 @@ Official Docker images with `rep`:
 ### Usage
 
 ```
-
 Usage: rep {options} {command}
 
 Notice that if you have more than one repository you should define its name as
@@ -70,6 +69,7 @@ Commands
   info package            Show info about package
   payload package type    Show package payload
   sign file…              Sign one or more packages
+  resign                  Resign all packages in reposotory
   add file…               Add one or more packages to testing repository
   remove query…           Remove package or packages from repository
   release query…          Copy package or packages from testing to release repository
@@ -93,6 +93,7 @@ Options
   --show-all, -A          Show all versions of packages (helpful with "list" command)
   --status, -S            Show package status (released or not)
   --epoch, -E             Show epoch info (helpful with "list" and "which-source" commands)
+  --pager, -P             Run command in "pager" mode (i.e. don't disable colors and don't show raw output)
   --no-color, -nc         Disable colors in output
   --help, -h              Show this help message
   --version, -v           Show version
