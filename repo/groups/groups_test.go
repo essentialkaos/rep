@@ -139,31 +139,31 @@ func (s *GroupsSuite) TestWriting(c *C) {
 
 func (s *GroupsSuite) TestDataSorting(c *C) {
 	pkgs := []*GroupPackage{
-		&GroupPackage{Type: 1, Name: "packageA"},
-		&GroupPackage{Type: 3, Name: "packageB"},
-		&GroupPackage{Type: 2, Name: "package10"},
-		&GroupPackage{Type: 2, Name: "package2"},
-		&GroupPackage{Type: 0, Name: "packageX"},
+		{Type: 1, Name: "packageA"},
+		{Type: 3, Name: "packageB"},
+		{Type: 2, Name: "package10"},
+		{Type: 2, Name: "package2"},
+		{Type: 0, Name: "packageX"},
 	}
 
 	groups := []*Group{
-		&Group{ID: "test10"},
-		&Group{ID: "test5"},
+		{ID: "test10"},
+		{ID: "test5"},
 	}
 
 	categories := []*Category{
-		&Category{ID: "test10"},
-		&Category{ID: "test5"},
+		{ID: "test10"},
+		{ID: "test5"},
 	}
 
 	envs := []*Environment{
-		&Environment{ID: "test10"},
-		&Environment{ID: "test5"},
+		{ID: "test10"},
+		{ID: "test5"},
 	}
 
 	langpacks := []*Langpack{
-		&Langpack{Name: "test10"},
-		&Langpack{Name: "test5"},
+		{Name: "test10"},
+		{Name: "test5"},
 	}
 
 	sort.Sort(packageSlice(pkgs))
