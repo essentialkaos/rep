@@ -41,12 +41,26 @@ var defArchs = []string{data.ARCH_SRC, data.ARCH_X64}
 
 func (s *StorageSuite) SetUpSuite(c *C) {
 	metaDate := time.Unix(1644506277, 0)
-	metaFile := dataDir + "/release/x86_64/repodata/repomd.xml"
+	metaDir := dataDir + "/release/x86_64/repodata"
+	metaFiles := []string{
+		"filelists.sqlite.bz2",
+		"filelists.xml.gz",
+		"filelists.xml.zck",
+		"other.sqlite.bz2",
+		"other.xml.gz",
+		"other.xml.zck",
+		"primary.sqlite.bz2",
+		"primary.xml.gz",
+		"primary.xml.zck",
+		"repomd.xml",
+	}
 
-	err := os.Chtimes(metaFile, metaDate, metaDate)
+	for _, metaFile := range metaFiles {
+		err := os.Chtimes(metaDir+"/"+metaFile, metaDate, metaDate)
 
-	if err != nil {
-		c.Fatalf("Can't set metadata mtime: %v", err)
+		if err != nil {
+			c.Fatalf("Can't change metadata mtime: %v", err)
+		}
 	}
 }
 

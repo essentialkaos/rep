@@ -41,10 +41,26 @@ func (s *MetaSuite) SetUpSuite(c *C) {
 	s.TmpDir = c.MkDir()
 
 	metaDate := time.Unix(1644506277, 0)
-	err := os.Chtimes(metaFile, metaDate, metaDate)
+	metaDir := repoDir + "/repodata"
+	metaFiles := []string{
+		"filelists.sqlite.bz2",
+		"filelists.xml.gz",
+		"filelists.xml.zck",
+		"other.sqlite.bz2",
+		"other.xml.gz",
+		"other.xml.zck",
+		"primary.sqlite.bz2",
+		"primary.xml.gz",
+		"primary.xml.zck",
+		"repomd.xml",
+	}
 
-	if err != nil {
-		c.Fatalf("Can't set metadata mtime: %v", err)
+	for _, metaFile := range metaFiles {
+		err := os.Chtimes(metaDir+"/"+metaFile, metaDate, metaDate)
+
+		if err != nil {
+			c.Fatalf("Can't change metadata mtime: %v", err)
+		}
 	}
 }
 
