@@ -217,7 +217,7 @@ func (p *Package) HasArch(arch string) bool {
 
 	archFlag := data.SupportedArchs[arch].Flag
 
-	if archFlag == 0 {
+	if archFlag == data.ARCH_FLAG_UNKNOWN {
 		return false
 	}
 
@@ -412,11 +412,12 @@ func (r *Repository) IsPackageReleased(pkg *Package) (bool, time.Time, error) {
 
 	for _, arch := range data.ArchList {
 		switch {
-		case arch == data.ARCH_NOARCH, !r.Release.HasArch(arch), r.Release.IsEmpty(arch):
-			continue
-		}
-
-		if !pkg.HasArch(arch) && !pkg.Files.HasArch(arch) {
+		case arch != data.ARCH_SRC && pkg.HasArch(data.ARCH_NOARCH):
+			// Package is noarch package, do the check
+		case arch == data.ARCH_NOARCH, // Skip if it pseudo arch
+			!r.Release.HasArch(arch), // Skip if the release repo doesn't contain this arch
+			r.Release.IsEmpty(arch),  // Skip if there are no packages with this arch
+			!pkg.HasArch(arch):       // Skip if the package doesn't contain this arch
 			continue
 		}
 
