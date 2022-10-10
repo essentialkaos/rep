@@ -1,0 +1,288 @@
+name: CI
+
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+    branches: [master]
+  schedule:
+    - cron: '0 11 */15 * *'
+
+permissions:
+  actions: read
+  contents: read
+  statuses: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CR_REPO: rpm-software-management/createrepo_c
+  CR_VERSION: 0.20.1
+
+jobs:
+  BuildCreaterepo:
+    name: BuildCreaterepo
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt install -y libcurl4-openssl-dev \
+                              libbz2-dev libxml2-dev \
+                              libssl-dev zlib1g-dev \
+                              pkg-config \
+                              libglib2.0-dev \
+                              liblzma-dev \
+                              libsqlite0-dev \
+                              libsqlite3-dev \
+                              librpm-dev \
+                              libzstd-dev \
+                              python3.9-dev \
+                              cmake
+
+      - name: Build createrepo_c binary
+        run: |
+          git clone --depth=1 --branch="${{env.CR_VERSION}}" \
+                    "https://github.com/${{env.CR_REPO}}.git" createrepo_c
+
+          cd createrepo_c
+          mkdir build
+          cd build
+
+          cmake .. -DWITH_ZCHUNK=NO \
+                   -DWITH_LIBMODULEMD=NO \
+                   -DENABLE_DRPM=OFF \
+                   -DBUILD_LIBCREATEREPO_C_SHARED=OFF
+
+          make -j 1
+
+          mkdir -p "${{github.workspace}}/.local/bin/"
+
+          cp src/createrepo_c "${{github.workspace}}/.local/bin/"
+
+      - name: Update PATH
+        run: echo "${{github.workspace}}/.local/bin" >> $GITHUB_PATH
+
+      - name: Print createrepo_c version info
+        run: createrepo_c --version
+
+      - name: Upload built artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: createrepo_c
+          path: ${{github.workspace}}/.local/bin/createrepo_c
+          if-no-files-found: error
+          retention-days: 1
+
+  Go:
+    name: Go
+    runs-on: ubuntu-latest
+
+    needs: BuildCreaterepo
+
+    env:
+      SRC_DIR: src/github.com/${{ github.repository }}
+
+    strategy:
+      matrix:
+        go: [ '1.18.x', '1.19.x' ]
+
+    steps:
+      - name: Download pre-built artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: createrepo_c
+          path: ${{github.workspace}}/.local/bin
+
+      - name: Configure environment
+        run: |
+          echo "${{github.workspace}}/.local/bin" >> $GITHUB_PATH
+          
+          chmod +x "${{github.workspace}}/.local/bin/createrepo_c"
+
+          if ! getent group | grep -q nobody ; then
+            sudo groupadd nobody
+          fi
+
+          if ! getent passwd | grep -q nobody ; then
+            sudo useradd -g nobody -s /sbin/nologin nobody
+          fi
+
+      - name: Print createrepo_c version info
+        run: createrepo_c --version
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go }}
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: ${{env.SRC_DIR}}
+
+      - uses: actions/cache@v3
+        id: cache-deps
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-essentialkaos-rep-${{ matrix.go }}-${{ hashFiles('**/go.sum') }}
+
+      - name: Download dependencies
+        working-directory: ${{env.SRC_DIR}}
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: make deps
+
+      - name: Update modification date for test repository
+        run: |
+          touch -t $(date -d @1644506277 +'%Y%m%d%H%M.%S') \
+                   ${{env.SRC_DIR}}/testdata/testrepo/release/x86_64/repodata/*
+
+      - name: Build binary
+        working-directory: ${{env.SRC_DIR}}
+        run: make all
+
+      - name: Run tests
+        working-directory: ${{env.SRC_DIR}}
+        run: make test COVERAGE_FILE=cover.out
+
+      - name: Send coverage data
+        uses: essentialkaos/goveralls-action@v1
+        env:
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path: ${{env.SRC_DIR}}
+          profile: cover.out
+          parallel: true
+          flag-name: linux-${{ matrix.go }}
+
+      - name: Generate HTML coverage report
+        uses: essentialkaos/htmlcov-action@v1
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          path: ${{env.SRC_DIR}}
+          profile: cover.out
+          output: coverage-report-${{runner.os}}-${{matrix.go}}
+
+  SendCoverage:
+    name: Send Coverage
+    runs-on: ubuntu-latest
+
+    needs: Go
+
+    steps:
+      - name: Finish parallel tests
+        uses: essentialkaos/goveralls-action@v1
+        env:
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          parallel-finished: true
+
+  Perfecto:
+    name: Perfecto
+    runs-on: ubuntu-latest
+
+    needs: Go
+
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check specs with Perfecto
+        uses: essentialkaos/perfecto-action@v2
+        with:
+          files: common/rep.spec
+
+  Shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+
+    needs: Go
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Check scripts with Shellcheck
+        uses: essentialkaos/shellcheck-action@v1
+        with:
+          files: rep-docker
+
+  Hadolint:
+    name: Hadolint
+    runs-on: ubuntu-latest
+
+    needs: Go
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Check dockerfiles with Hadolint
+        uses: essentialkaos/hadolint-action@v1
+        with:
+          files: Dockerfile
+
+  DockerBuild:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+
+    needs: [Hadolint, Shellcheck, Perfecto]
+
+    env:
+      DOCKER_FILE: Dockerfile
+      IMAGE_NAME: rep
+
+    steps:
+      - name: Check event type
+        run: |
+          if [[ "${{github.event_name}}" != "pull_request" ]] ; then
+            echo "::notice::Event type is not 'pull_request', all job actions will be skipped"
+          fi
+
+          # This step is a hack for needs+if issue with actions
+          # More info about issue: https://github.com/actions/runner/issues/491
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        if: ${{ github.event_name == 'pull_request' }}
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        if: ${{ github.event_name == 'pull_request' && env.DOCKERHUB_USERNAME != '' }}
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          docker build -f ${{ env.DOCKER_FILE }} -t ${{ env.IMAGE_NAME }} .
+
+      - name: Show info about built Docker image
+        uses: essentialkaos/docker-info-action@v1
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          image: ${{ env.IMAGE_NAME }}
+          show-labels: true

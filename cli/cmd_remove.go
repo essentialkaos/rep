@@ -1,0 +1,174 @@
+package cli
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+//                                                                                    //
+//                         Copyright (c) 2022 ESSENTIAL KAOS                          //
+//      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
+//                                                                                    //
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+import (
+	"github.com/essentialkaos/ek/v12/fmtc"
+	"github.com/essentialkaos/ek/v12/fmtutil"
+	"github.com/essentialkaos/ek/v12/options"
+	"github.com/essentialkaos/ek/v12/path"
+	"github.com/essentialkaos/ek/v12/spinner"
+	"github.com/essentialkaos/ek/v12/terminal"
+
+	"github.com/essentialkaos/rep/repo"
+	"github.com/essentialkaos/rep/repo/data"
+)
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// cmdRemove is 'remove' command handler
+func cmdRemove(ctx *context, args options.Arguments) bool {
+	var err error
+	var filter string
+	var testingStack, releaseStack repo.PackageStack
+
+	testingStack, filter, err = smartPackageSearch(ctx.Repo.Testing, args)
+
+	if err != nil {
+		terminal.PrintErrorMessage(err.Error())
+		return false
+	}
+
+	if options.GetB(OPT_ALL) {
+		releaseStack, _, err = smartPackageSearch(ctx.Repo.Release, args)
+
+		if err != nil {
+			terminal.PrintErrorMessage(err.Error())
+			return false
+		}
+	}
+
+	if testingStack.IsEmpty() && releaseStack.IsEmpty() {
+		terminal.PrintWarnMessage("No packages found")
+		return false
+	}
+
+	return removePackages(ctx, releaseStack, testingStack, filter)
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// removePackages removes packages from testing or all sub-repositories
+func removePackages(ctx *context, releaseStack, testingStack repo.PackageStack, filter string) bool {
+	if !options.GetB(OPT_FORCE) {
+		if !releaseStack.IsEmpty() {
+			printPackageList(ctx.Repo.Release, releaseStack, filter)
+		}
+
+		if !testingStack.IsEmpty() {
+			printPackageList(ctx.Repo.Testing, testingStack, filter)
+		}
+
+		fmtutil.Separator(true)
+		fmtc.NewLine()
+
+		ok, err := terminal.ReadAnswer("Do you really want to remove these packages?", "n")
+
+		if err != nil || !ok {
+			return false
+		}
+
+		fmtc.NewLine()
+	}
+
+	testingFiles := testingStack.FlattenFiles()
+	releaseFiles := releaseStack.FlattenFiles()
+
+	return removePackagesFiles(ctx, releaseFiles, testingFiles)
+}
+
+// removePackagesFiles removes packages files from testing or all sub-repositories
+func removePackagesFiles(ctx *context, releaseFiles, testingFiles []repo.PackageFile) bool {
+	var hasErrors, releaseRemoved, testingRemoved bool
+	var file repo.PackageFile
+
+	isCancelProtected = true
+
+	for _, file = range releaseFiles {
+		ok := removePackageFile(ctx, ctx.Repo.Release, file)
+
+		if isCanceled {
+			return false
+		}
+
+		if !ok {
+			hasErrors = true
+			continue
+		}
+
+		releaseRemoved = true
+	}
+
+	for _, file = range testingFiles {
+		ok := removePackageFile(ctx, ctx.Repo.Testing, file)
+
+		if !ok {
+			hasErrors = true
+			continue
+		}
+
+		if isCanceled {
+			return false
+		}
+
+		testingRemoved = true
+	}
+
+	isCancelProtected = false
+
+	if releaseRemoved || testingRemoved {
+		fmtc.NewLine()
+
+		if releaseRemoved {
+			reindexRepository(ctx, ctx.Repo.Release, false)
+		}
+
+		if testingRemoved {
+			reindexRepository(ctx, ctx.Repo.Testing, false)
+		}
+	}
+
+	return hasErrors == false
+}
+
+// removePackageFile removes package file from repository
+func removePackageFile(ctx *context, r *repo.SubRepository, file repo.PackageFile) bool {
+	fileName := path.Base(file.Path)
+	repoArch := file.BaseArchFlag.String()
+	archTag := fmtc.If(file.ArchFlag == data.ARCH_FLAG_NOARCH).Sprintf(" {s}[%s]{!}", repoArch)
+
+	spinner.Show("Removing {?package}%s{!}%s", fileName, archTag)
+
+	err := r.RemovePackage(file)
+
+	if err != nil {
+		spinner.Update(
+			"Can't remove {?package}%s{!}%s from {*}{?repo}%s{!}",
+			fileName, archTag, r.Name,
+		)
+
+		spinner.Done(false)
+		terminal.PrintErrorMessage("   %v", err)
+		return false
+	}
+
+	spinner.Update(
+		"Package {?package}%s{!}%s removed from {*}{?repo}%s{!}",
+		fileName, archTag, r.Name,
+	)
+
+	spinner.Done(true)
+
+	if file.ArchFlag == data.ARCH_FLAG_NOARCH {
+		ctx.Logger.Get(r.Name).Print("Removed package %s (%s)", fileName, repoArch)
+	} else {
+		ctx.Logger.Get(r.Name).Print("Removed package %s", fileName)
+	}
+
+	return true
+}

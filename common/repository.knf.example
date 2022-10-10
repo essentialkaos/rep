@@ -1,0 +1,29 @@
+[repository]
+
+  # Repository name
+  name: 7
+
+  # File filter checks all files by given glob
+  file-filter: *.el7.*
+
+  # Allow to replace packages already presented in repository
+  replace: true
+
+[permissions]
+
+  # Owner user name for files and directories
+  user:
+
+  # Owner group name for files and directories
+  group:
+
+  # Permissions mode for files (default: 644)
+  file: 644
+
+  # Permissions mode for directories (default: 755)
+  dir: 755
+
+[sign]
+
+  # Path to PGP private key file for signing packages
+  key:
