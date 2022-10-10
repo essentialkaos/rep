@@ -52,7 +52,7 @@
 
 Summary:         YUM repository management utility
 Name:            rep
-Version:         3.0.0
+Version:         3.0.1
 Release:         0%{?dist}
 Group:           Applications/System
 License:         Apache 2.0
@@ -167,5 +167,8 @@ fi
 ################################################################################
 
 %changelog
+* Mon Oct 10 2022 Anton Novojilov <andy@essentialkaos.com> - 3.0.1-0
+- Fixed bug with filtering packages by release status
+
 * Mon Jun 27 2022 Anton Novojilov <andy@essentialkaos.com> - 3.0.0-0
 - First public release of 3.x

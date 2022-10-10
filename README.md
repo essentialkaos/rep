@@ -69,7 +69,7 @@ Commands
   info package            Show info about package
   payload package type    Show package payload
   sign file…              Sign one or more packages
-  resign                  Resign all packages in reposotory
+  resign                  Resign all packages in repository
   add file…               Add one or more packages to testing repository
   remove query…           Remove package or packages from repository
   release query…          Copy package or packages from testing to release repository

@@ -374,7 +374,7 @@ func helpFind() {
 	help.Query(query.TERM_SHORT_REQUIRES, query.TERM_REQUIRES, "Package name or binary name required by the package", "Dependency")
 	help.Query(query.TERM_SHORT_CONFLICTS, query.TERM_CONFLICTS, "Name of conflicting package", "Dependency")
 	help.Query(query.TERM_SHORT_OBSOLETES, query.TERM_OBSOLETES, "Name of obsolete package", "Dependency")
-	help.Query(query.TERM_SHORT_RECOMMENDS, query.TERM_RECOMMENDS, "Name of package defined as recomended", "Dependency")
+	help.Query(query.TERM_SHORT_RECOMMENDS, query.TERM_RECOMMENDS, "Name of package defined as recommended", "Dependency")
 	help.Query(query.TERM_SHORT_ENHANCES, query.TERM_ENHANCES, "Name of package defined as the enhancement", "Dependency")
 	help.Query(query.TERM_SHORT_SUGGESTS, query.TERM_SUGGESTS, "Name of package defined as the suggestion", "Dependency")
 	help.Query(query.TERM_SHORT_SUPPLEMENTS, query.TERM_SUPPLEMENTS, "Name of package defined as the supplement", "Dependency")

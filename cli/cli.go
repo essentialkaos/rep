@@ -42,7 +42,7 @@ import (
 // App info
 const (
 	APP  = "rep"
-	VER  = "3.0.0"
+	VER  = "3.0.1"
 	DESC = "YUM repository management utility"
 )
 
@@ -590,7 +590,7 @@ func genUsage() *usage.Info {
 	info.AddCommand(COMMAND_INFO, "Show info about package", "package")
 	info.AddCommand(COMMAND_PAYLOAD, "Show package payload", "package", "?type")
 	info.AddCommand(COMMAND_SIGN, "Sign one or more packages", "file…")
-	info.AddCommand(COMMAND_RESIGN, "Resign all packages in reposotory")
+	info.AddCommand(COMMAND_RESIGN, "Resign all packages in repository")
 	info.AddCommand(COMMAND_ADD, "Add one or more packages to testing repository", "file…")
 	info.AddCommand(COMMAND_REMOVE, "Remove package or packages from repository", "query…")
 	info.AddCommand(COMMAND_RELEASE, "Copy package or packages from testing to release repository", "query…")
