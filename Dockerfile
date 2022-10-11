@@ -2,7 +2,7 @@
 
 FROM essentialkaos/alpine:3.14 as cr-builder
 
-ARG VERSION=0.15.11
+ARG VERSION=0.20.1
 
 # hadolint ignore=DL3003,DL3018
 RUN apk add --no-cache bash-completion bzip2-dev cmake curl-dev expat-dev \
