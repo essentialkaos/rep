@@ -52,7 +52,7 @@
 
 Summary:         YUM repository management utility
 Name:            rep
-Version:         3.0.1
+Version:         3.0.2
 Release:         0%{?dist}
 Group:           Applications/System
 License:         Apache 2.0
@@ -64,7 +64,7 @@ Source100:       checksum.sha512
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:   golang >= 1.17
+BuildRequires:   golang >= 1.19
 
 Requires:        createrepo_c
 
@@ -167,6 +167,9 @@ fi
 ################################################################################
 
 %changelog
+* Tue Oct 11 2022 Anton Novojilov <andy@essentialkaos.com> - 3.0.2-0
+- Added logging for re-signing packages
+
 * Mon Oct 10 2022 Anton Novojilov <andy@essentialkaos.com> - 3.0.1-0
 - Fixed bug with filtering packages by release status
 

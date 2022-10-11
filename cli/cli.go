@@ -42,7 +42,7 @@ import (
 // App info
 const (
 	APP  = "rep"
-	VER  = "3.0.1"
+	VER  = "3.0.2"
 	DESC = "YUM repository management utility"
 )
 
