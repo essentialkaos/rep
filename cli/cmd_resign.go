@@ -17,6 +17,7 @@ import (
 	"github.com/essentialkaos/ek/v12/terminal"
 
 	"github.com/essentialkaos/rep/repo"
+	"github.com/essentialkaos/rep/repo/data"
 	"github.com/essentialkaos/rep/repo/sign"
 )
 
@@ -53,6 +54,7 @@ func resignAllPackages(ctx *context, privateKey *sign.PrivateKey) bool {
 	var isResigned bool
 
 	if !resignRepoPackages(ctx, privateKey, ctx.Repo.Testing) {
+		ctx.Logger.Get(data.REPO_TESTING).Print("Packages re-signing finished with error")
 		return false
 	} else {
 		isResigned = true
@@ -60,6 +62,7 @@ func resignAllPackages(ctx *context, privateKey *sign.PrivateKey) bool {
 	}
 
 	if !resignRepoPackages(ctx, privateKey, ctx.Repo.Release) {
+		ctx.Logger.Get(data.REPO_RELEASE).Print("Packages re-signing finished with error")
 		return false
 	} else {
 		isResigned = true
@@ -77,6 +80,8 @@ func resignAllPackages(ctx *context, privateKey *sign.PrivateKey) bool {
 // resignRepoPackages re-signes all packages in given repository
 func resignRepoPackages(ctx *context, privateKey *sign.PrivateKey, r *repo.SubRepository) bool {
 	stack, err := r.List("", true)
+
+	ctx.Logger.Get(r.Name).Print("Started packages re-signing")
 
 	if err != nil {
 		terminal.PrintErrorMessage(err.Error())
@@ -133,6 +138,8 @@ func resignRepoPackages(ctx *context, privateKey *sign.PrivateKey, r *repo.SubRe
 	}
 
 	pb.Finish()
+
+	ctx.Logger.Get(r.Name).Print("Packages re-signing finished with success")
 
 	return true
 }
