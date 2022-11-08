@@ -127,6 +127,14 @@ func resignRepoPackages(ctx *context, privateKey *sign.PrivateKey, r *repo.SubRe
 			return false
 		}
 
+		err = replaceSignedRPMFile(filePath, tmpFile)
+
+		if err != nil {
+			pb.Finish()
+			terminal.PrintErrorMessage("Can't re-sign package: %v", err)
+			return false
+		}
+
 		pb.Add(1)
 
 		if isCanceled {
