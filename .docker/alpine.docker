@@ -1,6 +1,10 @@
+## REGISTRY CONFIGURATION ######################################################
+
+ARG REGISTRY="docker.io"
+
 ## CREATEREPO_C BUILDER ########################################################
 
-FROM essentialkaos/alpine:3.14 as cr-builder
+FROM ${REGISTRY}/essentialkaos/alpine:3.14 as cr-builder
 
 ARG VERSION=0.20.1
 
@@ -24,12 +28,12 @@ WORKDIR /go/src/github.com/essentialkaos/rep
 COPY . .
 
 # hadolint ignore=DL3018
-RUN apk add --no-cache git make gcc musl-dev upx && \
-    make deps && make all && upx rep
+RUN apk add --no-cache git make gcc musl-dev && \
+    make deps && make all
 
 ## FINAL IMAGE #################################################################
 
-FROM essentialkaos/alpine:3.14
+FROM ${REGISTRY}/essentialkaos/alpine:3.14
 
 LABEL org.opencontainers.image.title="rep" \
       org.opencontainers.image.description="YUM repository management utility" \
