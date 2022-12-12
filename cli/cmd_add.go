@@ -219,6 +219,7 @@ func printSpinnerAddError(fileName string, err string) {
 	terminal.PrintErrorMessage("   %v", err)
 }
 
+// filterRPMPackages filters packages using repository file filter pattern
 func filterRPMPackages(ctx *context, files []string) []string {
 	if !options.GetB(OPT_IGNORE_FILTER) {
 		return files
