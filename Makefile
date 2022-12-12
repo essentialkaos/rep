@@ -75,13 +75,13 @@ else
 	go mod tidy $(VERBOSE_FLAG)
 endif
 
-	test -d vendor && go mod vendor $(VERBOSE_FLAG) || :
+	test -d vendor && rm -rf vendor && go mod vendor $(VERBOSE_FLAG) || :
 
 mod-download:
 	go mod download
 
 mod-vendor:
-	go mod vendor $(VERBOSE_FLAG)
+	rm -rf vendor && go mod vendor $(VERBOSE_FLAG)
 
 fmt: ## Format source code with gofmt
 	find . -name "*.go" -exec gofmt -s -w {} \;
