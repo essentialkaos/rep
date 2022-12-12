@@ -221,7 +221,7 @@ func printSpinnerAddError(fileName string, err string) {
 
 // filterRPMPackages filters packages using repository file filter pattern
 func filterRPMPackages(ctx *context, files []string) []string {
-	if !options.GetB(OPT_IGNORE_FILTER) {
+	if options.GetB(OPT_IGNORE_FILTER) {
 		return files
 	}
 
