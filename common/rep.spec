@@ -10,7 +10,10 @@
 
 %define debug_package %{nil}
 
-%define srcdir src/github.com/essentialkaos/%{name}
+################################################################################
+
+%define _opt     /opt
+%define _logdir  %{_localstatedir}/log
 
 ################################################################################
 
@@ -49,17 +52,13 @@ YUM repository management utility.
 %build
 export GOPATH=$(pwd)
 
-if [[ ! -d "%{srcdir}/vendor" ]] ; then
+if [[ ! -d "%{name}/vendor" ]] ; then
   echo "This package requires vendored dependencies"
   exit 1
 fi
 
-pushd %{srcdir}
-  %if 0%{?unstable}
-    %{__make} %{?_smp_mflags} all GITREV=$(cat .REVISION)
-  %else
-    %{__make} %{?_smp_mflags} all
-  %endif
+pushd %{name}
+  %{__make} %{?_smp_mflags} all
 popd
 
 %install
@@ -74,15 +73,15 @@ install -dm 755 %{buildroot}%{_mandir}/man1
 
 install -dm 755 %{buildroot}%{_opt}/%{name}
 
-install -pm 755 %{srcdir}/%{name} \
+install -pm 755 %{name}/%{name} \
                 %{buildroot}%{_bindir}/
 
-install -pm 644 %{srcdir}/common/%{name}.knf \
+install -pm 644 %{name}/common/%{name}.knf \
                 %{buildroot}%{_sysconfdir}/
-install -pm 644 %{srcdir}/common/*.example \
+install -pm 644 %{name}/common/*.example \
                 %{buildroot}%{_sysconfdir}/%{name}.d/
 
-./%{srcdir}/%{name} --generate-man > %{buildroot}%{_mandir}/man1/%{name}.1
+./%{name}/%{name} --generate-man > %{buildroot}%{_mandir}/man1/%{name}.1
 
 %clean
 rm -rf %{buildroot}
@@ -119,7 +118,7 @@ fi
 
 %files
 %defattr(-,root,root,-)
-%doc LICENSE
+%doc %{name}/LICENSE
 %config(noreplace) %{_sysconfdir}/%{name}.knf
 %dir %{_localstatedir}/cache/%{name}
 %dir %{_opt}/%{name}
