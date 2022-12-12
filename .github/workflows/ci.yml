@@ -40,7 +40,7 @@ jobs:
                               libsqlite3-dev \
                               librpm-dev \
                               libzstd-dev \
-                              python3.9-dev \
+                              python3-dev \
                               cmake
 
       - name: Build createrepo_c binary

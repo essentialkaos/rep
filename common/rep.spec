@@ -16,7 +16,7 @@
 
 Summary:         YUM repository management utility
 Name:            rep
-Version:         3.0.4
+Version:         3.0.3
 Release:         0%{?dist}
 Group:           Applications/System
 License:         Apache 2.0
@@ -132,10 +132,8 @@ fi
 
 %changelog
 * Mon Dec 12 2022 Anton Novojilov <andy@essentialkaos.com> - 3.0.4-0
-- Added packages prefiltering to 'add' command
-
-* Tue Nov 08 2022 Anton Novojilov <andy@essentialkaos.com> - 3.0.3-0
 - Fixed bug with re-signing all packages
+- Added packages prefiltering to 'add' command
 
 * Tue Oct 11 2022 Anton Novojilov <andy@essentialkaos.com> - 3.0.2-0
 - Added logging for re-signing packages
