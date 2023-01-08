@@ -1,9 +1,5 @@
 ################################################################################
 
-# rpmbuilder:relative-pack true
-
-################################################################################
-
 %global crc_check pushd ../SOURCES ; sha512sum -c %{SOURCE100} ; popd
 
 ################################################################################
@@ -50,8 +46,6 @@ YUM repository management utility.
 %setup -q
 
 %build
-export GOPATH=$(pwd)
-
 if [[ ! -d "%{name}/vendor" ]] ; then
   echo "This package requires vendored dependencies"
   exit 1
