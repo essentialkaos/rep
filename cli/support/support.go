@@ -8,6 +8,7 @@ package support
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"fmt"
 	"os"
 	"runtime"
 	"strings"
@@ -25,8 +26,10 @@ import (
 // ShowSupportInfo prints verbose info about application, system, dependencies and
 // important environment
 func ShowSupportInfo(app, ver, gitRev string, gomod []byte) {
-	fmtutil.SeparatorTitleColorTag = "{*}"
+	fmtutil.SeparatorTitleColorTag = "{s-}"
 	fmtutil.SeparatorFullscreen = false
+	fmtutil.SeparatorColorTag = "{s-}"
+	fmtutil.SeparatorSize = 80
 
 	showApplicationInfo(app, ver, gitRev)
 	showOSInfo()
@@ -42,20 +45,20 @@ func ShowSupportInfo(app, ver, gitRev string, gomod []byte) {
 func showApplicationInfo(app, ver, gitRev string) {
 	fmtutil.Separator(false, "APPLICATION INFO")
 
-	fmtc.Printf("  {*}%-10s{!} %s\n", "Name:", app)
-	fmtc.Printf("  {*}%-10s{!} %s\n", "Version:", ver)
+	printInfo(7, "Name", app)
+	printInfo(7, "Version", ver)
 
-	fmtc.Printf(
-		"  {*}%-10s{!} %s {s}(%s/%s){!}\n", "Go:",
+	printInfo(7, "Git SHA", fmtc.Sprintf(
+		"%s {s}(%s/%s){!}",
 		strings.TrimLeft(runtime.Version(), "go"),
 		runtime.GOOS, runtime.GOARCH,
-	)
+	))
 
 	if gitRev != "" {
 		if !fmtc.DisableColors && fmtc.IsTrueColorSupported() {
-			fmtc.Printf("  {*}%-10s{!} %s {#"+strutil.Head(gitRev, 6)+"}●{!}\n", "Git SHA:", gitRev)
+			printInfo(7, "Git SHA", gitRev+getHashColorBullet(gitRev))
 		} else {
-			fmtc.Printf("  {*}%-10s{!} %s\n", "Git SHA:", gitRev)
+			printInfo(7, "Git SHA", gitRev)
 		}
 	}
 
@@ -65,9 +68,9 @@ func showApplicationInfo(app, ver, gitRev string) {
 	if binSHA != "" {
 		binSHA = strutil.Head(binSHA, 7)
 		if !fmtc.DisableColors && fmtc.IsTrueColorSupported() {
-			fmtc.Printf("  {*}%-10s{!} %s {#"+strutil.Head(binSHA, 6)+"}●{!}\n", "Bin SHA:", binSHA)
+			printInfo(7, "Bin SHA", binSHA+getHashColorBullet(binSHA))
 		} else {
-			fmtc.Printf("  {*}%-10s{!} %s\n", "Bin SHA:", binSHA)
+			printInfo(7, "Bin SHA", binSHA)
 		}
 	}
 }
@@ -91,11 +94,27 @@ func showDepsInfo(gomod []byte) {
 	}
 }
 
-// formatValue formats value for output
-func formatValue(v string) string {
-	if v == "" {
-		return fmtc.Sprintf("{s-}—{!}")
+// getHashColorBullet return bullet with color from hash
+func getHashColorBullet(v string) string {
+	if len(v) > 6 {
+		v = strutil.Head(v, 6)
 	}
 
-	return v
+	return fmtc.Sprintf(" {#" + strutil.Head(v, 6) + "}● {!}")
 }
+
+// printInfo formats and prints info record
+func printInfo(size int, name, value string) {
+	name = name + ":"
+	size++
+
+	if value == "" {
+		fm := fmt.Sprintf("  {*}%%-%ds{!}  {s-}—{!}\n", size)
+		fmtc.Printf(fm, name)
+	} else {
+		fm := fmt.Sprintf("  {*}%%-%ds{!}  %%s\n", size)
+		fmtc.Printf(fm, name, value)
+	}
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
