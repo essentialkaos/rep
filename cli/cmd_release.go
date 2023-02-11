@@ -43,7 +43,7 @@ func cmdRelease(ctx *context, args options.Arguments) bool {
 // releasePackages copies packages from testing to release repository
 func releasePackages(ctx *context, stack repo.PackageStack, filter string) bool {
 	if !options.GetB(OPT_FORCE) {
-		printPackageList(ctx.Repo.Release, stack, filter)
+		printPackageList(ctx.Repo.Testing, stack, filter)
 
 		fmtutil.Separator(true)
 		fmtc.NewLine()
