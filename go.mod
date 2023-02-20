@@ -1,9 +1,9 @@
 module github.com/essentialkaos/rep
 
-go 1.17
+go 1.19
 
 require (
-	github.com/ProtonMail/go-crypto v0.0.0-20230127150802-22e9f3c8043c
+	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8
 	github.com/essentialkaos/check v1.3.0
 	github.com/essentialkaos/depsy v1.0.0
 	github.com/essentialkaos/ek/v12 v12.60.0
@@ -14,7 +14,7 @@ require (
 
 require (
 	github.com/DataDog/zstd v1.5.2 // indirect
-	github.com/cloudflare/circl v1.3.1 // indirect
+	github.com/cloudflare/circl v1.3.2 // indirect
 	github.com/essentialkaos/go-linenoise/v3 v3.4.0 // indirect
 	github.com/klauspost/compress v1.15.15 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
