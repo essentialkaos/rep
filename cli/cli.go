@@ -515,6 +515,11 @@ func process(args options.Arguments) bool {
 		return false
 	}
 
+	// List repo be default
+	if args.Get(1).String() == "" {
+		return runCommand(configs[repo], COMMAND_LIST, nil)
+	}
+
 	return runCommand(configs[repo], args.Get(1).String(), args[2:])
 }
 
