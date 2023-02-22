@@ -2,7 +2,7 @@ package cli
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2022 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -43,7 +43,7 @@ func cmdRelease(ctx *context, args options.Arguments) bool {
 // releasePackages copies packages from testing to release repository
 func releasePackages(ctx *context, stack repo.PackageStack, filter string) bool {
 	if !options.GetB(OPT_FORCE) {
-		printPackageList(ctx.Repo.Release, stack, filter)
+		printPackageList(ctx.Repo.Testing, stack, filter)
 
 		fmtutil.Separator(true)
 		fmtc.NewLine()

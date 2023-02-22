@@ -2,7 +2,7 @@ package cli
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2022 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -120,6 +120,14 @@ func resignRepoPackages(ctx *context, privateKey *sign.PrivateKey, r *repo.SubRe
 		tmpFile := path.Join(tmpDir, fileName)
 
 		err = sign.Sign(filePath, tmpFile, privateKey)
+
+		if err != nil {
+			pb.Finish()
+			terminal.PrintErrorMessage("Can't re-sign package: %v", err)
+			return false
+		}
+
+		err = replaceSignedRPMFile(filePath, tmpFile)
 
 		if err != nil {
 			pb.Finish()

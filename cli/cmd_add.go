@@ -2,7 +2,7 @@ package cli
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2022 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -27,6 +27,7 @@ import (
 // cmdAdd is 'add' command handler
 func cmdAdd(ctx *context, args options.Arguments) bool {
 	files := args.Filter("*.rpm").Strings()
+	files = filterRPMPackages(ctx, files)
 
 	if len(files) == 0 {
 		terminal.PrintWarnMessage("There are no RPM packages to add")
@@ -216,4 +217,26 @@ func printSpinnerAddError(fileName string, err string) {
 	spinner.Update("Can't add {?package}%s{!}", fileName)
 	spinner.Done(false)
 	terminal.PrintErrorMessage("   %v", err)
+}
+
+// filterRPMPackages filters packages using repository file filter pattern
+func filterRPMPackages(ctx *context, files []string) []string {
+	if options.GetB(OPT_IGNORE_FILTER) {
+		return files
+	}
+
+	var result []string
+
+	for _, file := range files {
+		fileName := path.Base(file)
+		matchFilePattern, err := path.Match(ctx.Repo.FileFilter, fileName)
+
+		if err == nil && !matchFilePattern {
+			continue
+		}
+
+		result = append(result, file)
+	}
+
+	return result
 }

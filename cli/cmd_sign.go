@@ -2,7 +2,7 @@ package cli
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2022 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -149,10 +149,22 @@ func replaceSignedRPMFile(original, signed string) error {
 	err = os.Remove(original)
 
 	if err != nil {
-		return fmt.Errorf("Can't replace file: %v", err)
+		return fmt.Errorf("Can't remove original (non-signed) file: %v", err)
 	}
 
-	return os.Rename(signed, original)
+	err = fsutil.CopyFile(signed, original)
+
+	if err != nil {
+		return fmt.Errorf("Can't copy signed file: %v", err)
+	}
+
+	err = os.Remove(signed)
+
+	if err != nil {
+		return fmt.Errorf("Can't remove temporary file: %v", err)
+	}
+
+	return nil
 }
 
 // printSpinnerSignError stops spinner and shows given error

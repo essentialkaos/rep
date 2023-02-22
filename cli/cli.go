@@ -2,7 +2,7 @@ package cli
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2022 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -34,6 +34,8 @@ import (
 	knfr "github.com/essentialkaos/ek/v12/knf/validators/regexp"
 	knfs "github.com/essentialkaos/ek/v12/knf/validators/system"
 
+	"github.com/essentialkaos/rep/cli/support"
+
 	"github.com/essentialkaos/rep/repo/index"
 )
 
@@ -42,7 +44,7 @@ import (
 // App info
 const (
 	APP  = "rep"
-	VER  = "3.0.2"
+	VER  = "3.0.3"
 	DESC = "YUM repository management utility"
 )
 
@@ -241,7 +243,7 @@ func Init(gitRev string, gomod []byte) {
 		showAbout(gitRev)
 		return
 	case options.GetB(OPT_VERB_VER):
-		showVerboseAbout(gitRev, gomod)
+		support.ShowSupportInfo(APP, VER, gitRev, gomod)
 		return
 	case options.GetB(OPT_HELP) || len(args) == 0:
 		showUsage()
@@ -511,6 +513,11 @@ func process(args options.Arguments) bool {
 		)
 
 		return false
+	}
+
+	// List repo be default
+	if args.Get(1).String() == "" {
+		return runCommand(configs[repo], COMMAND_LIST, nil)
 	}
 
 	return runCommand(configs[repo], args.Get(1).String(), args[2:])
