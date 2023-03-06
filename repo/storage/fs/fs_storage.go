@@ -25,6 +25,7 @@ import (
 	"github.com/essentialkaos/rep/repo/index"
 	"github.com/essentialkaos/rep/repo/meta"
 	"github.com/essentialkaos/rep/repo/rpm"
+	"github.com/essentialkaos/rep/repo/storage"
 	"github.com/essentialkaos/rep/repo/storage/utils"
 )
 
@@ -97,6 +98,11 @@ var (
 	removeFunc = os.Remove
 	mkdirFunc  = os.Mkdir
 )
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// validate storage interface
+var _ storage.Storage = (*Storage)(nil)
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
