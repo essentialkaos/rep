@@ -70,7 +70,7 @@ func printPackagePayload(pkg *repo.Package, payloadType string) {
 			archColoredTag = "[unknown]"
 		}
 
-		fmtc.Printf(" ▾ "+archColoredTag+" {*}%s{!} {s-}(%s){!}\n", pkg.FullName(), pkg.Info.Summary)
+		fmtc.Printf(" ▾ "+archColoredTag+" {*}%s{!} {s-}(%s){!}\n\n", pkg.FullName(), pkg.Info.Summary)
 
 		fmtutil.Separator(true)
 	}
