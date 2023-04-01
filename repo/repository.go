@@ -1264,14 +1264,18 @@ func parsePayloadList(dir, objs, types string) []PayloadObject {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// Len is the number of elements in the collection
 func (p PackageStack) Len() int {
 	return len(p)
 }
 
+// Swap swaps the elements with indexes i and j
 func (p PackageStack) Swap(i, j int) {
 	p[i], p[j] = p[j], p[i]
 }
 
+// Less reports whether the element with index i
+// must sort before the element with index j
 func (p PackageStack) Less(i, j int) bool {
 	if p[i][0].Name != p[j][0].Name {
 		return sortutil.NaturalLess(p[i][0].Name, p[j][0].Name)
@@ -1293,14 +1297,18 @@ func (p PackageStack) Less(i, j int) bool {
 	return sortutil.NaturalLess(p[i][0].Release, p[j][0].Release)
 }
 
+// Len is the number of elements in the collection
 func (p PayloadData) Len() int {
 	return len(p)
 }
 
+// Swap swaps the elements with indexes i and j
 func (p PayloadData) Swap(i, j int) {
 	p[i], p[j] = p[j], p[i]
 }
 
+// Less reports whether the element with index i
+// must sort before the element with index j
 func (p PayloadData) Less(i, j int) bool {
 	iDir := path.Dir(p[i].Path)
 	jDir := path.Dir(p[j].Path)

@@ -69,6 +69,7 @@ var commands = map[string]command{
 	COMMAND_FIND:         {cmdFind, 1, FLAG_REQUIRE_CACHE},
 	COMMAND_INFO:         {cmdInfo, 1, FLAG_REQUIRE_CACHE},
 	COMMAND_PAYLOAD:      {cmdPayload, 1, FLAG_REQUIRE_CACHE},
+	COMMAND_CLEANUP:      {cmdCleanup, 0, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
 	COMMAND_SIGN:         {cmdSign, 1, FLAG_NONE},
 	COMMAND_RESIGN:       {cmdResign, 0, FLAG_REQUIRE_CACHE | FLAG_REQUIRE_LOCK},
 	COMMAND_ADD:          {cmdAdd, 1, FLAG_REQUIRE_LOCK},

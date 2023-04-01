@@ -173,6 +173,9 @@ func cmdHelp(ctx *context, args options.Arguments) bool {
 	case COMMAND_PAYLOAD, COMMAND_SHORT_PAYLOAD:
 		helpPayload()
 
+	case COMMAND_CLEANUP, COMMAND_SHORT_CLEANUP:
+		helpCleanup()
+
 	case COMMAND_SIGN, COMMAND_SHORT_SIGN:
 		helpSign()
 
@@ -468,6 +471,24 @@ func helpPayload() {
 	help.Shortcut()
 	help.Examples()
 	help.Options()
+}
+
+// helpCleanup shows help content about "cleanup" command
+func helpCleanup() {
+	help := &commandHelp{
+		command:  COMMAND_CLEANUP,
+		shortcut: COMMAND_SHORT_CLEANUP,
+		info:     genUsage(),
+		examples: []commandExample{
+			{"5", "Remove outdated packages except the 5 latest versions"},
+			{"10", "Remove outdated packages except the 10 latest versions"},
+		},
+	}
+
+	help.Usage()
+	help.Paragraph("Remove outdated packages. Note that number of versions counts only different versions, so different releases of the same version counts as one version.")
+	help.Shortcut()
+	help.Examples()
 }
 
 // helpSign shows help content about "sign" command

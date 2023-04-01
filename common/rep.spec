@@ -13,25 +13,25 @@
 
 ################################################################################
 
-Summary:         YUM repository management utility
-Name:            rep
-Version:         3.0.3
-Release:         0%{?dist}
-Group:           Applications/System
-License:         Apache 2.0
-URL:             https://kaos.sh/rep
+Summary:        YUM repository management utility
+Name:           rep
+Version:        3.1.0
+Release:        0%{?dist}
+Group:          Applications/System
+License:        Apache 2.0
+URL:            https://kaos.sh/rep
 
-Source0:         https://source.kaos.st/%{name}/%{name}-%{version}.tar.bz2
+Source0:        https://source.kaos.st/%{name}/%{name}-%{version}.tar.bz2
 
-Source100:       checksum.sha512
+Source100:      checksum.sha512
 
-BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:   golang >= 1.19
+BuildRequires:  golang >= 1.20
 
-Requires:        createrepo_c
+Requires:       createrepo_c
 
-Provides:        %{name} = %{version}-%{release}
+Provides:       %{name} = %{version}-%{release}
 
 ################################################################################
 
@@ -107,6 +107,9 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Sun Mar 12 2023 Anton Novojilov <andy@essentialkaos.com> - 3.1.0-0
+- Added 'cleanup' command
+
 * Mon Dec 12 2022 Anton Novojilov <andy@essentialkaos.com> - 3.0.3-0
 - Fixed bug with re-signing all packages
 - Added packages prefiltering to 'add' command
