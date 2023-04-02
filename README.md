@@ -8,7 +8,7 @@
   <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
 </p>
 
-<p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#using-with-docker">Using with Docker</a> • <a href="#usage">Usage</a> • <a href="#ci-status">CI Status</a> • <a href="#license">License</a></p>
+<p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#ci-status">CI Status</a> • <a href="#license">License</a></p>
 
 <br/>
 
@@ -27,14 +27,14 @@ sudo yum install -y https://yum.kaos.st/kaos-repo-latest.el$(grep 'CPE_NAME' /et
 sudo yum install rep
 ```
 
-### Using with Docker
+#### Containers
 
-You can use Docker containers for working with your repository. Install latest version of Docker, then:
+Official `rep` images available on [GitHub Container Registry](https://kaos.sh/p/rep) and [Docker Hub](https://kaos.sh/d/rep). Install the latest version of [Podman](https://podman.io/getting-started/installation.html) or [Docker](https://docs.docker.com/engine/install/), then:
 
 ```bash
-curl -fL# -o rep-docker https://kaos.sh/rep/rep-docker
-chmod +x rep-docker
-sudo mv rep-docker /usr/bin/rep
+curl -fL# -o rep-container https://kaos.sh/rep/rep-container
+chmod +x rep-container
+sudo mv rep-container /usr/bin/rep
 
 mkdir /opt/rep
 export REP_DIR=/opt/rep
@@ -47,8 +47,8 @@ rep add my-package.el7.x86_64.rpm
 
 Official Docker images with `rep`:
 
-- [`essentialkaos/rep:latest`](https://kaos.sh/d/rep)
 - [`ghcr.io/essentialkaos/rep:latest`](https://kaos.sh/p/rep)
+- [`essentialkaos/rep:latest`](https://kaos.sh/d/rep)
 
 ### Usage
 

@@ -7,11 +7,15 @@ RED=31
 
 ################################################################################
 
-# Official Docker image (String)
+# Official container image (String)
 IMAGE="ghcr.io/essentialkaos/rep:latest"
 
 # Path to working dir (String)
 WORKDIR="${REP_DIR:-/opt/rep}"
+
+################################################################################
+
+engine=""
 
 ################################################################################
 
@@ -20,10 +24,12 @@ WORKDIR="${REP_DIR:-/opt/rep}"
 # Code: No
 # Echo: No
 main() {
+  engine=$(getContainerEngine)
+
   checkEnv
   prepareEnv
 
-  docker run -it --rm -v "$WORKDIR":'/rep' -v "$(pwd)":'/input' "$IMAGE" "$@"
+  $engine run -it --rm -v "$WORKDIR":'/rep' -v "$(pwd)":'/input' "$IMAGE" "$@"
 }
 
 # Check environment
@@ -31,8 +37,8 @@ main() {
 # Code: No
 # Echo: No
 checkEnv() {
-  if ! hasApp "docker" ; then
-    error "You must install Docker runtime first"
+  if [[ -z "$engine" ]] ; then
+    error "You must install Podman or Docker runtime first"
     exit 1
   fi
 
@@ -64,7 +70,7 @@ checkEnv() {
 prepareEnv() {
   if ! isImageDownloaded ; then
     show "Downloading official rep image…\n" $BOLD
-    docker pull "$IMAGE"
+    $engine pull "$IMAGE"
   fi
 
   if [[ ! -e "$WORKDIR/conf" ]] ; then
@@ -84,12 +90,12 @@ prepareEnv() {
   fi
 }
 
-# Check if Docker image downloaded or not
+# Check if container image is downloaded or not
 #
 # Code: Yes
 # Echo: No
 isImageDownloaded() {
-  if [[ -z "$(docker images -q $IMAGE 2> /dev/null)" ]] ; then
+  if [[ -z "$($engine images -q $IMAGE 2> /dev/null)" ]] ; then
     return 1
   fi
 

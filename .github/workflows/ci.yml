@@ -219,7 +219,7 @@ jobs:
       - name: Check scripts with Shellcheck
         uses: essentialkaos/shellcheck-action@v1
         with:
-          files: rep-docker
+          files: rep-container
 
   Hadolint:
     name: Hadolint
