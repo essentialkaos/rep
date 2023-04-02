@@ -486,7 +486,7 @@ func helpCleanup() {
 	}
 
 	help.Usage()
-	help.Paragraph("Remove outdated packages. Note that number of versions counts only different versions, so different releases of the same version counts as one version.")
+	help.Paragraph("Remove old versions of packages. Note that number of versions counts only different versions, so different releases of the same version counts as one version.")
 	help.Shortcut()
 	help.Examples()
 }
