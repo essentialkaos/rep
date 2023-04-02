@@ -78,7 +78,7 @@ func printPackagePayload(pkg *repo.Package, payloadType string) {
 	switch payloadType {
 	case "files", "file", "f":
 		if rawOutput {
-			printRawPackageFilesList(pkg)
+			printRawPackagePayload(pkg)
 		} else {
 			printPackageFilesTree(pkg)
 		}
@@ -108,13 +108,13 @@ func printPackagePayload(pkg *repo.Package, payloadType string) {
 	}
 }
 
-// printRawPackageFilesList prints package payload
-func printRawPackageFilesList(pkg *repo.Package) {
-	payload := pkg.Info.Files
+// printRawPackagePayload prints raw package payload
+func printRawPackagePayload(pkg *repo.Package) {
+	payload := pkg.Info.Payload
 
 	sort.Sort(payload)
 
-	for _, obj := range pkg.Info.Files {
+	for _, obj := range pkg.Info.Payload {
 		if pkg.ArchFlags == data.ARCH_FLAG_SRC {
 			fmt.Println(strings.TrimLeft(obj.Path, "./"))
 		} else {
@@ -125,7 +125,7 @@ func printRawPackageFilesList(pkg *repo.Package) {
 
 // printPackageFilesTree prints files tree
 func printPackageFilesTree(pkg *repo.Package) {
-	payload := pkg.Info.Files
+	payload := pkg.Info.Payload
 
 	sort.Sort(payload)
 

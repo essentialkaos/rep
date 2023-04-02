@@ -27,7 +27,7 @@ import (
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Maximum number of files in info output
-const INFO_MAX_FILES = 30
+const INFO_MAX_OBJECTS = 30
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -56,7 +56,7 @@ func printPackageInfo(r *repo.Repository, pkg *repo.Package, releaseDate time.Ti
 	fmtc.NewLine()
 
 	printPackageBasicInfo(r, pkg, releaseDate)
-	printPackagePayloadInfo(pkg.Info.Files)
+	printPackagePayloadInfo(pkg.Info.Payload)
 	printPackageRequiresInfo(pkg.Info.Requires)
 	printPackageProvidesInfo(pkg.Info.Provides)
 	printPackageChangelogInfo(pkg.Info.Changelog)
@@ -148,22 +148,22 @@ func printPackageBasicInfo(r *repo.Repository, pkg *repo.Package, releaseDate ti
 }
 
 // printPackagePayloadInfo prints info about package data
-func printPackagePayloadInfo(files repo.PayloadData) {
-	if len(files) == 0 {
+func printPackagePayloadInfo(payload repo.PackagePayload) {
+	if len(payload) == 0 {
 		return
 	}
 
-	for i, obj := range files {
+	for i, obj := range payload {
 		if i == 0 {
 			fmtc.Printf("{*}%-16s{!}%s\n", "Payload", formatPayloadPath(obj.Path))
 		} else {
 			fmtc.Printf("{*}%-16s{!}%s\n", "", formatPayloadPath(obj.Path))
 		}
 
-		if i == INFO_MAX_FILES {
+		if i == INFO_MAX_OBJECTS {
 			fmtc.Printf(
 				"{*}%-16s{!}{s}+%d more{!}\n", "",
-				len(files)-INFO_MAX_FILES,
+				len(payload)-INFO_MAX_OBJECTS,
 			)
 
 			fmtc.NewLine()

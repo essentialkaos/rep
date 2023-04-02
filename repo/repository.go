@@ -112,11 +112,11 @@ type PackageInfo struct {
 	Changelog     *PackageChangelog // Changelog records
 	Requires      []data.Dependency // Requires
 	Provides      []data.Dependency // Provides
-	Files         PayloadData       // Files and directories
+	Payload       PackagePayload    // Files and directories
 }
 
-// PayloadData is a slice with info about files or directories
-type PayloadData []PayloadObject
+// PackagePayload is a slice with info about package files or directories
+type PackagePayload []PayloadObject
 
 // PackageChangelog contains changelog data
 type PackageChangelog struct {
@@ -1003,7 +1003,7 @@ func (r *SubRepository) getPackageInfo(name, arch string) (*Package, error) {
 		return nil, err
 	}
 
-	pkg.Info.Files, err = r.collectPackageFilesInfo(pkgID, arch)
+	pkg.Info.Payload, err = r.collectPackagePayloadInfo(pkgID, arch)
 
 	if err != nil {
 		return nil, err
@@ -1112,8 +1112,8 @@ func (r *SubRepository) collectPackageChangelogInfo(pkgID, arch string) (*Packag
 	}, nil
 }
 
-// collectPackageFilesInfo collects info about package payload
-func (r *SubRepository) collectPackageFilesInfo(pkgID, arch string) ([]PayloadObject, error) {
+// collectPackagePayloadInfo collects info about package payload
+func (r *SubRepository) collectPackagePayloadInfo(pkgID, arch string) ([]PayloadObject, error) {
 	rows, err := r.execQuery(data.DB_FILELISTS, arch, _SQL_INFO_FILES, pkgID)
 
 	if err != nil {
@@ -1299,18 +1299,18 @@ func (p PackageStack) Less(i, j int) bool {
 }
 
 // Len is the number of elements in the collection
-func (p PayloadData) Len() int {
+func (p PackagePayload) Len() int {
 	return len(p)
 }
 
 // Swap swaps the elements with indexes i and j
-func (p PayloadData) Swap(i, j int) {
+func (p PackagePayload) Swap(i, j int) {
 	p[i], p[j] = p[j], p[i]
 }
 
 // Less reports whether the element with index i
 // must sort before the element with index j
-func (p PayloadData) Less(i, j int) bool {
+func (p PackagePayload) Less(i, j int) bool {
 	iDir := path.Dir(p[i].Path)
 	jDir := path.Dir(p[j].Path)
 
