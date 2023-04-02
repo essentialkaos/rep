@@ -126,6 +126,7 @@ type PackageChangelog struct {
 
 // PackageFile contains info about package file
 type PackageFile struct {
+	CRC          string        // File checksum (first 7 symbols)
 	Path         string        // Path to file
 	ArchFlag     data.ArchFlag // Package arch flag
 	BaseArchFlag data.ArchFlag // Sub-repo (i.e. directory arch) flag
@@ -812,11 +813,11 @@ func (r *SubRepository) listArchPackages(psb *packageStackBuilder, arch string, 
 	defer rows.Close()
 
 	var sourceRPM string
-	var pkgName, pkgArch, pkgVer, pkgRel, pkgEpc, pkgSrc, pkgHREF sql.NullString
+	var pkgID, pkgName, pkgArch, pkgVer, pkgRel, pkgEpc, pkgSrc, pkgHREF sql.NullString
 
 ROWSLOOP:
 	for rows.Next() {
-		err = rows.Scan(&pkgName, &pkgArch, &pkgVer, &pkgRel, &pkgEpc, &pkgSrc, &pkgHREF)
+		err = rows.Scan(&pkgID, &pkgName, &pkgArch, &pkgVer, &pkgRel, &pkgEpc, &pkgSrc, &pkgHREF)
 
 		if err != nil {
 			return fmt.Errorf("Error while scaning rows with info about arch packages list (%s): %w", arch, err)
@@ -842,7 +843,7 @@ ROWSLOOP:
 					pkg.Epoch == pkgEpc.String {
 					pkg.ArchFlags |= data.SupportedArchs[pkgArch.String].Flag
 					pkg.Files = append(pkg.Files, PackageFile{
-						pkgHREF.String,
+						strutil.Head(pkgID.String, 7), pkgHREF.String,
 						data.SupportedArchs[pkgArch.String].Flag,
 						data.SupportedArchs[arch].Flag,
 					})
@@ -861,7 +862,7 @@ ROWSLOOP:
 				ArchFlags: data.SupportedArchs[pkgArch.String].Flag,
 				Src:       sourceRPM,
 				Files: PackageFiles{PackageFile{
-					pkgHREF.String,
+					strutil.Head(pkgID.String, 7), pkgHREF.String,
 					data.SupportedArchs[pkgArch.String].Flag,
 					data.SupportedArchs[arch].Flag,
 				}},
@@ -1061,7 +1062,7 @@ func (r *SubRepository) collectPackageBasicInfo(name, arch string) (*Package, st
 		ArchFlags: data.SupportedArchs[pkgArch.String].Flag,
 		Src:       pkgSrc.String,
 		Files: PackageFiles{PackageFile{
-			pkgHREF.String,
+			strutil.Head(pkgID.String, 7), pkgHREF.String,
 			data.SupportedArchs[pkgArch.String].Flag,
 			data.SupportedArchs[arch].Flag,
 		}},
