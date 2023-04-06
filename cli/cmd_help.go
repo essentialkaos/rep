@@ -176,6 +176,9 @@ func cmdHelp(ctx *context, args options.Arguments) bool {
 	case COMMAND_CLEANUP, COMMAND_SHORT_CLEANUP:
 		helpCleanup()
 
+	case COMMAND_CHECK, COMMAND_SHORT_CHECK:
+		helpCheck()
+
 	case COMMAND_SIGN, COMMAND_SHORT_SIGN:
 		helpSign()
 
@@ -487,6 +490,23 @@ func helpCleanup() {
 
 	help.Usage()
 	help.Paragraph("Remove old versions of packages. Note that number of versions counts only different versions, so different releases of the same version counts as one version.")
+	help.Shortcut()
+	help.Examples()
+}
+
+// helpCheck shows help content about "check" command
+func helpCheck() {
+	help := &commandHelp{
+		command:  COMMAND_CHECK,
+		shortcut: COMMAND_SHORT_CHECK,
+		info:     genUsage(),
+		examples: []commandExample{
+			{"", "Check release and testing repository for consistency"},
+		},
+	}
+
+	help.Usage()
+	help.Paragraph("Check repositories consistency.")
 	help.Shortcut()
 	help.Examples()
 }

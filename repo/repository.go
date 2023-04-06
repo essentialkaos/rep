@@ -32,10 +32,10 @@ import (
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 const (
-	_SQL_LIST_ALL       = `SELECT pkgKey,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages;`
-	_SQL_LIST_LATEST    = `SELECT pkgKey,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages GROUP BY name HAVING MAX(pkgKey);`
-	_SQL_LIST_BY_NAME   = `SELECT pkgKey,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages WHERE (name || "-" || version || "-" || release) LIKE ? ORDER BY rpm_sourcerpm;`
-	_SQL_FIND_BY_KEYS   = `SELECT pkgKey,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages WHERE pkgKey in (%s);`
+	_SQL_LIST_ALL       = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages;`
+	_SQL_LIST_LATEST    = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages GROUP BY name HAVING MAX(pkgKey);`
+	_SQL_LIST_BY_NAME   = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages WHERE (name || "-" || version || "-" || release) LIKE ? ORDER BY rpm_sourcerpm;`
+	_SQL_FIND_BY_KEYS   = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages WHERE pkgKey in (%s);`
 	_SQL_EXIST          = `SELECT time_file FROM packages WHERE name = ? AND version = ? AND release = ? AND epoch = ?;`
 	_SQL_CONTAINS_ONE   = `SELECT pkgKey FROM filelist WHERE length(filetypes) = 1 AND (dirname || "/" || filenames) GLOB ?;`
 	_SQL_CONTAINS_MANY  = `SELECT pkgKey FROM filelist WHERE length(filetypes) > 1 AND filelist_globber(?, dirname, filenames);`

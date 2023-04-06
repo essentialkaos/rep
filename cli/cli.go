@@ -60,6 +60,7 @@ const (
 	COMMAND_INFO         = "info"
 	COMMAND_PAYLOAD      = "payload"
 	COMMAND_CLEANUP      = "cleanup"
+	COMMAND_CHECK        = "check"
 	COMMAND_SIGN         = "sign"
 	COMMAND_RESIGN       = "resign"
 	COMMAND_ADD          = "add"
@@ -82,6 +83,7 @@ const (
 	COMMAND_SHORT_INFO         = "i"
 	COMMAND_SHORT_PAYLOAD      = "p"
 	COMMAND_SHORT_CLEANUP      = "c"
+	COMMAND_SHORT_CHECK        = "ch"
 	COMMAND_SHORT_SIGN         = "s"
 	COMMAND_SHORT_RESIGN       = "rs"
 	COMMAND_SHORT_ADD          = "a"
@@ -599,6 +601,7 @@ func genUsage() *usage.Info {
 	info.AddCommand(COMMAND_INFO, "Show info about package", "package")
 	info.AddCommand(COMMAND_PAYLOAD, "Show package payload", "package", "?type")
 	info.AddCommand(COMMAND_CLEANUP, "Remove old versions of packages", "?num")
+	info.AddCommand(COMMAND_CHECK, "Check repositories consistency")
 	info.AddCommand(COMMAND_SIGN, "Sign one or more packages", "file…")
 	info.AddCommand(COMMAND_RESIGN, "Resign all packages in repository")
 	info.AddCommand(COMMAND_ADD, "Add one or more packages to testing repository", "file…")
@@ -631,6 +634,9 @@ func genUsage() *usage.Info {
 	info.BoundOptions(COMMAND_ADD, OPT_IGNORE_FILTER)
 	info.BoundOptions(COMMAND_ADD, OPT_MOVE)
 	info.BoundOptions(COMMAND_ADD, OPT_NO_SOURCE)
+	info.BoundOptions(COMMAND_CLEANUP, OPT_FORCE)
+	info.BoundOptions(COMMAND_CLEANUP, OPT_RELEASE)
+	info.BoundOptions(COMMAND_CLEANUP, OPT_TESTING)
 	info.BoundOptions(COMMAND_FIND, OPT_RELEASE)
 	info.BoundOptions(COMMAND_FIND, OPT_STATUS)
 	info.BoundOptions(COMMAND_FIND, OPT_TESTING)
