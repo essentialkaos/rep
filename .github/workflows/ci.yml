@@ -121,15 +121,15 @@ jobs:
       - name: Print createrepo_c version info
         run: createrepo_c --version
 
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ matrix.go }}
-
       - name: Checkout
         uses: actions/checkout@v3
         with:
           path: ${{env.SRC_DIR}}
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go }}
 
       - uses: actions/cache@v3
         id: cache-deps
