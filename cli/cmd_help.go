@@ -501,7 +501,8 @@ func helpCheck() {
 		shortcut: COMMAND_SHORT_CHECK,
 		info:     genUsage(),
 		examples: []commandExample{
-			{"", "Check release and testing repository for consistency"},
+			{"", "Check the release and testing repository for consistency"},
+			{"100", "Check the release and testing repository for consistency and print the first 100 errors"},
 		},
 	}
 

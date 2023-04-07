@@ -519,7 +519,7 @@ func process(args options.Arguments) bool {
 		return false
 	}
 
-	// List repo be default
+	// List repositories by default
 	if args.Get(1).String() == "" {
 		return runCommand(configs[repo], COMMAND_LIST, nil)
 	}
@@ -601,7 +601,7 @@ func genUsage() *usage.Info {
 	info.AddCommand(COMMAND_INFO, "Show info about package", "package")
 	info.AddCommand(COMMAND_PAYLOAD, "Show package payload", "package", "?type")
 	info.AddCommand(COMMAND_CLEANUP, "Remove old versions of packages", "?num")
-	info.AddCommand(COMMAND_CHECK, "Check repositories consistency")
+	info.AddCommand(COMMAND_CHECK, "Check repositories consistency", "?errors-num")
 	info.AddCommand(COMMAND_SIGN, "Sign one or more packages", "file…")
 	info.AddCommand(COMMAND_RESIGN, "Resign all packages in repository")
 	info.AddCommand(COMMAND_ADD, "Add one or more packages to testing repository", "file…")

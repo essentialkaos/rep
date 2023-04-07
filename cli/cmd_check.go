@@ -17,8 +17,10 @@ import (
 	"github.com/essentialkaos/ek/v12/hash"
 	"github.com/essentialkaos/ek/v12/mathutil"
 	"github.com/essentialkaos/ek/v12/options"
+	"github.com/essentialkaos/ek/v12/path"
 	"github.com/essentialkaos/ek/v12/pluralize"
 	"github.com/essentialkaos/ek/v12/progress"
+	"github.com/essentialkaos/ek/v12/sortutil"
 	"github.com/essentialkaos/ek/v12/strutil"
 	"github.com/essentialkaos/ek/v12/system"
 	"github.com/essentialkaos/ek/v12/terminal"
@@ -29,8 +31,16 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// checkMaxErrNum is minimal number of check errors to print
+var checkMaxErrNum int
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // cmdCheck is 'check' command handler
 func cmdCheck(ctx *context, args options.Arguments) bool {
+	checkMaxErrNum, _ = args.Get(0).Int()
+	checkMaxErrNum = mathutil.Between(checkMaxErrNum, 20, 99999)
+
 	releaseStack, err := ctx.Repo.Release.List("", true)
 
 	if err != nil {
@@ -99,7 +109,8 @@ func checkRepositoriesConsistency(releaseIndex, testingIndex map[string]*repo.Pa
 		terminal.PrintWarnMessage("Testing repository is empty, skipping check…")
 	}
 
-	for pkgName, testingPkg := range testingIndex {
+	for _, pkgName := range getSortedPackageIndexKeys(testingIndex) {
+		testingPkg := testingIndex[pkgName]
 		releasePkg := releaseIndex[pkgName]
 
 		if releasePkg == nil {
@@ -161,15 +172,15 @@ func checkRepositoriesCRCInfo(r *repo.Repository, releaseIndex, testingIndex map
 func checkRepositoryCRCInfo(pb *progress.Bar, r *repo.SubRepository, index map[string]*repo.Package) errutil.Errors {
 	var errs errutil.Errors
 
-	for name, pkg := range index {
-		for _, file := range pkg.Files {
+	for _, pkgName := range getSortedPackageIndexKeys(index) {
+		for _, file := range index[pkgName].Files {
 			filePath := r.GetFullPackagePath(file)
 			fileCRC := strutil.Head(hash.FileHash(filePath), 7)
 
 			if fileCRC != file.CRC {
 				errs.Add(fmt.Errorf(
 					"Package %s in %s repository contains file %s with checksum mismatch between DB (%s) data and file on disk (%s)",
-					name, r.Name, file.Path, file.CRC, fileCRC,
+					pkgName, r.Name, file.Path, file.CRC, fileCRC,
 				))
 			}
 		}
@@ -184,7 +195,7 @@ func checkRepositoryCRCInfo(pb *progress.Bar, r *repo.SubRepository, index map[s
 func checkRepositoriesPermissions(r *repo.Repository, releaseIndex, testingIndex map[string]*repo.Package) bool {
 	var errs errutil.Errors
 
-	fmtc.Println("\n{*}[3/4]{!} Validating packages permissions…")
+	fmtc.Println("\n{*}[3/4]{!} Validating permissions…")
 
 	totalPackages := len(releaseIndex) + len(testingIndex)
 	pb := progress.New(int64(totalPackages), "")
@@ -216,7 +227,10 @@ func checkRepositoryPermissions(pb *progress.Bar, r *repo.SubRepository, index m
 	repoCfg := configs[r.Parent.Name]
 	user := repoCfg.GetS(PERMISSIONS_USER)
 	group := repoCfg.GetS(PERMISSIONS_GROUP)
-	perms := repoCfg.GetM(PERMISSIONS_FILE)
+	filePerms := repoCfg.GetM(PERMISSIONS_FILE)
+	dirPerms := repoCfg.GetM(PERMISSIONS_DIR)
+
+	checkedDirs := map[string]bool{}
 
 	if user != "" {
 		userInfo, err := system.LookupUser(user)
@@ -240,15 +254,15 @@ func checkRepositoryPermissions(pb *progress.Bar, r *repo.SubRepository, index m
 		groupID = groupInfo.GID
 	}
 
-	for name, pkg := range index {
-		for _, file := range pkg.Files {
+	for _, pkgName := range getSortedPackageIndexKeys(index) {
+		for _, file := range index[pkgName].Files {
 			filePath := r.GetFullPackagePath(file)
 			fileUID, fileGID, err := fsutil.GetOwner(filePath)
 
 			if err != nil {
 				errs.Add(fmt.Errorf(
 					"Error while checking package %s permissions in %s repository for file %s: %v",
-					name, r.Name, file.Path, err,
+					pkgName, r.Name, file.Path, err,
 				))
 
 				continue
@@ -256,8 +270,8 @@ func checkRepositoryPermissions(pb *progress.Bar, r *repo.SubRepository, index m
 
 			if userID != -1 && fileUID != userID {
 				errs.Add(fmt.Errorf(
-					"Package %s in %s repository contains file %s width different owner UID (%d ≠ %d)",
-					name, r.Name, file.Path, fileUID, userID,
+					"Package %s in %s repository contains file %s width wrong owner UID (%d ≠ %d)",
+					pkgName, r.Name, file.Path, fileUID, userID,
 				))
 
 				continue
@@ -265,22 +279,38 @@ func checkRepositoryPermissions(pb *progress.Bar, r *repo.SubRepository, index m
 
 			if groupID != -1 && fileGID != groupID {
 				errs.Add(fmt.Errorf(
-					"Package %s in %s repository contains file %s width different owner GID (%d ≠ %d)",
-					name, r.Name, file.Path, fileGID, groupID,
+					"Package %s in %s repository contains file %s width wrong owner GID (%d ≠ %d)",
+					pkgName, r.Name, file.Path, fileGID, groupID,
 				))
 
 				continue
 			}
 
-			filePerms := fsutil.GetMode(filePath)
+			pkgFilePerms := fsutil.GetMode(filePath)
+			pkgFileDir := path.Dir(filePath)
 
-			if perms != 0 && filePerms != perms {
+			if filePerms != 0 && pkgFilePerms != 0 && pkgFilePerms != filePerms {
 				errs.Add(fmt.Errorf(
-					"Package %s in %s repository contains file %s width different permissions (%s ≠ %s)",
-					name, r.Name, file.Path, filePerms, perms,
+					"Package %s in %s repository contains file %s width wrong permissions (%s ≠ %s)",
+					pkgName, r.Name, file.Path, pkgFilePerms, filePerms,
 				))
 
 				continue
+			}
+
+			if !checkedDirs[pkgFileDir] {
+				pkgDirPerms := fsutil.GetMode(pkgFileDir)
+
+				checkedDirs[pkgFileDir] = true
+
+				if dirPerms != 0 && pkgDirPerms != 0 && pkgDirPerms != dirPerms {
+					errs.Add(fmt.Errorf(
+						"Repository %s contains directory %s width wrong permissions (%s ≠ %s)",
+						r.Name, pkgFileDir, pkgDirPerms, dirPerms,
+					))
+
+					continue
+				}
 			}
 		}
 
@@ -329,15 +359,15 @@ func checkRepositoriesSignatures(r *repo.Repository, releaseIndex, testingIndex 
 func checkRepositorySignatures(pb *progress.Bar, r *repo.SubRepository, privateKey *sign.PrivateKey, index map[string]*repo.Package) errutil.Errors {
 	var errs errutil.Errors
 
-	for name, pkg := range index {
-		for _, file := range pkg.Files {
+	for _, pkgName := range getSortedPackageIndexKeys(index) {
+		for _, file := range index[pkgName].Files {
 			filePath := r.GetFullPackagePath(file)
 			hasSignature, err := sign.HasSignature(filePath)
 
 			if err != nil {
 				errs.Add(fmt.Errorf(
 					"Error while checking package %s signature in %s repository for file %s: %v",
-					name, r.Name, file.Path, err,
+					pkgName, r.Name, file.Path, err,
 				))
 
 				continue
@@ -346,7 +376,7 @@ func checkRepositorySignatures(pb *progress.Bar, r *repo.SubRepository, privateK
 			if !hasSignature {
 				errs.Add(fmt.Errorf(
 					"Package %s in %s repository contains file %s without signature",
-					name, r.Name, file.Path,
+					pkgName, r.Name, file.Path,
 				))
 
 				continue
@@ -357,7 +387,7 @@ func checkRepositorySignatures(pb *progress.Bar, r *repo.SubRepository, privateK
 			if err != nil {
 				errs.Add(fmt.Errorf(
 					"Error while checking package %s signature in %s repository for file %s: %v",
-					name, r.Name, file.Path, err,
+					pkgName, r.Name, file.Path, err,
 				))
 
 				continue
@@ -366,7 +396,7 @@ func checkRepositorySignatures(pb *progress.Bar, r *repo.SubRepository, privateK
 			if !isSigned {
 				errs.Add(fmt.Errorf(
 					"Package %s in %s repository contains file %s signed with different key",
-					name, r.Name, file.Path,
+					pkgName, r.Name, file.Path,
 				))
 
 				continue
@@ -379,6 +409,19 @@ func checkRepositorySignatures(pb *progress.Bar, r *repo.SubRepository, privateK
 	return errs
 }
 
+// getSortedPackageIndexKeys reads keys from index and returns sorted slice of keys
+func getSortedPackageIndexKeys(index map[string]*repo.Package) []string {
+	var result []string
+
+	for pkgName := range index {
+		result = append(result, pkgName)
+	}
+
+	sortutil.StringsNatural(result)
+
+	return result
+}
+
 // printCheckErrorsInfo prints info about check errors
 func printCheckErrorsInfo(errs errutil.Errors) bool {
 	if !errs.HasErrors() {
@@ -389,12 +432,14 @@ func printCheckErrorsInfo(errs errutil.Errors) bool {
 	errsList := errs.All()
 
 	terminal.PrintErrorMessage(
-		"Found %s %s. First 20 problems:\n",
+		"Found %s %s. First %s %s:\n",
 		fmtutil.PrettyNum(errs.Num()),
 		pluralize.Pluralize(errs.Num(), "problem", "problems"),
+		fmtutil.PrettyNum(checkMaxErrNum),
+		pluralize.Pluralize(checkMaxErrNum, "problem", "problems"),
 	)
 
-	for i := 0; i < mathutil.Min(errs.Num(), 20); i++ {
+	for i := 0; i < mathutil.Min(errs.Num(), checkMaxErrNum); i++ {
 		terminal.PrintErrorMessage(" • %v", errsList[i])
 	}
 
