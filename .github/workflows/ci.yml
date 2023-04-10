@@ -24,14 +24,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  CR_REPO: rpm-software-management/createrepo_c
-  CR_VERSION: 0.20.1
-
 jobs:
   BuildCreaterepo:
     name: BuildCreaterepo
     runs-on: ubuntu-latest
+
+    env:
+      CR_REPO: rpm-software-management/createrepo_c
+      CR_VERSION: 0.20.1
 
     steps:
       - name: Install build dependencies
@@ -143,7 +143,6 @@ jobs:
 
       - name: Run tests
         run: |
-          createrepo_c --version
           echo "$PATH"
           cat "$GITHUB_PATH"
           make test COVERAGE_FILE=cover.out
