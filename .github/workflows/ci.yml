@@ -116,7 +116,9 @@ jobs:
           fi
 
       - name: Print createrepo_c version info
-        run: createrepo_c --version
+        run: |
+          createrepo_c --version
+          printenv
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -125,6 +127,14 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go }}
+
+      - uses: actions/cache@v3
+        id: cache-deps
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-essentialkaos-rep-${{ matrix.go }}-${{ hashFiles('**/go.sum') }}
 
       - name: Download dependencies
         if: steps.cache-deps.outputs.cache-hit != 'true'
