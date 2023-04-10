@@ -36,6 +36,12 @@ var _ = Suite(&RepoSuite{})
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+func (s *RepoSuite) SetUpSuite(c *C) {
+	if !index.IsCreaterepoInstalled() {
+		c.Fatal("createrepo_c is required for tests")
+	}
+}
+
 func (s *RepoSuite) TestNewRepository(c *C) {
 	_, err := NewRepository("!!", nil)
 	c.Assert(err, NotNil)
