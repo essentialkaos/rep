@@ -143,8 +143,9 @@ jobs:
 
       - name: Run tests
         run: |
+          echo "${{github.workspace}}/.local/bin"
+          ls -lah "${{github.workspace}}/.local/bin"
           echo "$PATH"
-          cat "$GITHUB_PATH"
           make test COVERAGE_FILE=cover.out
 
       - name: Send coverage data
