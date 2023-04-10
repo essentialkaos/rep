@@ -68,6 +68,8 @@ Commands
   which-source query…     Show source package name
   info package            Show info about package
   payload package type    Show package payload
+  cleanup num             Remove old versions of packages
+  check errors-num        Check repositories consistency
   sign file…              Sign one or more packages
   resign                  Resign all packages in repository
   add file…               Add one or more packages to testing repository
