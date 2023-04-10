@@ -123,6 +123,10 @@ func IsCreaterepoInstalled() bool {
 
 // Generate creates repository index using createrepo_c utility
 func Generate(path string, options *Options, full bool) error {
+	if !IsCreaterepoInstalled() {
+		return fmt.Errorf("Can't generate index: createrepo_c not installed")
+	}
+
 	err := options.Validate()
 
 	if err != nil {
