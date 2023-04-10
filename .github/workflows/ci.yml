@@ -90,9 +90,6 @@ jobs:
 
     needs: BuildCreaterepo
 
-    env:
-      SRC_DIR: src/github.com/${{ github.repository }}
-
     strategy:
       matrix:
         go: [ '1.19.x', '1.20.x' ]
@@ -123,8 +120,6 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          path: ${{env.SRC_DIR}}
 
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -140,16 +135,13 @@ jobs:
           key: ${{ runner.os }}-essentialkaos-rep-${{ matrix.go }}-${{ hashFiles('**/go.sum') }}
 
       - name: Download dependencies
-        working-directory: ${{env.SRC_DIR}}
         if: steps.cache-deps.outputs.cache-hit != 'true'
         run: make deps
 
       - name: Build binary
-        working-directory: ${{env.SRC_DIR}}
         run: make all
 
       - name: Run tests
-        working-directory: ${{env.SRC_DIR}}
         run: make test COVERAGE_FILE=cover.out
 
       - name: Send coverage data
@@ -157,7 +149,6 @@ jobs:
         env:
           COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          path: ${{env.SRC_DIR}}
           profile: cover.out
           parallel: true
           flag-name: linux-${{ matrix.go }}
@@ -166,7 +157,6 @@ jobs:
         uses: essentialkaos/htmlcov-action@v1
         if: ${{ github.event_name == 'pull_request' }}
         with:
-          path: ${{env.SRC_DIR}}
           profile: cover.out
           output: coverage-report-${{runner.os}}-${{matrix.go}}
 
