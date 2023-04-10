@@ -95,29 +95,6 @@ jobs:
         go: [ '1.19.x', '1.20.x' ]
 
     steps:
-      - name: Download pre-built artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: createrepo_c
-          path: ${{github.workspace}}/.local/bin
-
-      - name: Configure environment
-        run: |
-          echo "${{github.workspace}}/.local/bin" >> $GITHUB_PATH
-          
-          chmod +x "${{github.workspace}}/.local/bin/createrepo_c"
-
-          if ! getent group | grep -q nobody ; then
-            sudo groupadd nobody
-          fi
-
-          if ! getent passwd | grep -q nobody ; then
-            sudo useradd -g nobody -s /sbin/nologin nobody
-          fi
-
-      - name: Print createrepo_c version info
-        run: createrepo_c --version
-
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -141,12 +118,31 @@ jobs:
       - name: Build binary
         run: make all
 
-      - name: Run tests
+      - name: Download pre-built artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: createrepo_c
+          path: ${{github.workspace}}/.local/bin
+
+      - name: Configure environment
         run: |
-          echo "${{github.workspace}}/.local/bin"
-          ls -lah "${{github.workspace}}/.local/bin"
-          echo "$PATH"
-          make test COVERAGE_FILE=cover.out
+          echo "${{github.workspace}}/.local/bin" >> $GITHUB_PATH
+          
+          chmod +x "${{github.workspace}}/.local/bin/createrepo_c"
+
+          if ! getent group | grep -q nobody ; then
+            sudo groupadd nobody
+          fi
+
+          if ! getent passwd | grep -q nobody ; then
+            sudo useradd -g nobody -s /sbin/nologin nobody
+          fi
+
+      - name: Print createrepo_c version info
+        run: createrepo_c --version
+
+      - name: Run tests
+        run: make test COVERAGE_FILE=cover.out
 
       - name: Send coverage data
         uses: essentialkaos/goveralls-action@v1
