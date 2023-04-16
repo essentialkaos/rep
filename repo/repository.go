@@ -767,7 +767,7 @@ func (r *SubRepository) getRepoStats(arch string) (int, int64, error) {
 	err = infoRows.Scan(&size, &count)
 
 	if err != nil {
-		return 0, 0, fmt.Errorf("Error while scaning rows with repository stats (arch: %s): %w", arch, err)
+		return 0, 0, fmt.Errorf("Error while scanning rows with repository stats (arch: %s): %w", arch, err)
 	}
 
 	return int(count.Int64), size.Int64, nil
@@ -819,7 +819,7 @@ ROWSLOOP:
 		err = rows.Scan(&pkgID, &pkgName, &pkgArch, &pkgVer, &pkgRel, &pkgEpc, &pkgSrc, &pkgHREF)
 
 		if err != nil {
-			return fmt.Errorf("Error while scaning rows with info about arch packages list (%s): %w", arch, err)
+			return fmt.Errorf("Error while scanning rows with info about arch packages list (%s): %w", arch, err)
 		}
 
 		if pkgArch.String == data.ARCH_SRC {
@@ -942,7 +942,7 @@ func (r *SubRepository) searchArchPackages(arch, targetDB string, queries []stri
 
 			if err != nil {
 				rows.Close()
-				return nil, fmt.Errorf("Error while scaning rows with info about packages architecture (%s): %w", arch, err)
+				return nil, fmt.Errorf("Error while scanning rows with info about packages architecture (%s): %w", arch, err)
 			}
 
 			keyMap.Set(pkgKey)
@@ -976,7 +976,7 @@ func (r *SubRepository) hasPackage(pkg *Package, arch string) (bool, time.Time, 
 	err = rows.Scan(&pTimeFile)
 
 	if err != nil {
-		return false, time.Time{}, fmt.Errorf("Error while scaning rows with info about package: %w", err)
+		return false, time.Time{}, fmt.Errorf("Error while scanning rows with info about package: %w", err)
 	}
 
 	return true, time.Unix(pTimeFile.Int64, 0), nil
@@ -1050,7 +1050,7 @@ func (r *SubRepository) collectPackageBasicInfo(name, arch string) (*Package, st
 	)
 
 	if err != nil {
-		return nil, "", fmt.Errorf("Error while scaning rows with basic package info: %w", err)
+		return nil, "", fmt.Errorf("Error while scanning rows with basic package info: %w", err)
 	}
 
 	pkg := &Package{
@@ -1101,7 +1101,7 @@ func (r *SubRepository) collectPackageChangelogInfo(pkgID, arch string) (*Packag
 	err = rows.Scan(&clAuthor, &clRecords)
 
 	if err != nil {
-		return nil, fmt.Errorf("Error while scaning rows with changelog records: %w", err)
+		return nil, fmt.Errorf("Error while scanning rows with changelog records: %w", err)
 	}
 
 	return &PackageChangelog{
@@ -1127,7 +1127,7 @@ func (r *SubRepository) collectPackagePayloadInfo(pkgID, arch string) ([]Payload
 		err = rows.Scan(&fDir, &fObjs, &fTypes)
 
 		if err != nil {
-			return nil, fmt.Errorf("Error while scaning rows with payload info: %w", err)
+			return nil, fmt.Errorf("Error while scanning rows with payload info: %w", err)
 		}
 
 		result = append(result, parsePayloadList(
@@ -1155,7 +1155,7 @@ func (r *SubRepository) collectPackageDepInfo(pkgID, arch, query string) ([]data
 		err = rows.Scan(&pkgName, &pkgFlag, &pkgEpc, &pkgVer, &pkgRel)
 
 		if err != nil {
-			return nil, fmt.Errorf("Error while scaning rows with requires/provides data: %w", err)
+			return nil, fmt.Errorf("Error while scanning rows with requires/provides data: %w", err)
 		}
 
 		dep := data.Dependency{

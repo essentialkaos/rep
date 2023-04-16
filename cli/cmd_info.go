@@ -305,7 +305,7 @@ func formatPayloadPath(path string) string {
 	return lscolors.ColorizePath(path)
 }
 
-// getPackageFileInfoWithMark retuns status mark for package file
+// getPackageFileInfoWithMark returns status mark for package file
 func getPackageFileInfoWithMark(r *repo.Repository, pkgFile repo.PackageFile, isReleased bool) string {
 	testingFile := r.Testing.GetFullPackagePath(pkgFile)
 
@@ -324,7 +324,7 @@ func getPackageFileInfoWithMark(r *repo.Repository, pkgFile repo.PackageFile, is
 	return fmtc.Sprintf("%s {g}✔ {!}", pkgFile.Path)
 }
 
-// getPackageFileCRCWithMark retuns status mark for package file
+// getPackageFileCRCWithMark returns status mark for package file
 func getPackageFileCRCWithMark(r *repo.Repository, pkgFile repo.PackageFile, isReleased bool) string {
 	testingFile := r.Testing.GetFullPackagePath(pkgFile)
 

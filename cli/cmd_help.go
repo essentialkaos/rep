@@ -464,7 +464,7 @@ func helpPayload() {
 	)
 	fmtc.Printf(
 		"  {m}%-8s{!} {s}or{!} {m}%-6s{!} %s\n", "requires", "reqs",
-		"Reqiured dependencies",
+		"Required dependencies",
 	)
 	fmtc.Printf(
 		"  {m}%-8s{!} {s}or{!} {m}%-6s{!} %s\n", "provides", "provs",

@@ -64,7 +64,7 @@
   # Default directory permissions
   dir-perms: 755
 
-  # Defaul log file permissions
+  # Default log file permissions
   file-perms: 644
 
   # Path to main directory with logs

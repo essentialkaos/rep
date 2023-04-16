@@ -388,7 +388,7 @@ func (s *Storage) IsEmpty(repo, arch string) bool {
 	return s.GetDepot(repo, arch).IsEmpty()
 }
 
-// HasRepo returns true if given repositry exists
+// HasRepo returns true if given repository exists
 func (s *Storage) HasRepo(repo string) bool {
 	if repo == "" {
 		return false

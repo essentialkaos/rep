@@ -45,7 +45,7 @@ type Storage interface {
 	// IsEmpty returns true if repository is empty (no packages)
 	IsEmpty(repo, arch string) bool
 
-	// HasRepo returns true if given repositry exists
+	// HasRepo returns true if given repository exists
 	HasRepo(repo string) bool
 
 	// HasArch returns true if repository storage contains directory for specific arch
