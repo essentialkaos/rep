@@ -12,7 +12,7 @@ import (
 
 	"github.com/essentialkaos/ek/v12/secstr"
 
-	"github.com/essentialkaos/rep/repo/sign"
+	"github.com/essentialkaos/rep/v3/repo/sign"
 
 	. "github.com/essentialkaos/check"
 )
