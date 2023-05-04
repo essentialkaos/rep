@@ -16,9 +16,9 @@ import (
 	"github.com/essentialkaos/ek/v12/progress"
 	"github.com/essentialkaos/ek/v12/terminal"
 
-	"github.com/essentialkaos/rep/repo"
-	"github.com/essentialkaos/rep/repo/data"
-	"github.com/essentialkaos/rep/repo/sign"
+	"github.com/essentialkaos/rep/v3/repo"
+	"github.com/essentialkaos/rep/v3/repo/data"
+	"github.com/essentialkaos/rep/v3/repo/sign"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //

@@ -14,7 +14,7 @@ import (
 
 	"github.com/sassoftware/go-rpmutils"
 
-	"github.com/essentialkaos/rep/repo/data"
+	"github.com/essentialkaos/rep/v3/repo/data"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //

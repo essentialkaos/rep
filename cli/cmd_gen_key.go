@@ -21,7 +21,7 @@ import (
 	"github.com/essentialkaos/ek/v12/spinner"
 	"github.com/essentialkaos/ek/v12/terminal"
 
-	"github.com/essentialkaos/rep/repo/sign/keygen"
+	"github.com/essentialkaos/rep/v3/repo/sign/keygen"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //

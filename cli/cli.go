@@ -34,9 +34,9 @@ import (
 	knfr "github.com/essentialkaos/ek/v12/knf/validators/regexp"
 	knfs "github.com/essentialkaos/ek/v12/knf/validators/system"
 
-	"github.com/essentialkaos/rep/cli/support"
+	"github.com/essentialkaos/rep/v3/cli/support"
 
-	"github.com/essentialkaos/rep/repo/index"
+	"github.com/essentialkaos/rep/v3/repo/index"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //

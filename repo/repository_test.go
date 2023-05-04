@@ -15,11 +15,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/essentialkaos/rep/repo/data"
-	"github.com/essentialkaos/rep/repo/index"
-	"github.com/essentialkaos/rep/repo/search"
-	"github.com/essentialkaos/rep/repo/sign"
-	"github.com/essentialkaos/rep/repo/storage/fs"
+	"github.com/essentialkaos/rep/v3/repo/data"
+	"github.com/essentialkaos/rep/v3/repo/index"
+	"github.com/essentialkaos/rep/v3/repo/search"
+	"github.com/essentialkaos/rep/v3/repo/sign"
+	"github.com/essentialkaos/rep/v3/repo/storage/fs"
 
 	. "github.com/essentialkaos/check"
 )

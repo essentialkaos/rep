@@ -10,7 +10,7 @@ package main
 import (
 	_ "embed"
 
-	CLI "github.com/essentialkaos/rep/cli"
+	CLI "github.com/essentialkaos/rep/v3/cli"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //

@@ -1,4 +1,4 @@
-module github.com/essentialkaos/rep
+module github.com/essentialkaos/rep/v3
 
 go 1.19
 

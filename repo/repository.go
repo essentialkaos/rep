@@ -21,12 +21,12 @@ import (
 	"github.com/essentialkaos/ek/v12/strutil"
 	"github.com/essentialkaos/ek/v12/version"
 
-	"github.com/essentialkaos/rep/repo/data"
-	"github.com/essentialkaos/rep/repo/helpers"
-	"github.com/essentialkaos/rep/repo/rpm"
-	"github.com/essentialkaos/rep/repo/search"
-	"github.com/essentialkaos/rep/repo/sign"
-	"github.com/essentialkaos/rep/repo/storage"
+	"github.com/essentialkaos/rep/v3/repo/data"
+	"github.com/essentialkaos/rep/v3/repo/helpers"
+	"github.com/essentialkaos/rep/v3/repo/rpm"
+	"github.com/essentialkaos/rep/v3/repo/search"
+	"github.com/essentialkaos/rep/v3/repo/sign"
+	"github.com/essentialkaos/rep/v3/repo/storage"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //

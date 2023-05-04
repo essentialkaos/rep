@@ -23,14 +23,14 @@ import (
 	"github.com/essentialkaos/ek/v12/terminal"
 	"github.com/essentialkaos/ek/v12/tmp"
 
-	"github.com/essentialkaos/rep/cli/logger"
-	"github.com/essentialkaos/rep/cli/query"
-	"github.com/essentialkaos/rep/repo"
-	"github.com/essentialkaos/rep/repo/data"
-	"github.com/essentialkaos/rep/repo/index"
-	"github.com/essentialkaos/rep/repo/sign"
-	"github.com/essentialkaos/rep/repo/storage"
-	"github.com/essentialkaos/rep/repo/storage/fs"
+	"github.com/essentialkaos/rep/v3/cli/logger"
+	"github.com/essentialkaos/rep/v3/cli/query"
+	"github.com/essentialkaos/rep/v3/repo"
+	"github.com/essentialkaos/rep/v3/repo/data"
+	"github.com/essentialkaos/rep/v3/repo/index"
+	"github.com/essentialkaos/rep/v3/repo/sign"
+	"github.com/essentialkaos/rep/v3/repo/storage"
+	"github.com/essentialkaos/rep/v3/repo/storage/fs"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
