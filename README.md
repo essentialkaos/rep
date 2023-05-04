@@ -1,9 +1,10 @@
 <p align="center"><a href="#readme"><img src="https://gh.kaos.st/rep.svg"/></a></p>
 
 <p align="center">
-  <a href="https://kaos.sh/w/rep/ci"><img src="https://kaos.sh/w/rep/ci.svg" alt="GitHub Actions CI Status" /></a>
+  <a href="https://kaos.sh/r/rep"><img src="https://kaos.sh/r/rep.svg" alt="GoReportCard" /></a>
   <a href="https://kaos.sh/l/rep"><img src="https://kaos.sh/l/e3f19767174b1fd0777d.svg" alt="Code Climate Maintainability" /></a>
   <a href="https://kaos.sh/b/rep"><img src="https://kaos.sh/b/07867ea4-6025-47a8-ad18-112dd7b37a3c.svg" alt="codebeat badge" /></a>
+  <a href="https://kaos.sh/w/rep/ci"><img src="https://kaos.sh/w/rep/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/w/rep/codeql"><img src="https://kaos.sh/w/rep/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
 </p>
