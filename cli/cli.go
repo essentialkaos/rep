@@ -194,8 +194,8 @@ var optMap = options.Map{
 	OPT_STATUS:        {Type: options.BOOL},
 	OPT_PAGER:         {Type: options.BOOL},
 	OPT_NO_COLOR:      {Type: options.BOOL},
-	OPT_HELP:          {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VER:           {Type: options.BOOL, Alias: "ver"},
+	OPT_HELP:          {Type: options.BOOL},
+	OPT_VER:           {Type: options.MIXED},
 
 	OPT_DEBUG:    {Type: options.BOOL},
 	OPT_VERB_VER: {Type: options.BOOL},
@@ -240,18 +240,19 @@ func Init(gitRev string, gomod []byte) {
 
 	switch {
 	case options.Has(OPT_COMPLETION):
-		os.Exit(genCompletion())
+		os.Exit(printCompletion())
 	case options.Has(OPT_GENERATE_MAN):
-		os.Exit(genMan())
+		printMan()
+		os.Exit(0)
 	case options.GetB(OPT_VER):
-		showAbout(gitRev)
-		return
+		genAbout(gitRev).Print(options.GetS(OPT_VER))
+		os.Exit(0)
 	case options.GetB(OPT_VERB_VER):
-		support.ShowSupportInfo(APP, VER, gitRev, gomod)
-		return
+		support.Print(APP, VER, gitRev, gomod)
+		os.Exit(0)
 	case options.GetB(OPT_HELP) || len(args) == 0:
-		showUsage()
-		return
+		genUsage().Print()
+		os.Exit(0)
 	}
 
 	checkPermissions()
@@ -543,32 +544,32 @@ func shutdown(ec int) {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// showUsage prints usage info
-func showUsage() {
-	genUsage().Render()
-}
-
-// showAbout prints info about version
-func showAbout(gitRev string) {
-	genAbout(gitRev).Render()
-}
-
-// genCompletion generates completion for different shells
-func genCompletion() int {
+// printCompletion prints completion for given shell
+func printCompletion() int {
 	info := genUsage()
 
 	switch options.GetS(OPT_COMPLETION) {
 	case "bash":
-		fmt.Printf(bash.Generate(info, "rep"))
+		fmt.Printf(bash.Generate(info, APP))
 	case "fish":
-		fmt.Printf(fish.Generate(info, "rep"))
+		fmt.Printf(fish.Generate(info, APP))
 	case "zsh":
-		fmt.Printf(zsh.Generate(info, optMap, "rep"))
+		fmt.Printf(zsh.Generate(info, optMap, APP))
 	default:
 		return 1
 	}
 
 	return 0
+}
+
+// printMan prints man page
+func printMan() {
+	fmt.Println(
+		man.Generate(
+			genUsage(),
+			genAbout(""),
+		),
+	)
 }
 
 // genMan generates man page
