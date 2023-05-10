@@ -9,7 +9,7 @@ require (
 	github.com/essentialkaos/ek/v12 v12.67.0
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/sassoftware/go-rpmutils v0.2.0
-	golang.org/x/crypto v0.8.0
+	golang.org/x/crypto v0.9.0
 )
 
 require (
