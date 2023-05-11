@@ -34,9 +34,9 @@ import (
 	knfr "github.com/essentialkaos/ek/v12/knf/validators/regexp"
 	knfs "github.com/essentialkaos/ek/v12/knf/validators/system"
 
-	"github.com/essentialkaos/rep/cli/support"
+	"github.com/essentialkaos/rep/v3/cli/support"
 
-	"github.com/essentialkaos/rep/repo/index"
+	"github.com/essentialkaos/rep/v3/repo/index"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -44,7 +44,7 @@ import (
 // App info
 const (
 	APP  = "rep"
-	VER  = "3.0.3"
+	VER  = "3.1.0"
 	DESC = "YUM repository management utility"
 )
 
@@ -59,6 +59,8 @@ const (
 	COMMAND_FIND         = "find"
 	COMMAND_INFO         = "info"
 	COMMAND_PAYLOAD      = "payload"
+	COMMAND_CLEANUP      = "cleanup"
+	COMMAND_CHECK        = "check"
 	COMMAND_SIGN         = "sign"
 	COMMAND_RESIGN       = "resign"
 	COMMAND_ADD          = "add"
@@ -80,6 +82,8 @@ const (
 	COMMAND_SHORT_FIND         = "f"
 	COMMAND_SHORT_INFO         = "i"
 	COMMAND_SHORT_PAYLOAD      = "p"
+	COMMAND_SHORT_CLEANUP      = "c"
+	COMMAND_SHORT_CHECK        = "ch"
 	COMMAND_SHORT_SIGN         = "s"
 	COMMAND_SHORT_RESIGN       = "rs"
 	COMMAND_SHORT_ADD          = "a"
@@ -190,8 +194,8 @@ var optMap = options.Map{
 	OPT_STATUS:        {Type: options.BOOL},
 	OPT_PAGER:         {Type: options.BOOL},
 	OPT_NO_COLOR:      {Type: options.BOOL},
-	OPT_HELP:          {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VER:           {Type: options.BOOL, Alias: "ver"},
+	OPT_HELP:          {Type: options.BOOL},
+	OPT_VER:           {Type: options.MIXED},
 
 	OPT_DEBUG:    {Type: options.BOOL},
 	OPT_VERB_VER: {Type: options.BOOL},
@@ -236,18 +240,19 @@ func Init(gitRev string, gomod []byte) {
 
 	switch {
 	case options.Has(OPT_COMPLETION):
-		os.Exit(genCompletion())
+		os.Exit(printCompletion())
 	case options.Has(OPT_GENERATE_MAN):
-		os.Exit(genMan())
+		printMan()
+		os.Exit(0)
 	case options.GetB(OPT_VER):
-		showAbout(gitRev)
-		return
+		genAbout(gitRev).Print(options.GetS(OPT_VER))
+		os.Exit(0)
 	case options.GetB(OPT_VERB_VER):
-		support.ShowSupportInfo(APP, VER, gitRev, gomod)
-		return
+		support.Print(APP, VER, gitRev, gomod)
+		os.Exit(0)
 	case options.GetB(OPT_HELP) || len(args) == 0:
-		showUsage()
-		return
+		genUsage().Print()
+		os.Exit(0)
 	}
 
 	checkPermissions()
@@ -515,7 +520,7 @@ func process(args options.Arguments) bool {
 		return false
 	}
 
-	// List repo be default
+	// List repositories by default
 	if args.Get(1).String() == "" {
 		return runCommand(configs[repo], COMMAND_LIST, nil)
 	}
@@ -539,32 +544,32 @@ func shutdown(ec int) {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// showUsage prints usage info
-func showUsage() {
-	genUsage().Render()
-}
-
-// showAbout prints info about version
-func showAbout(gitRev string) {
-	genAbout(gitRev).Render()
-}
-
-// genCompletion generates completion for different shells
-func genCompletion() int {
+// printCompletion prints completion for given shell
+func printCompletion() int {
 	info := genUsage()
 
 	switch options.GetS(OPT_COMPLETION) {
 	case "bash":
-		fmt.Printf(bash.Generate(info, "rep"))
+		fmt.Printf(bash.Generate(info, APP))
 	case "fish":
-		fmt.Printf(fish.Generate(info, "rep"))
+		fmt.Printf(fish.Generate(info, APP))
 	case "zsh":
-		fmt.Printf(zsh.Generate(info, optMap, "rep"))
+		fmt.Printf(zsh.Generate(info, optMap, APP))
 	default:
 		return 1
 	}
 
 	return 0
+}
+
+// printMan prints man page
+func printMan() {
+	fmt.Println(
+		man.Generate(
+			genUsage(),
+			genAbout(""),
+		),
+	)
 }
 
 // genMan generates man page
@@ -596,6 +601,8 @@ func genUsage() *usage.Info {
 	info.AddCommand(COMMAND_WHICH_SOURCE, "Show source package name", "query…")
 	info.AddCommand(COMMAND_INFO, "Show info about package", "package")
 	info.AddCommand(COMMAND_PAYLOAD, "Show package payload", "package", "?type")
+	info.AddCommand(COMMAND_CLEANUP, "Remove old versions of packages", "?num")
+	info.AddCommand(COMMAND_CHECK, "Check repositories consistency", "?errors-num")
 	info.AddCommand(COMMAND_SIGN, "Sign one or more packages", "file…")
 	info.AddCommand(COMMAND_RESIGN, "Resign all packages in repository")
 	info.AddCommand(COMMAND_ADD, "Add one or more packages to testing repository", "file…")
@@ -628,6 +635,9 @@ func genUsage() *usage.Info {
 	info.BoundOptions(COMMAND_ADD, OPT_IGNORE_FILTER)
 	info.BoundOptions(COMMAND_ADD, OPT_MOVE)
 	info.BoundOptions(COMMAND_ADD, OPT_NO_SOURCE)
+	info.BoundOptions(COMMAND_CLEANUP, OPT_FORCE)
+	info.BoundOptions(COMMAND_CLEANUP, OPT_RELEASE)
+	info.BoundOptions(COMMAND_CLEANUP, OPT_TESTING)
 	info.BoundOptions(COMMAND_FIND, OPT_RELEASE)
 	info.BoundOptions(COMMAND_FIND, OPT_STATUS)
 	info.BoundOptions(COMMAND_FIND, OPT_TESTING)

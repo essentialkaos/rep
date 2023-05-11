@@ -15,8 +15,8 @@ import (
 	"github.com/essentialkaos/ek/v12/spinner"
 	"github.com/essentialkaos/ek/v12/terminal"
 
-	"github.com/essentialkaos/rep/repo"
-	"github.com/essentialkaos/rep/repo/data"
+	"github.com/essentialkaos/rep/v3/repo"
+	"github.com/essentialkaos/rep/v3/repo/data"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -44,7 +44,7 @@ func cmdRemove(ctx *context, args options.Arguments) bool {
 	}
 
 	if testingStack.IsEmpty() && releaseStack.IsEmpty() {
-		terminal.PrintWarnMessage("No packages found")
+		terminal.PrintWarnMessage("Release and testing repositories are empty")
 		return false
 	}
 

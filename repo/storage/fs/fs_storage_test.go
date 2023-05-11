@@ -15,8 +15,8 @@ import (
 
 	"github.com/essentialkaos/ek/v12/fsutil"
 
-	"github.com/essentialkaos/rep/repo/data"
-	"github.com/essentialkaos/rep/repo/index"
+	"github.com/essentialkaos/rep/v3/repo/data"
+	"github.com/essentialkaos/rep/v3/repo/index"
 
 	. "github.com/essentialkaos/check"
 )
@@ -40,6 +40,10 @@ var defArchs = []string{data.ARCH_SRC, data.ARCH_X64}
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 func (s *StorageSuite) SetUpSuite(c *C) {
+	if !index.IsCreaterepoInstalled() {
+		c.Fatal("createrepo_c is required for tests")
+	}
+
 	metaDate := time.Unix(1644506277, 0)
 	metaDir := dataDir + "/release/x86_64/repodata"
 	metaFiles := []string{

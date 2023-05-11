@@ -14,14 +14,14 @@ import (
 	"strings"
 
 	"github.com/essentialkaos/ek/v12/fmtc"
-	"github.com/essentialkaos/ek/v12/fmtc/lscolors"
 	"github.com/essentialkaos/ek/v12/fmtutil"
+	"github.com/essentialkaos/ek/v12/lscolors"
 	"github.com/essentialkaos/ek/v12/options"
 	"github.com/essentialkaos/ek/v12/strutil"
 	"github.com/essentialkaos/ek/v12/terminal"
 
-	"github.com/essentialkaos/rep/repo"
-	"github.com/essentialkaos/rep/repo/data"
+	"github.com/essentialkaos/rep/v3/repo"
+	"github.com/essentialkaos/rep/v3/repo/data"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -70,7 +70,7 @@ func printPackagePayload(pkg *repo.Package, payloadType string) {
 			archColoredTag = "[unknown]"
 		}
 
-		fmtc.Printf(" ▾ "+archColoredTag+" {*}%s{!} {s-}(%s){!}\n", pkg.FullName(), pkg.Info.Summary)
+		fmtc.Printf(" ▾ "+archColoredTag+" {*}%s{!} {s-}(%s){!}\n\n", pkg.FullName(), pkg.Info.Summary)
 
 		fmtutil.Separator(true)
 	}
@@ -78,7 +78,7 @@ func printPackagePayload(pkg *repo.Package, payloadType string) {
 	switch payloadType {
 	case "files", "file", "f":
 		if rawOutput {
-			printRawPackageFilesList(pkg)
+			printRawPackagePayload(pkg)
 		} else {
 			printPackageFilesTree(pkg)
 		}
@@ -108,13 +108,13 @@ func printPackagePayload(pkg *repo.Package, payloadType string) {
 	}
 }
 
-// printRawPackageFilesList prints package payload
-func printRawPackageFilesList(pkg *repo.Package) {
-	payload := pkg.Info.Files
+// printRawPackagePayload prints raw package payload
+func printRawPackagePayload(pkg *repo.Package) {
+	payload := pkg.Info.Payload
 
 	sort.Sort(payload)
 
-	for _, obj := range pkg.Info.Files {
+	for _, obj := range pkg.Info.Payload {
 		if pkg.ArchFlags == data.ARCH_FLAG_SRC {
 			fmt.Println(strings.TrimLeft(obj.Path, "./"))
 		} else {
@@ -125,7 +125,7 @@ func printRawPackageFilesList(pkg *repo.Package) {
 
 // printPackageFilesTree prints files tree
 func printPackageFilesTree(pkg *repo.Package) {
-	payload := pkg.Info.Files
+	payload := pkg.Info.Payload
 
 	sort.Sort(payload)
 

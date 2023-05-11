@@ -13,21 +13,23 @@ import (
 	"time"
 
 	"github.com/essentialkaos/ek/v12/fmtc"
-	"github.com/essentialkaos/ek/v12/fmtc/lscolors"
 	"github.com/essentialkaos/ek/v12/fmtutil"
+	"github.com/essentialkaos/ek/v12/fsutil"
+	"github.com/essentialkaos/ek/v12/hash"
+	"github.com/essentialkaos/ek/v12/lscolors"
 	"github.com/essentialkaos/ek/v12/options"
 	"github.com/essentialkaos/ek/v12/strutil"
 	"github.com/essentialkaos/ek/v12/terminal"
 	"github.com/essentialkaos/ek/v12/timeutil"
 
-	"github.com/essentialkaos/rep/repo"
-	"github.com/essentialkaos/rep/repo/data"
+	"github.com/essentialkaos/rep/v3/repo"
+	"github.com/essentialkaos/rep/v3/repo/data"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Maximum number of files in info output
-const INFO_MAX_FILES = 30
+const INFO_MAX_OBJECTS = 30
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -56,7 +58,7 @@ func printPackageInfo(r *repo.Repository, pkg *repo.Package, releaseDate time.Ti
 	fmtc.NewLine()
 
 	printPackageBasicInfo(r, pkg, releaseDate)
-	printPackagePayloadInfo(pkg.Info.Files)
+	printPackagePayloadInfo(pkg.Info.Payload)
 	printPackageRequiresInfo(pkg.Info.Requires)
 	printPackageProvidesInfo(pkg.Info.Provides)
 	printPackageChangelogInfo(pkg.Info.Changelog)
@@ -124,8 +126,14 @@ func printPackageBasicInfo(r *repo.Repository, pkg *repo.Package, releaseDate ti
 	fmtc.NewLine()
 
 	if len(pkg.Files) != 0 {
-		fmtc.Printf("{*}%-16s{!}%s\n", "RPM File", pkg.Files[0].Path)
-		fmtc.Printf("{*}%-16s{!}%s\n", "Checksum", strutil.Head(pkg.Info.Checksum, 7))
+		fmtc.Printf(
+			"{*}%-16s{!}%s\n", "RPM File",
+			getPackageFileInfoWithMark(r, pkg.Files[0], !releaseDate.IsZero()),
+		)
+		fmtc.Printf(
+			"{*}%-16s{!}%s\n", "Checksum",
+			getPackageFileCRCWithMark(r, pkg.Files[0], !releaseDate.IsZero()),
+		)
 		fmtc.NewLine()
 	}
 
@@ -148,22 +156,22 @@ func printPackageBasicInfo(r *repo.Repository, pkg *repo.Package, releaseDate ti
 }
 
 // printPackagePayloadInfo prints info about package data
-func printPackagePayloadInfo(files repo.PayloadData) {
-	if len(files) == 0 {
+func printPackagePayloadInfo(payload repo.PackagePayload) {
+	if len(payload) == 0 {
 		return
 	}
 
-	for i, obj := range files {
+	for i, obj := range payload {
 		if i == 0 {
 			fmtc.Printf("{*}%-16s{!}%s\n", "Payload", formatPayloadPath(obj.Path))
 		} else {
 			fmtc.Printf("{*}%-16s{!}%s\n", "", formatPayloadPath(obj.Path))
 		}
 
-		if i == INFO_MAX_FILES {
+		if i == INFO_MAX_OBJECTS {
 			fmtc.Printf(
 				"{*}%-16s{!}{s}+%d more{!}\n", "",
-				len(files)-INFO_MAX_FILES,
+				len(payload)-INFO_MAX_OBJECTS,
 			)
 
 			fmtc.NewLine()
@@ -295,4 +303,54 @@ func formatPayloadPath(path string) string {
 	}
 
 	return lscolors.ColorizePath(path)
+}
+
+// getPackageFileInfoWithMark returns status mark for package file
+func getPackageFileInfoWithMark(r *repo.Repository, pkgFile repo.PackageFile, isReleased bool) string {
+	testingFile := r.Testing.GetFullPackagePath(pkgFile)
+
+	if !fsutil.IsExist(testingFile) {
+		return fmtc.Sprintf("%s {r}✖ {!} {s-}(No file on disk in testing repository){!}", pkgFile.Path)
+	}
+
+	if isReleased {
+		releaseFile := r.Release.GetFullPackagePath(pkgFile)
+
+		if !fsutil.IsExist(releaseFile) {
+			return fmtc.Sprintf("%s {r}✖ {!} {s-}(No file on disk in release repository){!}", pkgFile.Path)
+		}
+	}
+
+	return fmtc.Sprintf("%s {g}✔ {!}", pkgFile.Path)
+}
+
+// getPackageFileCRCWithMark returns status mark for package file
+func getPackageFileCRCWithMark(r *repo.Repository, pkgFile repo.PackageFile, isReleased bool) string {
+	testingFile := r.Testing.GetFullPackagePath(pkgFile)
+
+	if !fsutil.IsExist(testingFile) {
+		return fmtc.Sprintf("%s", pkgFile.Path)
+	}
+
+	testingHash := strutil.Head(hash.FileHash(testingFile), 7)
+
+	if testingHash != pkgFile.CRC {
+		return fmtc.Sprintf("%s {r}✖ {!} {s-}(CRC mismatch in testing repository){!}", pkgFile.Path)
+	}
+
+	if isReleased {
+		releaseFile := r.Release.GetFullPackagePath(pkgFile)
+
+		if !fsutil.IsExist(releaseFile) {
+			return fmtc.Sprintf("%s", pkgFile.Path)
+		}
+
+		releaseHash := strutil.Head(hash.FileHash(releaseFile), 7)
+
+		if releaseHash != pkgFile.CRC {
+			return fmtc.Sprintf("%s {r}✖ {!} {s-}(CRC mismatch in release repository){!}", pkgFile.Path)
+		}
+	}
+
+	return fmtc.Sprintf("%s {g}✔ {!}", pkgFile.CRC)
 }

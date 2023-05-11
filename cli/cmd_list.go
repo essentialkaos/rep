@@ -17,8 +17,8 @@ import (
 	"github.com/essentialkaos/ek/v12/options"
 	"github.com/essentialkaos/ek/v12/terminal"
 
-	"github.com/essentialkaos/rep/repo"
-	"github.com/essentialkaos/rep/repo/data"
+	"github.com/essentialkaos/rep/v3/repo"
+	"github.com/essentialkaos/rep/v3/repo/data"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -36,9 +36,9 @@ func cmdList(ctx *context, args options.Arguments) bool {
 		return false
 	}
 
-	showAll := !options.GetB(OPT_RELEASE) && !options.GetB(OPT_TESTING)
+	all := !options.GetB(OPT_RELEASE) && !options.GetB(OPT_TESTING)
 
-	if showAll || options.GetB(OPT_RELEASE) {
+	if all || options.GetB(OPT_RELEASE) {
 		status := listPackages(ctx.Repo.Release, filter)
 
 		if status != true {
@@ -46,7 +46,7 @@ func cmdList(ctx *context, args options.Arguments) bool {
 		}
 	}
 
-	if showAll || options.GetB(OPT_TESTING) {
+	if all || options.GetB(OPT_TESTING) {
 		status := listPackages(ctx.Repo.Testing, filter)
 
 		if status != true {

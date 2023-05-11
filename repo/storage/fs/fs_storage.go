@@ -20,12 +20,13 @@ import (
 	"github.com/essentialkaos/ek/v12/strutil"
 	"github.com/essentialkaos/ek/v12/system"
 
-	"github.com/essentialkaos/rep/repo/data"
-	"github.com/essentialkaos/rep/repo/helpers"
-	"github.com/essentialkaos/rep/repo/index"
-	"github.com/essentialkaos/rep/repo/meta"
-	"github.com/essentialkaos/rep/repo/rpm"
-	"github.com/essentialkaos/rep/repo/storage/utils"
+	"github.com/essentialkaos/rep/v3/repo/data"
+	"github.com/essentialkaos/rep/v3/repo/helpers"
+	"github.com/essentialkaos/rep/v3/repo/index"
+	"github.com/essentialkaos/rep/v3/repo/meta"
+	"github.com/essentialkaos/rep/v3/repo/rpm"
+	"github.com/essentialkaos/rep/v3/repo/storage"
+	"github.com/essentialkaos/rep/v3/repo/storage/utils"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -97,6 +98,11 @@ var (
 	removeFunc = os.Remove
 	mkdirFunc  = os.Mkdir
 )
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// validate storage interface
+var _ storage.Storage = (*Storage)(nil)
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -382,7 +388,7 @@ func (s *Storage) IsEmpty(repo, arch string) bool {
 	return s.GetDepot(repo, arch).IsEmpty()
 }
 
-// HasRepo returns true if given repositry exists
+// HasRepo returns true if given repository exists
 func (s *Storage) HasRepo(repo string) bool {
 	if repo == "" {
 		return false

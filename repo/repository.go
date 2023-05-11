@@ -21,21 +21,21 @@ import (
 	"github.com/essentialkaos/ek/v12/strutil"
 	"github.com/essentialkaos/ek/v12/version"
 
-	"github.com/essentialkaos/rep/repo/data"
-	"github.com/essentialkaos/rep/repo/helpers"
-	"github.com/essentialkaos/rep/repo/rpm"
-	"github.com/essentialkaos/rep/repo/search"
-	"github.com/essentialkaos/rep/repo/sign"
-	"github.com/essentialkaos/rep/repo/storage"
+	"github.com/essentialkaos/rep/v3/repo/data"
+	"github.com/essentialkaos/rep/v3/repo/helpers"
+	"github.com/essentialkaos/rep/v3/repo/rpm"
+	"github.com/essentialkaos/rep/v3/repo/search"
+	"github.com/essentialkaos/rep/v3/repo/sign"
+	"github.com/essentialkaos/rep/v3/repo/storage"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 const (
-	_SQL_LIST_ALL       = `SELECT name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages;`
-	_SQL_LIST_LATEST    = `SELECT name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages GROUP BY name HAVING MAX(pkgKey);`
-	_SQL_LIST_BY_NAME   = `SELECT name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages WHERE (name || "-" || version || "-" || release) LIKE ? ORDER BY rpm_sourcerpm;`
-	_SQL_FIND_BY_KEYS   = `SELECT name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages WHERE pkgKey in (%s);`
+	_SQL_LIST_ALL       = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages;`
+	_SQL_LIST_LATEST    = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages GROUP BY name HAVING MAX(pkgKey);`
+	_SQL_LIST_BY_NAME   = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages WHERE (name || "-" || version || "-" || release) LIKE ? ORDER BY rpm_sourcerpm;`
+	_SQL_FIND_BY_KEYS   = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages WHERE pkgKey in (%s);`
 	_SQL_EXIST          = `SELECT time_file FROM packages WHERE name = ? AND version = ? AND release = ? AND epoch = ?;`
 	_SQL_CONTAINS_ONE   = `SELECT pkgKey FROM filelist WHERE length(filetypes) = 1 AND (dirname || "/" || filenames) GLOB ?;`
 	_SQL_CONTAINS_MANY  = `SELECT pkgKey FROM filelist WHERE length(filetypes) > 1 AND filelist_globber(?, dirname, filenames);`
@@ -104,7 +104,6 @@ type PackageInfo struct {
 	Packager      string            // Packager
 	Group         string            // Group
 	License       string            // License
-	Checksum      string            // Checksum
 	SizePackage   uint64            // Size of package in bytes
 	SizeInstalled uint64            // Size of installed data in bytes
 	DateAdded     time.Time         // Add date as unix timestamp
@@ -112,11 +111,11 @@ type PackageInfo struct {
 	Changelog     *PackageChangelog // Changelog records
 	Requires      []data.Dependency // Requires
 	Provides      []data.Dependency // Provides
-	Files         PayloadData       // Files and directories
+	Payload       PackagePayload    // Files and directories
 }
 
-// PayloadData is a slice with info about files or directories
-type PayloadData []PayloadObject
+// PackagePayload is a slice with info about package files or directories
+type PackagePayload []PayloadObject
 
 // PackageChangelog contains changelog data
 type PackageChangelog struct {
@@ -126,6 +125,7 @@ type PackageChangelog struct {
 
 // PackageFile contains info about package file
 type PackageFile struct {
+	CRC          string        // File checksum (first 7 symbols)
 	Path         string        // Path to file
 	ArchFlag     data.ArchFlag // Package arch flag
 	BaseArchFlag data.ArchFlag // Sub-repo (i.e. directory arch) flag
@@ -767,7 +767,7 @@ func (r *SubRepository) getRepoStats(arch string) (int, int64, error) {
 	err = infoRows.Scan(&size, &count)
 
 	if err != nil {
-		return 0, 0, fmt.Errorf("Error while scaning rows with repository stats (arch: %s): %w", arch, err)
+		return 0, 0, fmt.Errorf("Error while scanning rows with repository stats (arch: %s): %w", arch, err)
 	}
 
 	return int(count.Int64), size.Int64, nil
@@ -812,14 +812,14 @@ func (r *SubRepository) listArchPackages(psb *packageStackBuilder, arch string, 
 	defer rows.Close()
 
 	var sourceRPM string
-	var pkgName, pkgArch, pkgVer, pkgRel, pkgEpc, pkgSrc, pkgHREF sql.NullString
+	var pkgID, pkgName, pkgArch, pkgVer, pkgRel, pkgEpc, pkgSrc, pkgHREF sql.NullString
 
 ROWSLOOP:
 	for rows.Next() {
-		err = rows.Scan(&pkgName, &pkgArch, &pkgVer, &pkgRel, &pkgEpc, &pkgSrc, &pkgHREF)
+		err = rows.Scan(&pkgID, &pkgName, &pkgArch, &pkgVer, &pkgRel, &pkgEpc, &pkgSrc, &pkgHREF)
 
 		if err != nil {
-			return fmt.Errorf("Error while scaning rows with info about arch packages list (%s): %w", arch, err)
+			return fmt.Errorf("Error while scanning rows with info about arch packages list (%s): %w", arch, err)
 		}
 
 		if pkgArch.String == data.ARCH_SRC {
@@ -842,7 +842,7 @@ ROWSLOOP:
 					pkg.Epoch == pkgEpc.String {
 					pkg.ArchFlags |= data.SupportedArchs[pkgArch.String].Flag
 					pkg.Files = append(pkg.Files, PackageFile{
-						pkgHREF.String,
+						strutil.Head(pkgID.String, 7), pkgHREF.String,
 						data.SupportedArchs[pkgArch.String].Flag,
 						data.SupportedArchs[arch].Flag,
 					})
@@ -861,7 +861,7 @@ ROWSLOOP:
 				ArchFlags: data.SupportedArchs[pkgArch.String].Flag,
 				Src:       sourceRPM,
 				Files: PackageFiles{PackageFile{
-					pkgHREF.String,
+					strutil.Head(pkgID.String, 7), pkgHREF.String,
 					data.SupportedArchs[pkgArch.String].Flag,
 					data.SupportedArchs[arch].Flag,
 				}},
@@ -942,7 +942,7 @@ func (r *SubRepository) searchArchPackages(arch, targetDB string, queries []stri
 
 			if err != nil {
 				rows.Close()
-				return nil, fmt.Errorf("Error while scaning rows with info about packages architecture (%s): %w", arch, err)
+				return nil, fmt.Errorf("Error while scanning rows with info about packages architecture (%s): %w", arch, err)
 			}
 
 			keyMap.Set(pkgKey)
@@ -976,7 +976,7 @@ func (r *SubRepository) hasPackage(pkg *Package, arch string) (bool, time.Time, 
 	err = rows.Scan(&pTimeFile)
 
 	if err != nil {
-		return false, time.Time{}, fmt.Errorf("Error while scaning rows with info about package: %w", err)
+		return false, time.Time{}, fmt.Errorf("Error while scanning rows with info about package: %w", err)
 	}
 
 	return true, time.Unix(pTimeFile.Int64, 0), nil
@@ -1002,7 +1002,7 @@ func (r *SubRepository) getPackageInfo(name, arch string) (*Package, error) {
 		return nil, err
 	}
 
-	pkg.Info.Files, err = r.collectPackageFilesInfo(pkgID, arch)
+	pkg.Info.Payload, err = r.collectPackagePayloadInfo(pkgID, arch)
 
 	if err != nil {
 		return nil, err
@@ -1050,7 +1050,7 @@ func (r *SubRepository) collectPackageBasicInfo(name, arch string) (*Package, st
 	)
 
 	if err != nil {
-		return nil, "", fmt.Errorf("Error while scaning rows with basic package info: %w", err)
+		return nil, "", fmt.Errorf("Error while scanning rows with basic package info: %w", err)
 	}
 
 	pkg := &Package{
@@ -1061,7 +1061,7 @@ func (r *SubRepository) collectPackageBasicInfo(name, arch string) (*Package, st
 		ArchFlags: data.SupportedArchs[pkgArch.String].Flag,
 		Src:       pkgSrc.String,
 		Files: PackageFiles{PackageFile{
-			pkgHREF.String,
+			strutil.Head(pkgID.String, 7), pkgHREF.String,
 			data.SupportedArchs[pkgArch.String].Flag,
 			data.SupportedArchs[arch].Flag,
 		}},
@@ -1072,7 +1072,6 @@ func (r *SubRepository) collectPackageBasicInfo(name, arch string) (*Package, st
 			License:       pkgLic.String,
 			Vendor:        pkgVend.String,
 			Group:         pkgGroup.String,
-			Checksum:      pkgID.String,
 			SizePackage:   uint64(pkgSize.Int64),
 			SizeInstalled: uint64(pkgSizeInst.Int64),
 			DateAdded:     time.Unix(pkgAddTS.Int64, 0),
@@ -1102,7 +1101,7 @@ func (r *SubRepository) collectPackageChangelogInfo(pkgID, arch string) (*Packag
 	err = rows.Scan(&clAuthor, &clRecords)
 
 	if err != nil {
-		return nil, fmt.Errorf("Error while scaning rows with changelog records: %w", err)
+		return nil, fmt.Errorf("Error while scanning rows with changelog records: %w", err)
 	}
 
 	return &PackageChangelog{
@@ -1111,8 +1110,8 @@ func (r *SubRepository) collectPackageChangelogInfo(pkgID, arch string) (*Packag
 	}, nil
 }
 
-// collectPackageFilesInfo collects info about package payload
-func (r *SubRepository) collectPackageFilesInfo(pkgID, arch string) ([]PayloadObject, error) {
+// collectPackagePayloadInfo collects info about package payload
+func (r *SubRepository) collectPackagePayloadInfo(pkgID, arch string) ([]PayloadObject, error) {
 	rows, err := r.execQuery(data.DB_FILELISTS, arch, _SQL_INFO_FILES, pkgID)
 
 	if err != nil {
@@ -1128,7 +1127,7 @@ func (r *SubRepository) collectPackageFilesInfo(pkgID, arch string) ([]PayloadOb
 		err = rows.Scan(&fDir, &fObjs, &fTypes)
 
 		if err != nil {
-			return nil, fmt.Errorf("Error while scaning rows with payload info: %w", err)
+			return nil, fmt.Errorf("Error while scanning rows with payload info: %w", err)
 		}
 
 		result = append(result, parsePayloadList(
@@ -1156,7 +1155,7 @@ func (r *SubRepository) collectPackageDepInfo(pkgID, arch, query string) ([]data
 		err = rows.Scan(&pkgName, &pkgFlag, &pkgEpc, &pkgVer, &pkgRel)
 
 		if err != nil {
-			return nil, fmt.Errorf("Error while scaning rows with requires/provides data: %w", err)
+			return nil, fmt.Errorf("Error while scanning rows with requires/provides data: %w", err)
 		}
 
 		dep := data.Dependency{
@@ -1264,14 +1263,18 @@ func parsePayloadList(dir, objs, types string) []PayloadObject {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// Len is the number of elements in the collection
 func (p PackageStack) Len() int {
 	return len(p)
 }
 
+// Swap swaps the elements with indexes i and j
 func (p PackageStack) Swap(i, j int) {
 	p[i], p[j] = p[j], p[i]
 }
 
+// Less reports whether the element with index i
+// must sort before the element with index j
 func (p PackageStack) Less(i, j int) bool {
 	if p[i][0].Name != p[j][0].Name {
 		return sortutil.NaturalLess(p[i][0].Name, p[j][0].Name)
@@ -1293,15 +1296,19 @@ func (p PackageStack) Less(i, j int) bool {
 	return sortutil.NaturalLess(p[i][0].Release, p[j][0].Release)
 }
 
-func (p PayloadData) Len() int {
+// Len is the number of elements in the collection
+func (p PackagePayload) Len() int {
 	return len(p)
 }
 
-func (p PayloadData) Swap(i, j int) {
+// Swap swaps the elements with indexes i and j
+func (p PackagePayload) Swap(i, j int) {
 	p[i], p[j] = p[j], p[i]
 }
 
-func (p PayloadData) Less(i, j int) bool {
+// Less reports whether the element with index i
+// must sort before the element with index j
+func (p PackagePayload) Less(i, j int) bool {
 	iDir := path.Dir(p[i].Path)
 	jDir := path.Dir(p[j].Path)
 

@@ -18,8 +18,8 @@ import (
 	"github.com/essentialkaos/ek/v12/terminal"
 	"github.com/essentialkaos/ek/v12/usage"
 
-	"github.com/essentialkaos/rep/cli/query"
-	"github.com/essentialkaos/rep/repo/data"
+	"github.com/essentialkaos/rep/v3/cli/query"
+	"github.com/essentialkaos/rep/v3/repo/data"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -172,6 +172,12 @@ func cmdHelp(ctx *context, args options.Arguments) bool {
 
 	case COMMAND_PAYLOAD, COMMAND_SHORT_PAYLOAD:
 		helpPayload()
+
+	case COMMAND_CLEANUP, COMMAND_SHORT_CLEANUP:
+		helpCleanup()
+
+	case COMMAND_CHECK, COMMAND_SHORT_CHECK:
+		helpCheck()
 
 	case COMMAND_SIGN, COMMAND_SHORT_SIGN:
 		helpSign()
@@ -458,7 +464,7 @@ func helpPayload() {
 	)
 	fmtc.Printf(
 		"  {m}%-8s{!} {s}or{!} {m}%-6s{!} %s\n", "requires", "reqs",
-		"Reqiured dependencies",
+		"Required dependencies",
 	)
 	fmtc.Printf(
 		"  {m}%-8s{!} {s}or{!} {m}%-6s{!} %s\n", "provides", "provs",
@@ -468,6 +474,42 @@ func helpPayload() {
 	help.Shortcut()
 	help.Examples()
 	help.Options()
+}
+
+// helpCleanup shows help content about "cleanup" command
+func helpCleanup() {
+	help := &commandHelp{
+		command:  COMMAND_CLEANUP,
+		shortcut: COMMAND_SHORT_CLEANUP,
+		info:     genUsage(),
+		examples: []commandExample{
+			{"5", "Remove outdated packages except the 5 latest versions"},
+			{"10", "Remove outdated packages except the 10 latest versions"},
+		},
+	}
+
+	help.Usage()
+	help.Paragraph("Remove old versions of packages. Note that number of versions counts only different versions, so different releases of the same version counts as one version.")
+	help.Shortcut()
+	help.Examples()
+}
+
+// helpCheck shows help content about "check" command
+func helpCheck() {
+	help := &commandHelp{
+		command:  COMMAND_CHECK,
+		shortcut: COMMAND_SHORT_CHECK,
+		info:     genUsage(),
+		examples: []commandExample{
+			{"", "Check the release and testing repository for consistency"},
+			{"100", "Check the release and testing repository for consistency and print the first 100 errors"},
+		},
+	}
+
+	help.Usage()
+	help.Paragraph("Check repositories consistency.")
+	help.Shortcut()
+	help.Examples()
 }
 
 // helpSign shows help content about "sign" command

@@ -30,6 +30,12 @@ var _ = Suite(&IndexSuite{})
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+func (s *IndexSuite) SetUpSuite(c *C) {
+	if !IsCreaterepoInstalled() {
+		c.Fatal("createrepo_c is required for tests")
+	}
+}
+
 func (s *IndexSuite) TestClone(c *C) {
 	opts := &Options{
 		GroupFile:      "/path/to/groups/file.xml",

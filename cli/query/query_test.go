@@ -10,8 +10,8 @@ package query
 import (
 	"testing"
 
-	"github.com/essentialkaos/rep/repo/data"
-	"github.com/essentialkaos/rep/repo/search"
+	"github.com/essentialkaos/rep/v3/repo/data"
+	"github.com/essentialkaos/rep/v3/repo/search"
 
 	. "github.com/essentialkaos/check"
 )
