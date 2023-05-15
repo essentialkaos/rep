@@ -6,7 +6,7 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230426101702-58e86b294756
 	github.com/essentialkaos/check v1.4.0
 	github.com/essentialkaos/depsy v1.1.0
-	github.com/essentialkaos/ek/v12 v12.67.0
+	github.com/essentialkaos/ek/v12 v12.67.1
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/sassoftware/go-rpmutils v0.2.0
 	golang.org/x/crypto v0.9.0
