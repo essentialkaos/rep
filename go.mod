@@ -6,10 +6,10 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230426101702-58e86b294756
 	github.com/essentialkaos/check v1.4.0
 	github.com/essentialkaos/depsy v1.1.0
-	github.com/essentialkaos/ek/v12 v12.67.0
-	github.com/mattn/go-sqlite3 v1.14.16
+	github.com/essentialkaos/ek/v12 v12.67.1
+	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/sassoftware/go-rpmutils v0.2.0
-	golang.org/x/crypto v0.9.0
+	golang.org/x/crypto v0.10.0
 )
 
 require (
@@ -23,5 +23,5 @@ require (
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
-	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/sys v0.9.0 // indirect
 )
