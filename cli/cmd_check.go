@@ -122,6 +122,7 @@ func checkRepositoriesConsistency(releaseIndex, testingIndex map[string]*repo.Pa
 				"Package %s contains different number of files in release (%d) and testing (%d) repositories",
 				pkgName, len(releasePkg.Files), len(testingPkg.Files),
 			))
+			continue
 		}
 
 		for fileIndex := range testingPkg.Files {
@@ -130,6 +131,7 @@ func checkRepositoriesConsistency(releaseIndex, testingIndex map[string]*repo.Pa
 					"Package %s contains file %s with different checksum in release (%s) and testing (%s) repositories",
 					pkgName, releasePkg.Files[fileIndex].Path, releasePkg.Files[fileIndex].CRC, testingPkg.Files[fileIndex].CRC,
 				))
+				continue
 			}
 		}
 	}
