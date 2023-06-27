@@ -10,6 +10,7 @@ package cli
 import (
 	"fmt"
 
+	"github.com/essentialkaos/ek.v12/terminal"
 	"github.com/essentialkaos/ek/v12/errutil"
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fmtutil"
@@ -81,16 +82,32 @@ func checkRepositoriesData(r *repo.Repository, releaseStack, testingStack repo.P
 		hasProblems = true
 	}
 
+	if !waitForUserToContinue() {
+		return false
+	}
+
 	if !checkRepositoriesCRCInfo(r, releaseIndex, testingIndex) {
 		hasProblems = true
+	}
+
+	if !waitForUserToContinue() {
+		return false
 	}
 
 	if !checkRepositoriesPermissions(r, releaseIndex, testingIndex) {
 		hasProblems = true
 	}
 
+	if !waitForUserToContinue() {
+		return false
+	}
+
 	if !checkRepositoriesSignatures(r, releaseIndex, testingIndex) {
 		hasProblems = true
+	}
+
+	if !waitForUserToContinue() {
+		return false
 	}
 
 	return hasProblems == false
@@ -459,4 +476,10 @@ func createIndexForStack(stack repo.PackageStack) map[string]*repo.Package {
 	}
 
 	return result
+}
+
+// waitForUserToContinue blocks execution waiting user input
+func waitForUserToContinue() bool {
+	ok, _ := terminal.ReadAnswer("Continue?", "Y")
+	return ok
 }
