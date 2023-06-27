@@ -183,7 +183,7 @@ func printPackagePayloadInfo(payload repo.PackagePayload) {
 	fmtc.NewLine()
 }
 
-// printPackageRequiresInfo prints info about reqired packages and binaries
+// printPackageRequiresInfo prints info about required packages and binaries
 func printPackageRequiresInfo(reqs []data.Dependency) {
 	if len(reqs) == 0 {
 		return

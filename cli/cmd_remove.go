@@ -44,7 +44,7 @@ func cmdRemove(ctx *context, args options.Arguments) bool {
 	}
 
 	if testingStack.IsEmpty() && releaseStack.IsEmpty() {
-		terminal.PrintWarnMessage("Release and testing repositories are empty")
+		terminal.PrintWarnMessage("No packages found")
 		return false
 	}
 

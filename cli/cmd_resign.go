@@ -77,7 +77,7 @@ func resignAllPackages(ctx *context, privateKey *sign.PrivateKey) bool {
 	return true
 }
 
-// resignRepoPackages re-signes all packages in given repository
+// resignRepoPackages re-signs all packages in given repository
 func resignRepoPackages(ctx *context, privateKey *sign.PrivateKey, r *repo.SubRepository) bool {
 	stack, err := r.List("", true)
 
