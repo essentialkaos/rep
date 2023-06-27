@@ -10,7 +10,6 @@ package cli
 import (
 	"fmt"
 
-	"github.com/essentialkaos/ek.v12/terminal"
 	"github.com/essentialkaos/ek/v12/errutil"
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fmtutil"
@@ -480,6 +479,12 @@ func createIndexForStack(stack repo.PackageStack) map[string]*repo.Package {
 
 // waitForUserToContinue blocks execution waiting user input
 func waitForUserToContinue() bool {
+	if options.GetB(OPT_FORCE) {
+		return true
+	}
+
+	fmtc.NewLine()
 	ok, _ := terminal.ReadAnswer("Continue?", "Y")
+
 	return ok
 }
