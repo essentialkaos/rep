@@ -15,7 +15,7 @@
 
 Summary:        YUM repository management utility
 Name:           rep
-Version:        3.1.1
+Version:        3.1.2
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache 2.0
@@ -107,6 +107,9 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Tue Jun 27 2023 Anton Novojilov <andy@essentialkaos.com> - 3.1.2-0
+- Minor UI fix
+
 * Mon Jun 26 2023 Anton Novojilov <andy@essentialkaos.com> - 3.1.1-0
 - Added pauses between checks in 'check' command output
 - Fixed panic while checking repositories consistency
