@@ -295,6 +295,7 @@ func configureUI() {
 	progress.DefaultSettings.RemainingColorTag = ""
 	progress.DefaultSettings.BarFgColorTag = "{c}"
 	progress.DefaultSettings.IsSize = false
+	progress.DefaultSettings.WindowSizeSec = 60.0
 
 	fmtc.NameColor("package", "{m}")
 	fmtc.NameColor("repo", "{c}")
