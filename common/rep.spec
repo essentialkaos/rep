@@ -109,6 +109,7 @@ rm -rf %{buildroot}
 %changelog
 * Tue Jun 27 2023 Anton Novojilov <andy@essentialkaos.com> - 3.1.2-0
 - Minor UI fix
+- Dependencies update
 
 * Mon Jun 26 2023 Anton Novojilov <andy@essentialkaos.com> - 3.1.1-0
 - Added pauses between checks in 'check' command output
