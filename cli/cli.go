@@ -44,7 +44,7 @@ import (
 // App info
 const (
 	APP  = "rep"
-	VER  = "3.1.1"
+	VER  = "3.1.2"
 	DESC = "YUM repository management utility"
 )
 
@@ -295,6 +295,7 @@ func configureUI() {
 	progress.DefaultSettings.RemainingColorTag = ""
 	progress.DefaultSettings.BarFgColorTag = "{c}"
 	progress.DefaultSettings.IsSize = false
+	progress.DefaultSettings.WindowSizeSec = 60.0
 
 	fmtc.NameColor("package", "{m}")
 	fmtc.NameColor("repo", "{c}")

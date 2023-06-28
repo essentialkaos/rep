@@ -105,10 +105,6 @@ func checkRepositoriesData(r *repo.Repository, releaseStack, testingStack repo.P
 		hasProblems = true
 	}
 
-	if !waitForUserToContinue() {
-		return false
-	}
-
 	return hasProblems == false
 }
 
