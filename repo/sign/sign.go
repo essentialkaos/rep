@@ -155,7 +155,7 @@ func (k *Key) Get(password *secstr.String) (*PrivateKey, error) {
 
 // getKey returns private key from keyring
 func (k *Key) getKey() (*PrivateKey, error) {
-	r := bytes.NewReader([]byte(k.data))
+	r := bytes.NewReader(k.data)
 	kr, err := openpgp.ReadArmoredKeyRing(r)
 
 	if err != nil {
