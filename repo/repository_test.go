@@ -409,7 +409,7 @@ func (s *RepoSuite) TestSubRepositoryAddPackage(c *C) {
 
 	err = r.Testing.AddPackage("../testdata/test-package-1.0.0-0.el7.x86_64.rpm")
 	c.Assert(err, NotNil)
-	c.Assert(err, ErrorMatches, `Can't add file to repository: Private key is empty`)
+	c.Assert(err, ErrorMatches, `Can't add file to repository: Key is empty`)
 
 	r.SigningKey = nil
 
