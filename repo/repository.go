@@ -56,7 +56,7 @@ type Repository struct {
 	FileFilter  string
 	Replace     bool
 
-	SigningKey *sign.Key
+	SigningKey *sign.ArmoredKey
 
 	Testing *SubRepository // Testing sub-repository (with unstable packages)
 	Release *SubRepository // Release sub-repository (with stable packages)
@@ -495,13 +495,13 @@ func (r *SubRepository) AddPackage(rpmFilePath string) error {
 	}
 
 	if r.Parent.SigningKey != nil {
-		privateKey, err := r.Parent.SigningKey.Get(nil)
+		key, err := r.Parent.SigningKey.Read(nil)
 
 		if err != nil {
 			return fmt.Errorf("Can't add file to repository: %w", err)
 		}
 
-		isSigned, err := sign.IsSigned(rpmFilePath, privateKey)
+		isSigned, err := sign.IsPackageSignatureValid(rpmFilePath, key)
 
 		if err != nil {
 			return fmt.Errorf("Can't add file to repository: %w", err)

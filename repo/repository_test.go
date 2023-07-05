@@ -405,7 +405,7 @@ func (s *RepoSuite) TestSubRepositoryAddPackage(c *C) {
 	c.Assert(err, NotNil)
 	c.Assert(err, ErrorMatches, `Can't add file to repository: Repository allows only singed packages`)
 
-	r.SigningKey = &sign.Key{}
+	r.SigningKey = &sign.ArmoredKey{}
 
 	err = r.Testing.AddPackage("../testdata/test-package-1.0.0-0.el7.x86_64.rpm")
 	c.Assert(err, NotNil)

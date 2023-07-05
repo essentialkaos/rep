@@ -36,19 +36,19 @@ func cmdSign(ctx *context, args options.Arguments) bool {
 		return false
 	}
 
-	privateKey, ok := getRepoPrivateKey(ctx.Repo)
+	key, ok := getRepoSigningKey(ctx.Repo)
 
 	if !ok {
 		return false
 	}
 
-	return signRPMFiles(files, ctx, privateKey)
+	return signRPMFiles(files, ctx, key)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // signRPMFiles signs given RPM files
-func signRPMFiles(files []string, ctx *context, privateKey *sign.PrivateKey) bool {
+func signRPMFiles(files []string, ctx *context, key *sign.Key) bool {
 	tmpDir, err := ctx.Temp.MkDir("rep")
 
 	if err != nil {
@@ -61,7 +61,7 @@ func signRPMFiles(files []string, ctx *context, privateKey *sign.PrivateKey) boo
 	var hasErrors bool
 
 	for _, file := range files {
-		ok := signRPMFile(file, tmpDir, ctx, privateKey)
+		ok := signRPMFile(file, tmpDir, ctx, key)
 
 		if isCanceled {
 			return false
@@ -78,7 +78,7 @@ func signRPMFiles(files []string, ctx *context, privateKey *sign.PrivateKey) boo
 }
 
 // signRPMFile signs given RPM file
-func signRPMFile(file, tmpDir string, ctx *context, privateKey *sign.PrivateKey) bool {
+func signRPMFile(file, tmpDir string, ctx *context, key *sign.Key) bool {
 	var err error
 
 	fileName := path.Base(file)
@@ -104,21 +104,21 @@ func signRPMFile(file, tmpDir string, ctx *context, privateKey *sign.PrivateKey)
 		return false
 	}
 
-	isSigned, err := sign.IsSigned(file, privateKey)
+	isSignValid, err := sign.IsPackageSignatureValid(file, key)
 
 	if err != nil {
 		printSpinnerSignError(fileName, err.Error())
 		return false
 	}
 
-	if isSigned {
+	if isSignValid {
 		spinner.Update("Package {?package}%s{!} already signed with this key", file)
 		spinner.Done(true)
 		return true
 	}
 
 	tmpFile := path.Join(tmpDir, fileName)
-	err = sign.Sign(file, tmpFile, privateKey)
+	err = sign.SignPackage(file, tmpFile, key)
 
 	if err != nil {
 		printSpinnerSignError(fileName, err.Error())

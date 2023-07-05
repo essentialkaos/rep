@@ -340,7 +340,7 @@ func checkRepositoriesSignatures(r *repo.Repository, releaseIndex, testingIndex 
 
 	fmtc.Println("\n{*}[4/4]{!} Validating packages signatures…")
 
-	privateKey, err := r.SigningKey.Get(nil)
+	key, err := r.SigningKey.Read(nil)
 
 	if err != nil {
 		terminal.PrintErrorMessage("Can't read signing key: %v", err)
@@ -353,11 +353,11 @@ func checkRepositoriesSignatures(r *repo.Repository, releaseIndex, testingIndex 
 	pb.Start()
 
 	if len(testingIndex) != 0 {
-		errs.Add(checkRepositorySignatures(pb, r.Testing, privateKey, testingIndex))
+		errs.Add(checkRepositorySignatures(pb, r.Testing, key, testingIndex))
 	}
 
 	if len(releaseIndex) != 0 {
-		errs.Add(checkRepositorySignatures(pb, r.Release, privateKey, releaseIndex))
+		errs.Add(checkRepositorySignatures(pb, r.Release, key, releaseIndex))
 	}
 
 	pb.Finish()
@@ -370,13 +370,13 @@ func checkRepositoriesSignatures(r *repo.Repository, releaseIndex, testingIndex 
 }
 
 // checkRepositorySignatures checks packages signatures in given repository
-func checkRepositorySignatures(pb *progress.Bar, r *repo.SubRepository, privateKey *sign.PrivateKey, index map[string]*repo.Package) errutil.Errors {
+func checkRepositorySignatures(pb *progress.Bar, r *repo.SubRepository, key *sign.Key, index map[string]*repo.Package) errutil.Errors {
 	var errs errutil.Errors
 
 	for _, pkgName := range getSortedPackageIndexKeys(index) {
 		for _, file := range index[pkgName].Files {
 			filePath := r.GetFullPackagePath(file)
-			hasSignature, err := sign.HasSignature(filePath)
+			hasSign, err := sign.IsPackageSigned(filePath)
 
 			if err != nil {
 				errs.Add(fmt.Errorf(
@@ -387,7 +387,7 @@ func checkRepositorySignatures(pb *progress.Bar, r *repo.SubRepository, privateK
 				continue
 			}
 
-			if !hasSignature {
+			if !hasSign {
 				errs.Add(fmt.Errorf(
 					"Package %s in %s repository contains file %s without signature",
 					pkgName, r.Name, file.Path,
@@ -396,7 +396,7 @@ func checkRepositorySignatures(pb *progress.Bar, r *repo.SubRepository, privateK
 				continue
 			}
 
-			isSigned, err := sign.IsSigned(filePath, privateKey)
+			isSignValid, err := sign.IsPackageSignatureValid(filePath, key)
 
 			if err != nil {
 				errs.Add(fmt.Errorf(
@@ -407,7 +407,7 @@ func checkRepositorySignatures(pb *progress.Bar, r *repo.SubRepository, privateK
 				continue
 			}
 
-			if !isSigned {
+			if !isSignValid {
 				errs.Add(fmt.Errorf(
 					"Package %s in %s repository contains file %s signed with different key",
 					pkgName, r.Name, file.Path,
