@@ -8,7 +8,7 @@ package sign
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/essentialkaos/ek/v12/fsutil"
@@ -31,7 +31,7 @@ var _ = Suite(&SignSuite{})
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-func (s *SignSuite) TestSigning(c *C) {
+func (s *SignSuite) TestPackageSigning(c *C) {
 	srcDir := c.MkDir()
 	trgDir := c.MkDir()
 
@@ -77,6 +77,28 @@ func (s *SignSuite) TestSigning(c *C) {
 	c.Assert(err, IsNil)
 }
 
+func (s *SignSuite) TestFileSigning(c *C) {
+	tmpDir := c.MkDir()
+	armKey, err := ReadKey("../../testdata/reptest.private")
+
+	c.Assert(armKey, NotNil)
+	c.Assert(err, IsNil)
+
+	password, _ := secstr.NewSecureString("test1234TEST")
+	key, err := armKey.Read(password)
+
+	c.Assert(key, NotNil)
+	c.Assert(err, IsNil)
+
+	os.WriteFile(tmpDir+"/temp.txt", []byte("TEST1234ABCD!@#$"), 0644)
+
+	c.Assert(SignFile(tmpDir+"/temp.txt", key), IsNil)
+
+	c.Assert(SignFile(tmpDir+"/temp.txt", nil), NotNil)
+	c.Assert(SignFile("_unknown_", key), NotNil)
+	c.Assert(SignFile("/etc/passwd", key), NotNil)
+}
+
 func (s *SignSuite) TestReadKey(c *C) {
 	armKey, err := ReadKey("../../testdata/reptest.private")
 	c.Assert(armKey, NotNil)
@@ -99,7 +121,7 @@ func (s *SignSuite) TestReadKey(c *C) {
 	c.Assert(err, ErrorMatches, "open /_unknown_: no such file or directory")
 
 	tmpFile := c.MkDir() + "/key.private"
-	ioutil.WriteFile(tmpFile, []byte("TEST"), 0640)
+	os.WriteFile(tmpFile, []byte("TEST"), 0640)
 	_, err = ReadKey(tmpFile)
 	c.Assert(err, ErrorMatches, "openpgp: invalid argument: no armored data found")
 
@@ -110,10 +132,6 @@ func (s *SignSuite) TestReadKey(c *C) {
 	armKey = &ArmoredKey{false, []byte("TEST")}
 	_, err = armKey.Read(password)
 	c.Assert(err, ErrorMatches, "openpgp: invalid argument: no armored data found")
-}
-
-func (s *SignSuite) TestEmptyKeyring(c *C) {
-
 }
 
 func (s *SignSuite) TestErrors(c *C) {

@@ -49,25 +49,50 @@ var (
 // SignPackage signs package with given private key
 // Notice that encrypted private key MUST BE decrypted before signing
 func SignPackage(pkgFile, output string, key *Key) error {
-	if key == nil || key.entity == nil || key.entity.PrivateKey == nil {
-		return ErrKeyIsNil
-	}
-
-	if key.entity.PrivateKey.Encrypted {
-		return ErrKeyIsEncrypted
-	}
-
-	f, err := os.OpenFile(pkgFile, os.O_RDONLY, 0)
+	err := checkKey(key)
 
 	if err != nil {
 		return err
 	}
 
-	defer f.Close()
+	fd, err := os.OpenFile(pkgFile, os.O_RDONLY, 0)
 
-	_, err = rpmutils.SignRpmFile(f, output, key.entity.PrivateKey, nil)
+	if err != nil {
+		return err
+	}
+
+	defer fd.Close()
+
+	_, err = rpmutils.SignRpmFile(fd, output, key.entity.PrivateKey, nil)
 
 	return err
+}
+
+// SignFile generates asc file with PGP signature
+func SignFile(file string, key *Key) error {
+	err := checkKey(key)
+
+	if err != nil {
+		return err
+	}
+
+	srcFd, err := os.OpenFile(file, os.O_RDONLY, 0)
+
+	if err != nil {
+		return err
+	}
+
+	defer srcFd.Close()
+
+	outFd, err := os.OpenFile(file, os.O_CREATE|os.O_WRONLY, 0644)
+
+	if err != nil {
+		return err
+	}
+
+	defer outFd.Close()
+
+	return openpgp.ArmoredDetachSign(outFd, key.entity, srcFd, &packet.Config{})
 }
 
 // IsPackageSignatureValid checks if package is signed with given key
@@ -161,6 +186,19 @@ func (k *ArmoredKey) Read(password *secstr.String) (*Key, error) {
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
+
+// checkKey checks key for problems
+func checkKey(key *Key) error {
+	if key == nil || key.entity == nil || key.entity.PrivateKey == nil {
+		return ErrKeyIsNil
+	}
+
+	if key.entity.PrivateKey.Encrypted {
+		return ErrKeyIsEncrypted
+	}
+
+	return nil
+}
 
 // readHeader reads RPM package header
 func readHeader(pkgFile string) (*rpmutils.RpmHeader, error) {
