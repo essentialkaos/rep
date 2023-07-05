@@ -501,14 +501,14 @@ func (r *SubRepository) AddPackage(rpmFilePath string) error {
 			return fmt.Errorf("Can't add file to repository: %w", err)
 		}
 
-		isSigned, err := sign.IsPackageSignatureValid(rpmFilePath, key)
+		isSignValid, err := sign.IsPackageSignatureValid(rpmFilePath, key)
 
 		if err != nil {
 			return fmt.Errorf("Can't add file to repository: %w", err)
 		}
 
-		if !isSigned {
-			return fmt.Errorf("Can't add file to repository: Repository allows only singed packages")
+		if !isSignValid {
+			return fmt.Errorf("Can't add file to repository: Repository allows only signed packages")
 		}
 	}
 
