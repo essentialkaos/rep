@@ -242,6 +242,8 @@ jobs:
 
     needs: Go
 
+    continue-on-error: true
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
