@@ -227,10 +227,10 @@ func Init(gitRev string, gomod []byte) {
 	args, errs := options.Parse(optMap)
 
 	if len(errs) != 0 {
-		terminal.PrintErrorMessage("Can't parse options:")
+		terminal.Error("Can't parse options:")
 
 		for _, err := range errs {
-			terminal.PrintErrorMessage("  %v\n", err)
+			terminal.Error("  %v\n", err)
 		}
 
 		os.Exit(1)
@@ -332,12 +332,12 @@ func checkPermissions() {
 	curUser, err := system.CurrentUser()
 
 	if err != nil {
-		terminal.PrintErrorMessage("Can't get info about current user: %v", err)
+		terminal.Error("Can't get info about current user: %v", err)
 		os.Exit(1)
 	}
 
 	if !curUser.IsRoot() {
-		terminal.PrintErrorMessage("This app requires superuser (root) privileges")
+		terminal.Error("This app requires superuser (root) privileges")
 		os.Exit(1)
 	}
 }
@@ -347,7 +347,7 @@ func loadGlobalConfig() {
 	err := knf.Global(CONFIG_FILE)
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
+		terminal.Error(err.Error())
 		os.Exit(1)
 	}
 }
@@ -377,10 +377,10 @@ func validateGlobalConfig() {
 		return
 	}
 
-	terminal.PrintErrorMessage("Errors while global configuration file validation:")
+	terminal.Error("Errors while global configuration file validation:")
 
 	for _, err := range errs {
-		terminal.PrintErrorMessage(" - %v", err)
+		terminal.Error(" - %v", err)
 	}
 
 	os.Exit(1)
@@ -403,7 +403,7 @@ func loadRepoConfigs() {
 		cfg, err := knf.Read(cf)
 
 		if err != nil {
-			terminal.PrintErrorMessage(err.Error())
+			terminal.Error(err.Error())
 			os.Exit(1)
 		}
 
@@ -437,13 +437,13 @@ func validateRepoConfigs() {
 
 		hasErrors = true
 
-		terminal.PrintErrorMessage(
+		terminal.Error(
 			"Errors while repository configuration file validation (%s):",
 			cfg.File(),
 		)
 
 		for _, err := range errs {
-			terminal.PrintErrorMessage(" - %v", err)
+			terminal.Error(" - %v", err)
 		}
 	}
 
@@ -465,7 +465,7 @@ func configureRepoCache() {
 			err := os.Mkdir(repoCacheDir, 0700)
 
 			if err != nil {
-				terminal.PrintErrorMessage(err.Error())
+				terminal.Error(err.Error())
 				hasErrors = true
 			}
 		}
@@ -508,12 +508,12 @@ func process(args options.Arguments) bool {
 	}
 
 	if len(configs) == 0 {
-		terminal.PrintWarnMessage("No repository configuration files were found")
+		terminal.Warn("No repository configuration files were found")
 		return false
 	}
 
 	if configs[repo] == nil {
-		terminal.PrintErrorMessage(
+		terminal.Error(
 			"Unknown repository '%s'. Maybe you meant 'rep %s %s'?",
 			repo, getPrimaryRepoName(), repo,
 		)

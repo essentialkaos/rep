@@ -155,7 +155,7 @@ func runCommand(repoCfg *knf.Config, cmdName string, cmdArgs options.Arguments) 
 	ctx, err := getRepoContext(repoCfg)
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error() + "\n")
+		terminal.Error(err.Error() + "\n")
 		return false
 	}
 
@@ -178,7 +178,7 @@ func runCommand(repoCfg *knf.Config, cmdName string, cmdArgs options.Arguments) 
 
 	if cmd.RequireLock() {
 		if !checkForLock() {
-			terminal.PrintErrorMessage("Can't run command due to lock\n")
+			terminal.Error("Can't run command due to lock\n")
 			return false
 		}
 
@@ -222,7 +222,7 @@ func checkCommand(cmdName string, args options.Arguments) bool {
 	}
 
 	if len(args) < cmd.MinArgs {
-		terminal.PrintErrorMessage("Command '%s' requires more arguments (at least %d)\n", cmdName, cmd.MinArgs)
+		terminal.Error("Command '%s' requires more arguments (at least %d)\n", cmdName, cmd.MinArgs)
 		return false
 	}
 
@@ -413,7 +413,7 @@ func checkRPMFiles(files []string) bool {
 		err := fsutil.ValidatePerms("FRS", file)
 
 		if err != nil {
-			terminal.PrintErrorMessage(err.Error())
+			terminal.Error(err.Error())
 			hasErrors = true
 		}
 	}
@@ -454,7 +454,7 @@ func isSignRequired(r *repo.SubRepository, files []string) bool {
 // getRepoSigningKey reads password and decrypts repository private key
 func getRepoSigningKey(r *repo.Repository) (*sign.Key, bool) {
 	if r.SigningKey == nil {
-		terminal.PrintWarnMessage("No signing key defined in configuration file")
+		terminal.Warn("No signing key defined in configuration file")
 		return nil, false
 	}
 
@@ -476,7 +476,7 @@ func getRepoSigningKey(r *repo.Repository) (*sign.Key, bool) {
 	password.Destroy()
 
 	if err != nil {
-		terminal.PrintErrorMessage("Can't decrypt the secret key (wrong passphrase?)")
+		terminal.Error("Can't decrypt the secret key (wrong passphrase?)")
 		return nil, false
 	}
 

@@ -30,7 +30,7 @@ func cmdAdd(ctx *context, args options.Arguments) bool {
 	files = filterRPMPackages(ctx, files)
 
 	if len(files) == 0 {
-		terminal.PrintWarnMessage("There are no RPM packages to add")
+		terminal.Warn("There are no RPM packages to add")
 		return false
 	}
 
@@ -80,7 +80,7 @@ func addRPMFiles(ctx *context, files []string, signingKey *sign.Key) bool {
 	tmpDir, err := ctx.Temp.MkDir("rep")
 
 	if err != nil {
-		terminal.PrintErrorMessage("Can't create temporary directory: %v", err)
+		terminal.Error("Can't create temporary directory: %v", err)
 		return false
 	}
 
@@ -216,7 +216,7 @@ func addRPMFile(ctx *context, file, tmpDir string, signingKey *sign.Key) bool {
 func printSpinnerAddError(fileName string, err string) {
 	spinner.Update("Can't add {?package}%s{!}", fileName)
 	spinner.Done(false)
-	terminal.PrintErrorMessage("   %v", err)
+	terminal.Error("   %v", err)
 }
 
 // filterRPMPackages filters packages using repository file filter pattern

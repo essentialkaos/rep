@@ -37,7 +37,7 @@ func cmdPayload(ctx *context, args options.Arguments) bool {
 		case "files", "file", "f", "requires", "req", "reqs", "provides", "prov", "provs":
 			payloadType = args.Get(1).String()
 		default:
-			terminal.PrintErrorMessage("Unknown payload type %q", args.Get(1).String())
+			terminal.Error("Unknown payload type %q", args.Get(1).String())
 			return false
 		}
 	}
@@ -45,7 +45,7 @@ func cmdPayload(ctx *context, args options.Arguments) bool {
 	pkg, _, err := ctx.Repo.Info(pkgName, pkgArch)
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
+		terminal.Error(err.Error())
 		return false
 	}
 

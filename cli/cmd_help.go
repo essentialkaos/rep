@@ -210,7 +210,7 @@ func cmdHelp(ctx *context, args options.Arguments) bool {
 		helpHelp()
 
 	default:
-		terminal.PrintErrorMessage("Unknown command \"%s\"", cmdName)
+		terminal.Error("Unknown command \"%s\"", cmdName)
 		return false
 	}
 

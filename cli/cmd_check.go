@@ -44,19 +44,19 @@ func cmdCheck(ctx *context, args options.Arguments) bool {
 	releaseStack, err := ctx.Repo.Release.List("", true)
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
+		terminal.Error(err.Error())
 		return false
 	}
 
 	testingStack, err := ctx.Repo.Testing.List("", true)
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
+		terminal.Error(err.Error())
 		return false
 	}
 
 	if releaseStack.IsEmpty() && testingStack.IsEmpty() {
-		terminal.PrintWarnMessage("Release and testing repositories are empty")
+		terminal.Warn("Release and testing repositories are empty")
 		return false
 	}
 
@@ -116,9 +116,9 @@ func checkRepositoriesConsistency(releaseIndex, testingIndex map[string]*repo.Pa
 
 	switch {
 	case len(releaseIndex) == 0:
-		terminal.PrintWarnMessage("Release repository is empty, skipping check…")
+		terminal.Warn("Release repository is empty, skipping check…")
 	case len(testingIndex) == 0:
-		terminal.PrintWarnMessage("Testing repository is empty, skipping check…")
+		terminal.Warn("Testing repository is empty, skipping check…")
 	}
 
 	for _, pkgName := range getSortedPackageIndexKeys(testingIndex) {
@@ -343,7 +343,7 @@ func checkRepositoriesSignatures(r *repo.Repository, releaseIndex, testingIndex 
 	key, err := r.SigningKey.Read(nil)
 
 	if err != nil {
-		terminal.PrintErrorMessage("Can't read signing key: %v", err)
+		terminal.Error("Can't read signing key: %v", err)
 		return false
 	}
 
@@ -445,7 +445,7 @@ func printCheckErrorsInfo(errs errutil.Errors) bool {
 
 	errsList := errs.All()
 
-	terminal.PrintErrorMessage(
+	terminal.Error(
 		"Found %s %s. First %s %s:\n",
 		fmtutil.PrettyNum(errs.Num()),
 		pluralize.Pluralize(errs.Num(), "problem", "problems"),
@@ -454,7 +454,7 @@ func printCheckErrorsInfo(errs errutil.Errors) bool {
 	)
 
 	for i := 0; i < mathutil.Min(errs.Num(), checkMaxErrNum); i++ {
-		terminal.PrintErrorMessage(" • %v", errsList[i])
+		terminal.Error(" • %v", errsList[i])
 	}
 
 	return false

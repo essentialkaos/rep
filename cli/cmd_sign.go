@@ -28,7 +28,7 @@ func cmdSign(ctx *context, args options.Arguments) bool {
 	files := args.Filter("*.rpm").Strings()
 
 	if len(files) == 0 {
-		terminal.PrintWarnMessage("There are no RPM packages to sign")
+		terminal.Warn("There are no RPM packages to sign")
 		return false
 	}
 
@@ -52,7 +52,7 @@ func signRPMFiles(files []string, ctx *context, key *sign.Key) bool {
 	tmpDir, err := ctx.Temp.MkDir("rep")
 
 	if err != nil {
-		terminal.PrintErrorMessage("Can't create temporary directory: %v", err)
+		terminal.Error("Can't create temporary directory: %v", err)
 		return false
 	}
 
@@ -171,5 +171,5 @@ func replaceSignedRPMFile(original, signed string) error {
 func printSpinnerSignError(fileName string, err string) {
 	spinner.Update("Can't sign {?package}%s{!}", fileName)
 	spinner.Done(false)
-	terminal.PrintErrorMessage("   %v", err)
+	terminal.Error("   %v", err)
 }

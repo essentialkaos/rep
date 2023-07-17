@@ -26,12 +26,12 @@ func cmdUnrelease(ctx *context, args options.Arguments) bool {
 	stack, filter, err := smartPackageSearch(ctx.Repo.Release, args)
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
+		terminal.Error(err.Error())
 		return false
 	}
 
 	if stack.IsEmpty() {
-		terminal.PrintWarnMessage("No packages found")
+		terminal.Warn("No packages found")
 		return false
 	}
 
@@ -166,5 +166,5 @@ func unreleasePackageFile(ctx *context, file repo.PackageFile) (bool, bool) {
 func printSpinnerUnreleaseError(file repo.PackageFile, err string) {
 	spinner.Update("Can't unrelease {?package}%s{!}", path.Base(file.Path))
 	spinner.Done(false)
-	terminal.PrintErrorMessage("   %v", err)
+	terminal.Error("   %v", err)
 }

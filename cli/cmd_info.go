@@ -41,7 +41,7 @@ func cmdInfo(ctx *context, args options.Arguments) bool {
 	pkg, releaseDate, err := ctx.Repo.Info(pkgName, pkgArch)
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
+		terminal.Error(err.Error())
 		return false
 	}
 

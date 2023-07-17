@@ -24,7 +24,7 @@ func cmdPurgeCache(ctx *context, args options.Arguments) bool {
 	isCancelProtected = false
 
 	if err != nil {
-		terminal.PrintErrorMessage("Can't clean cached data: %v", err)
+		terminal.Error("Can't clean cached data: %v", err)
 		return false
 	}
 

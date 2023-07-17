@@ -40,7 +40,7 @@ var emailValidator = regexp.MustCompile(`^[^@]+@[^@]+\.[^@]+(;[^@]+@[^@]+\.[^@]+
 // cmdGenKey is 'gen-key' command handler
 func cmdGenKey(ctx *context, args options.Arguments) bool {
 	if fsutil.IsExist(outputPrivKeyFile) {
-		terminal.PrintErrorMessage("Private key file (%s) already exists", outputPrivKeyFile)
+		terminal.Error("Private key file (%s) already exists", outputPrivKeyFile)
 		return false
 	}
 
@@ -49,21 +49,21 @@ func cmdGenKey(ctx *context, args options.Arguments) bool {
 	var name, email, outputPubKeyFile string
 
 	for {
-		name, err = terminal.ReadUI("Key name", true)
+		name, err = terminal.Read("Key name", true)
 
 		if err != nil {
 			return false
 		}
 
 		if !repoKeyNameValidator.MatchString(name) {
-			terminal.PrintErrorMessage("\nGiven name is invalid\n")
+			terminal.Error("\nGiven name is invalid\n")
 			continue
 		}
 
 		outputPubKeyFile = "RPM-GPG-KEY-" + strings.ReplaceAll(name, " ", "-")
 
 		if fsutil.IsExist(outputPubKeyFile) {
-			terminal.PrintErrorMessage("\nPublic key file for given name (%s) already exists\n", outputPubKeyFile)
+			terminal.Error("\nPublic key file for given name (%s) already exists\n", outputPubKeyFile)
 			continue
 		}
 
@@ -73,14 +73,14 @@ func cmdGenKey(ctx *context, args options.Arguments) bool {
 	fmtc.NewLine()
 
 	for {
-		email, err = terminal.ReadUI("Email address", true)
+		email, err = terminal.Read("Email address", true)
 
 		if err != nil {
 			return false
 		}
 
 		if !emailValidator.MatchString(email) {
-			terminal.PrintErrorMessage("\nGiven email address is invalid\n")
+			terminal.Error("\nGiven email address is invalid\n")
 			continue
 		}
 
@@ -99,7 +99,7 @@ func cmdGenKey(ctx *context, args options.Arguments) bool {
 		fmtc.NewLine()
 
 		if passwd.GetPasswordBytesStrength(password.Data) < passwd.STRENGTH_MEDIUM {
-			terminal.PrintWarnMessage("Given passphrase is not strong enough.\n")
+			terminal.Warn("Given passphrase is not strong enough.\n")
 
 			ok, _ := terminal.ReadAnswer("Use this passphrase anyway?", "n")
 
