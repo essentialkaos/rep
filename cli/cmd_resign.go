@@ -26,8 +26,12 @@ import (
 // cmdSign is 'resign' command handler
 func cmdResign(ctx *context, args options.Arguments) bool {
 	if !options.GetB(OPT_FORCE) {
-		terminal.Warn("▲ This command will re-sign all packages in the repo. This action")
-		terminal.Warn("  can take a lot of time (depending on how many packages you have).\n")
+		terminal.Warn("Command can take a lot of time",
+			`This command will re-sign all packages in the repo. Re-sign process requires 
+rewriting {*}every{!} package in repository and can take a lot of time (depending on 
+how many packages you have and how big they are).`)
+
+		fmtc.NewLine()
 
 		ok, err := terminal.ReadAnswer("Do you really want to re-sign all packages?", "n")
 
