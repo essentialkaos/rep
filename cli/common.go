@@ -357,13 +357,13 @@ func getRepoFSStorage(repoCfg *knf.Config) (*fs.Storage, error) {
 			Deltas:         knf.GetB(INDEX_DELTAS),
 			NumDeltas:      knf.GetI(INDEX_NUM_DELTAS),
 			MDFilenames:    knf.GetS(INDEX_MD_FILENAMES, index.MDF_SIMPLE),
-			CompressType:   knf.GetS(INDEX_REVISION, index.COMPRESSION_BZ2),
 			CheckSum:       knf.GetS(INDEX_CHECKSUM, index.CHECKSUM_SHA256),
 			ChangelogLimit: knf.GetI(INDEX_CHANGELOG_LIMIT),
 			Distro:         knf.GetS(INDEX_DISTRO),
 			Content:        knf.GetS(INDEX_CONTENT),
 			Revision:       knf.GetS(INDEX_REVISION),
 			Workers:        knf.GetI(INDEX_WORKERS, 0),
+			CompressType:   knf.GetS(INDEX_COMPRESSION_TYPE, index.COMPRESSION_XZ),
 		},
 	)
 }
