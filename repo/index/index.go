@@ -99,13 +99,14 @@ var CompressionMethods = []string{
 	COMPRESSION_GZ,
 	COMPRESSION_BZ2,
 	COMPRESSION_XZ,
+	COMPRESSION_ZSTD,
 }
 
 // DefaultOptions is default options
 var DefaultOptions = &Options{
 	Update:       true,
 	MDFilenames:  MDF_SIMPLE,
-	CompressType: COMPRESSION_BZ2,
+	CompressType: COMPRESSION_XZ,
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

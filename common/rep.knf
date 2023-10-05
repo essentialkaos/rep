@@ -57,7 +57,7 @@
   workers:
 
   # Which compression type to use (gz/bz2/xz/zstd)
-  compression-type: bz2
+  compression-type: xz
 
 [log]
 
