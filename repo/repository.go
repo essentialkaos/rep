@@ -44,7 +44,7 @@ const (
 	_SQL_INFO_FILES     = `SELECT f.dirname,f.filenames,f.filetypes FROM filelist f INNER JOIN packages p ON f.pkgKey = p.pkgKey WHERE p.pkgId = ? ORDER BY f.dirname,f.filenames;`
 	_SQL_INFO_REQUIRES  = `SELECT r.name,r.flags,r.epoch,r.version,r.release FROM requires r INNER JOIN packages p ON r.pkgKey = p.pkgKey WHERE p.pkgId = ? ORDER BY r.name;`
 	_SQL_INFO_PROVIDES  = `SELECT r.name,r.flags,r.epoch,r.version,r.release FROM provides r INNER JOIN packages p ON r.pkgKey = p.pkgKey WHERE p.pkgId = ? ORDER BY r.name;`
-	_SQL_INFO_CHANGELOG = `SELECT c.author,c.changelog FROM changelog c INNER JOIN packages p ON c.pkgKey = p.pkgKey WHERE p.pkgId = ? ORDER BY 1 DESC LIMIT 1;`
+	_SQL_INFO_CHANGELOG = `SELECT c.author,c.date,c.changelog FROM changelog c INNER JOIN packages p ON c.pkgKey = p.pkgKey WHERE p.pkgId = ? AND c.author LIKE ? ORDER BY c.date DESC LIMIT 1;`
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -119,8 +119,9 @@ type PackagePayload []PayloadObject
 
 // PackageChangelog contains changelog data
 type PackageChangelog struct {
-	Author  string
 	Records []string
+	Author  string
+	Date    time.Time
 }
 
 // PackageFile contains info about package file
@@ -996,12 +997,6 @@ func (r *SubRepository) getPackageInfo(name, arch string) (*Package, error) {
 		return nil, nil
 	}
 
-	pkg.Info.Changelog, err = r.collectPackageChangelogInfo(pkgID, arch)
-
-	if err != nil {
-		return nil, err
-	}
-
 	pkg.Info.Payload, err = r.collectPackagePayloadInfo(pkgID, arch)
 
 	if err != nil {
@@ -1015,6 +1010,12 @@ func (r *SubRepository) getPackageInfo(name, arch string) (*Package, error) {
 	}
 
 	pkg.Info.Provides, err = r.collectPackageDepInfo(pkgID, arch, _SQL_INFO_PROVIDES)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.appendPackageChangelogInfo(pkg, pkgID, arch)
 
 	if err != nil {
 		return nil, err
@@ -1082,32 +1083,37 @@ func (r *SubRepository) collectPackageBasicInfo(name, arch string) (*Package, st
 	return pkg, pkgID.String, nil
 }
 
-// collectPackageChangelogInfo collects changelog records for package
-func (r *SubRepository) collectPackageChangelogInfo(pkgID, arch string) (*PackageChangelog, error) {
-	rows, err := r.execQuery(data.DB_OTHER, arch, _SQL_INFO_CHANGELOG, pkgID)
+// appendPackageChangelogInfo appends changelog records for package
+func (r *SubRepository) appendPackageChangelogInfo(pkg *Package, pkgID, arch string) error {
+	version := fmt.Sprintf("%% - %s-%s", pkg.Version, formatReleaseVersion(pkg.Release))
+	rows, err := r.execQuery(data.DB_OTHER, arch, _SQL_INFO_CHANGELOG, pkgID, version)
 
 	if err != nil {
-		return nil, fmt.Errorf("Can't execute query for collecting changelog records: %w", err)
+		return fmt.Errorf("Can't execute query for collecting changelog records: %w", err)
 	}
 
 	defer rows.Close()
 
-	var clAuthor, clRecords sql.NullString
+	var cAuthor, cRecords sql.NullString
+	var cDate sql.NullInt64
 
 	if !rows.Next() {
-		return nil, nil
+		return nil
 	}
 
-	err = rows.Scan(&clAuthor, &clRecords)
+	err = rows.Scan(&cAuthor, &cDate, &cRecords)
 
 	if err != nil {
-		return nil, fmt.Errorf("Error while scanning rows with changelog records: %w", err)
+		return fmt.Errorf("Error while scanning rows with changelog records: %w", err)
 	}
 
-	return &PackageChangelog{
-		Author:  clAuthor.String,
-		Records: strings.Split(clRecords.String, "\n"),
-	}, nil
+	pkg.Info.Changelog = &PackageChangelog{
+		Records: strings.Split(cRecords.String, "\n"),
+		Author:  cAuthor.String,
+		Date:    time.Unix(cDate.Int64, 0),
+	}
+
+	return nil
 }
 
 // collectPackagePayloadInfo collects info about package payload
@@ -1259,6 +1265,17 @@ func parsePayloadList(dir, objs, types string) []PayloadObject {
 	}
 
 	return result
+}
+
+// formatReleaseVersion formats release version removing OS info
+func formatReleaseVersion(r string) string {
+	i := strings.LastIndex(r, ".")
+
+	if i == -1 {
+		return r
+	}
+
+	return r[:i]
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

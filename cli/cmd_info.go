@@ -223,7 +223,11 @@ func printPackageChangelogInfo(changelog *repo.PackageChangelog) {
 		return
 	}
 
-	fmtc.Printf("{*}%-16s{!}{s}%s{!}\n", "Changelog", changelog.Author)
+	fmtc.Printf(
+		"{*}%-16s{!}{*s}%s{!} {s}%s{!}\n", "Changelog",
+		timeutil.Format(changelog.Date, "%a %b %d %Y"),
+		changelog.Author,
+	)
 
 	for _, rec := range changelog.Records {
 		fmtc.Printf("%-16s%s\n", "", rec)
