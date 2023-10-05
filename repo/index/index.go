@@ -296,9 +296,15 @@ func (o *Options) ToArgs() []string {
 	}
 
 	if o.CompressType != "" {
-		args = append(args, "--compress-type="+o.CompressType)
+		args = append(args,
+			"--compress-type="+o.CompressType,
+			"--general-compress-type="+o.CompressType,
+		)
 	} else {
-		args = append(args, "--compress-type="+COMPRESSION_BZ2)
+		args = append(args,
+			"--compress-type="+COMPRESSION_BZ2,
+			"--general-compress-type="+COMPRESSION_BZ2,
+		)
 	}
 
 	if o.Zchunk {

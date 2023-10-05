@@ -160,6 +160,7 @@ func (s *IndexSuite) TestToArg(c *C) {
 		"--num-deltas=8",
 		"--workers=11",
 		"--compress-type=xz",
+		"--general-compress-type=xz",
 		"--zck",
 		"--unique-md-filenames",
 	})
@@ -185,6 +186,7 @@ func (s *IndexSuite) TestToArg(c *C) {
 		"--num-deltas=8",
 		"--workers=11",
 		"--compress-type=bz2",
+		"--general-compress-type=bz2",
 		"--zck",
 		"--simple-md-filenames",
 	})
@@ -204,11 +206,11 @@ func (s *IndexSuite) TestCreaterepo(c *C) {
 
 	c.Assert(err, IsNil)
 	c.Assert(fsutil.IsExist(repoDir+"/repodata/filelists.sqlite.bz2"), Equals, true)
-	c.Assert(fsutil.IsExist(repoDir+"/repodata/filelists.xml.gz"), Equals, true)
+	c.Assert(fsutil.IsExist(repoDir+"/repodata/filelists.xml.bz2"), Equals, true)
 	c.Assert(fsutil.IsExist(repoDir+"/repodata/other.sqlite.bz2"), Equals, true)
-	c.Assert(fsutil.IsExist(repoDir+"/repodata/other.xml.gz"), Equals, true)
+	c.Assert(fsutil.IsExist(repoDir+"/repodata/other.xml.bz2"), Equals, true)
 	c.Assert(fsutil.IsExist(repoDir+"/repodata/primary.sqlite.bz2"), Equals, true)
-	c.Assert(fsutil.IsExist(repoDir+"/repodata/primary.xml.gz"), Equals, true)
+	c.Assert(fsutil.IsExist(repoDir+"/repodata/primary.xml.bz2"), Equals, true)
 	c.Assert(fsutil.IsExist(repoDir+"/repodata/repomd.xml"), Equals, true)
 }
 
