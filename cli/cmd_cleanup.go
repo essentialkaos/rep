@@ -35,7 +35,7 @@ func cmdCleanup(ctx *context, args options.Arguments) bool {
 	keepVerNum, err := getCleanupVersionNum(args)
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
+		terminal.Error(err.Error())
 		return false
 	}
 
@@ -43,7 +43,7 @@ func cmdCleanup(ctx *context, args options.Arguments) bool {
 		releaseStack, err = getStackToCleanup(ctx.Repo.Release, keepVerNum)
 
 		if err != nil {
-			terminal.PrintErrorMessage(err.Error())
+			terminal.Error(err.Error())
 			return false
 		}
 	}
@@ -52,7 +52,7 @@ func cmdCleanup(ctx *context, args options.Arguments) bool {
 		testingStack, err = getStackToCleanup(ctx.Repo.Testing, keepVerNum)
 
 		if err != nil {
-			terminal.PrintErrorMessage(err.Error())
+			terminal.Error(err.Error())
 			return false
 		}
 	}

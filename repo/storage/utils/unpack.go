@@ -15,6 +15,9 @@ import (
 	"io"
 	"os"
 	"strings"
+
+	"github.com/klauspost/compress/zstd"
+	"github.com/ulikunitz/xz"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -23,6 +26,8 @@ const (
 	_FORMAT_RAW  uint8 = 0
 	_FORMAT_GZIP       = 1
 	_FORMAT_BZIP       = 2
+	_FORMAT_XZ         = 3
+	_FORMAT_ZSTD       = 4
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -41,6 +46,12 @@ func UnpackDB(source, output string) error {
 
 	case strings.HasSuffix(source, ".bz2"):
 		return unpackDBData(source, output, _FORMAT_BZIP)
+
+	case strings.HasSuffix(source, ".xz"):
+		return unpackDBData(source, output, _FORMAT_XZ)
+
+	case strings.HasSuffix(source, ".zst"):
+		return unpackDBData(source, output, _FORMAT_ZSTD)
 
 	case strings.HasSuffix(source, ".sqlite"):
 		return unpackDBData(source, output, _FORMAT_RAW)
@@ -110,6 +121,10 @@ func getFormatReader(format uint8, sourceFd io.Reader) io.Reader {
 		r, _ = gzip.NewReader(sourceFd)
 	case _FORMAT_BZIP:
 		r = bzip2.NewReader(sourceFd)
+	case _FORMAT_XZ:
+		r, _ = xz.NewReader(sourceFd)
+	case _FORMAT_ZSTD:
+		r, _ = zstd.NewReader(sourceFd)
 	default:
 		r = sourceFd
 	}

@@ -23,58 +23,85 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Key contains raw key data
-type Key struct {
+// ArmoredKey contains raw key data
+type ArmoredKey struct {
 	IsEncrypted bool
 
 	data []byte
 }
 
-// PrivateKey represents a possibly encrypted private key
-type PrivateKey = packet.PrivateKey
+// Key contains parsed OpenGPG entity
+type Key struct {
+	entity *openpgp.Entity
+}
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 var (
-	ErrKeyIsEncrypted = fmt.Errorf("Private key is encrypted")
-	ErrKeyIsNil       = fmt.Errorf("Private key is nil")
-	ErrKeyIsEmpty     = fmt.Errorf("Private key is empty")
+	ErrKeyIsEncrypted = fmt.Errorf("Key is encrypted (decrypted key is required)")
+	ErrKeyIsNil       = fmt.Errorf("Key is nil")
+	ErrKeyIsEmpty     = fmt.Errorf("Key is empty")
 	ErrKeyringIsEmpty = fmt.Errorf("Keyring is empty (there is no private key)")
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Sign signs package with given private key
-// Notice that encrypted private key must be decrypted before signing
-func Sign(file, output string, privateKey *PrivateKey) error {
-	if privateKey == nil {
-		return ErrKeyIsNil
-	}
-
-	if privateKey.Encrypted {
-		return ErrKeyIsEncrypted
-	}
-
-	f, err := os.OpenFile(file, os.O_RDONLY, 0)
+// SignPackage signs package with given private key
+// Notice that encrypted private key MUST BE decrypted before signing
+func SignPackage(pkgFile, output string, key *Key) error {
+	err := checkKey(key)
 
 	if err != nil {
 		return err
 	}
 
-	defer f.Close()
+	fd, err := os.OpenFile(pkgFile, os.O_RDONLY, 0)
 
-	_, err = rpmutils.SignRpmFile(f, output, privateKey, nil)
+	if err != nil {
+		return err
+	}
+
+	defer fd.Close()
+
+	_, err = rpmutils.SignRpmFile(fd, output, key.entity.PrivateKey, nil)
 
 	return err
 }
 
-// IsSigned checks if package is signed with given key
-func IsSigned(file string, privateKey *PrivateKey) (bool, error) {
-	if privateKey == nil {
+// SignFile generates asc file with PGP signature
+func SignFile(file string, key *Key) error {
+	err := checkKey(key)
+
+	if err != nil {
+		return err
+	}
+
+	srcFd, err := os.OpenFile(file, os.O_RDONLY, 0)
+
+	if err != nil {
+		return err
+	}
+
+	defer srcFd.Close()
+
+	outFd, err := os.OpenFile(file, os.O_CREATE|os.O_WRONLY, 0644)
+
+	if err != nil {
+		return err
+	}
+
+	defer outFd.Close()
+
+	return openpgp.ArmoredDetachSign(outFd, key.entity, srcFd, &packet.Config{})
+}
+
+// IsPackageSignatureValid checks if package is signed with given key
+func IsPackageSignatureValid(pkgFile string, key *Key) (bool, error) {
+	if key == nil || key.entity == nil || key.entity.PrivateKey == nil {
 		return false, ErrKeyIsNil
 	}
 
-	hdr, err := readHeader(file)
+	hdr, err := readHeader(pkgFile)
 
 	if err != nil {
 		return false, err
@@ -84,12 +111,12 @@ func IsSigned(file string, privateKey *PrivateKey) (bool, error) {
 		return false, nil
 	}
 
-	return checkSignature(hdr, privateKey)
+	return checkSignature(hdr, key.entity.PrivateKey)
 }
 
-// HasSignature checks if package has PGP/GPG signature
-func HasSignature(file string) (bool, error) {
-	hdr, err := readHeader(file)
+// IsPackageSigned checks if package has PGP/GPG signature
+func IsPackageSigned(pkgFile string) (bool, error) {
+	hdr, err := readHeader(pkgFile)
 
 	if err != nil {
 		return false, err
@@ -98,22 +125,24 @@ func HasSignature(file string) (bool, error) {
 	return hdr.HasTag(rpmutils.SIG_PGP), nil
 }
 
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // LoadKey loads private key data
-func LoadKey(data []byte) (*Key, error) {
-	k := &Key{IsEncrypted: false, data: data}
-	pk, err := k.getKey()
+func LoadKey(data []byte) (*ArmoredKey, error) {
+	rk := &ArmoredKey{IsEncrypted: false, data: data}
+	k, err := rk.Read(nil)
 
 	if err != nil {
 		return nil, err
 	}
 
-	k.IsEncrypted = pk.Encrypted
+	rk.IsEncrypted = k.entity.PrivateKey.Encrypted
 
-	return k, nil
+	return rk, nil
 }
 
 // ReadKey securely reads signing key from file
-func ReadKey(file string) (*Key, error) {
+func ReadKey(file string) (*ArmoredKey, error) {
 	data, err := directio.ReadFile(file)
 
 	if err != nil {
@@ -125,37 +154,16 @@ func ReadKey(file string) (*Key, error) {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Get decrypts raw signing key and returns private key
+// Read reads and decrypts (if password is provided) raw OpenPGP key
 //
 // You MUST NOT decrypt signing key (provide password) for checking package
-// signature. Decrypted signing key ONLY required for signing packages.
-func (k *Key) Get(password *secstr.String) (*PrivateKey, error) {
+// signature. Decrypted signing key ONLY required for signing packages/meta.
+func (k *ArmoredKey) Read(password *secstr.String) (*Key, error) {
 	if len(k.data) == 0 {
 		return nil, ErrKeyIsEmpty
 	}
 
-	pk, err := k.getKey()
-
-	if err != nil {
-		return nil, err
-	}
-
-	if pk.Encrypted && password != nil && !password.IsEmpty() {
-		err = pk.Decrypt(password.Data)
-
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return pk, nil
-}
-
-// ////////////////////////////////////////////////////////////////////////////////// //
-
-// getKey returns private key from keyring
-func (k *Key) getKey() (*PrivateKey, error) {
-	r := bytes.NewReader([]byte(k.data))
+	r := bytes.NewReader(k.data)
 	kr, err := openpgp.ReadArmoredKeyRing(r)
 
 	if err != nil {
@@ -166,14 +174,35 @@ func (k *Key) getKey() (*PrivateKey, error) {
 		return nil, ErrKeyringIsEmpty
 	}
 
-	return kr[0].PrivateKey, nil
+	if kr[0].PrivateKey.Encrypted && password != nil && !password.IsEmpty() {
+		err = kr[0].PrivateKey.Decrypt(password.Data)
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &Key{kr[0]}, nil
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// checkKey checks key for problems
+func checkKey(key *Key) error {
+	if key == nil || key.entity == nil || key.entity.PrivateKey == nil {
+		return ErrKeyIsNil
+	}
+
+	if key.entity.PrivateKey.Encrypted {
+		return ErrKeyIsEncrypted
+	}
+
+	return nil
+}
+
 // readHeader reads RPM package header
-func readHeader(file string) (*rpmutils.RpmHeader, error) {
-	f, err := os.OpenFile(file, os.O_RDONLY, 0)
+func readHeader(pkgFile string) (*rpmutils.RpmHeader, error) {
+	f, err := os.OpenFile(pkgFile, os.O_RDONLY, 0)
 
 	if err != nil {
 		return nil, err
@@ -185,7 +214,7 @@ func readHeader(file string) (*rpmutils.RpmHeader, error) {
 }
 
 // checkSignature checks signature from header and compare it with private key
-func checkSignature(hdr *rpmutils.RpmHeader, privateKey *PrivateKey) (bool, error) {
+func checkSignature(hdr *rpmutils.RpmHeader, privateKey *packet.PrivateKey) (bool, error) {
 	sigBlob, err := hdr.GetBytes(rpmutils.SIG_PGP)
 
 	if err != nil {
@@ -196,7 +225,7 @@ func checkSignature(hdr *rpmutils.RpmHeader, privateKey *PrivateKey) (bool, erro
 }
 
 // checkSignaturePacket checks signature packet
-func checkSignaturePacket(signature []byte, privateKey *PrivateKey) (bool, error) {
+func checkSignaturePacket(signature []byte, privateKey *packet.PrivateKey) (bool, error) {
 	packetReader := packet.NewReader(bytes.NewReader(signature))
 	pkt, err := packetReader.Next()
 

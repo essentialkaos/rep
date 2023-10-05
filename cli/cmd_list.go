@@ -68,7 +68,7 @@ func listPackages(r *repo.SubRepository, filter string) bool {
 	stack, err := r.List(filter, options.GetB(OPT_SHOW_ALL))
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
+		terminal.Error(err.Error())
 		return false
 	}
 
@@ -214,12 +214,12 @@ func getPkgNameWithFilter(pkgName, filter string) string {
 // isFilterValueValid returns true if filter value is valid
 func isFilterValueValid(filter string) bool {
 	if filter != "" && len(filter) < 3 {
-		terminal.PrintErrorMessage("Filter must be at least 3 symbols long")
+		terminal.Error("Filter must be at least 3 symbols long")
 		return false
 	}
 
 	if filter != "" && !filterValidationRegex.MatchString(filter) {
-		terminal.PrintErrorMessage("Filter contains invalid symbols")
+		terminal.Error("Filter contains invalid symbols")
 		return false
 	}
 

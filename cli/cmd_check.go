@@ -44,19 +44,19 @@ func cmdCheck(ctx *context, args options.Arguments) bool {
 	releaseStack, err := ctx.Repo.Release.List("", true)
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
+		terminal.Error(err.Error())
 		return false
 	}
 
 	testingStack, err := ctx.Repo.Testing.List("", true)
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
+		terminal.Error(err.Error())
 		return false
 	}
 
 	if releaseStack.IsEmpty() && testingStack.IsEmpty() {
-		terminal.PrintWarnMessage("Release and testing repositories are empty")
+		terminal.Warn("Release and testing repositories are empty")
 		return false
 	}
 
@@ -116,9 +116,9 @@ func checkRepositoriesConsistency(releaseIndex, testingIndex map[string]*repo.Pa
 
 	switch {
 	case len(releaseIndex) == 0:
-		terminal.PrintWarnMessage("Release repository is empty, skipping check…")
+		terminal.Warn("Release repository is empty, skipping check…")
 	case len(testingIndex) == 0:
-		terminal.PrintWarnMessage("Testing repository is empty, skipping check…")
+		terminal.Warn("Testing repository is empty, skipping check…")
 	}
 
 	for _, pkgName := range getSortedPackageIndexKeys(testingIndex) {
@@ -340,10 +340,10 @@ func checkRepositoriesSignatures(r *repo.Repository, releaseIndex, testingIndex 
 
 	fmtc.Println("\n{*}[4/4]{!} Validating packages signatures…")
 
-	privateKey, err := r.SigningKey.Get(nil)
+	key, err := r.SigningKey.Read(nil)
 
 	if err != nil {
-		terminal.PrintErrorMessage("Can't read signing key: %v", err)
+		terminal.Error("Can't read signing key: %v", err)
 		return false
 	}
 
@@ -353,11 +353,11 @@ func checkRepositoriesSignatures(r *repo.Repository, releaseIndex, testingIndex 
 	pb.Start()
 
 	if len(testingIndex) != 0 {
-		errs.Add(checkRepositorySignatures(pb, r.Testing, privateKey, testingIndex))
+		errs.Add(checkRepositorySignatures(pb, r.Testing, key, testingIndex))
 	}
 
 	if len(releaseIndex) != 0 {
-		errs.Add(checkRepositorySignatures(pb, r.Release, privateKey, releaseIndex))
+		errs.Add(checkRepositorySignatures(pb, r.Release, key, releaseIndex))
 	}
 
 	pb.Finish()
@@ -370,13 +370,13 @@ func checkRepositoriesSignatures(r *repo.Repository, releaseIndex, testingIndex 
 }
 
 // checkRepositorySignatures checks packages signatures in given repository
-func checkRepositorySignatures(pb *progress.Bar, r *repo.SubRepository, privateKey *sign.PrivateKey, index map[string]*repo.Package) errutil.Errors {
+func checkRepositorySignatures(pb *progress.Bar, r *repo.SubRepository, key *sign.Key, index map[string]*repo.Package) errutil.Errors {
 	var errs errutil.Errors
 
 	for _, pkgName := range getSortedPackageIndexKeys(index) {
 		for _, file := range index[pkgName].Files {
 			filePath := r.GetFullPackagePath(file)
-			hasSignature, err := sign.HasSignature(filePath)
+			hasSign, err := sign.IsPackageSigned(filePath)
 
 			if err != nil {
 				errs.Add(fmt.Errorf(
@@ -387,7 +387,7 @@ func checkRepositorySignatures(pb *progress.Bar, r *repo.SubRepository, privateK
 				continue
 			}
 
-			if !hasSignature {
+			if !hasSign {
 				errs.Add(fmt.Errorf(
 					"Package %s in %s repository contains file %s without signature",
 					pkgName, r.Name, file.Path,
@@ -396,7 +396,7 @@ func checkRepositorySignatures(pb *progress.Bar, r *repo.SubRepository, privateK
 				continue
 			}
 
-			isSigned, err := sign.IsSigned(filePath, privateKey)
+			isSignValid, err := sign.IsPackageSignatureValid(filePath, key)
 
 			if err != nil {
 				errs.Add(fmt.Errorf(
@@ -407,7 +407,7 @@ func checkRepositorySignatures(pb *progress.Bar, r *repo.SubRepository, privateK
 				continue
 			}
 
-			if !isSigned {
+			if !isSignValid {
 				errs.Add(fmt.Errorf(
 					"Package %s in %s repository contains file %s signed with different key",
 					pkgName, r.Name, file.Path,
@@ -445,7 +445,7 @@ func printCheckErrorsInfo(errs errutil.Errors) bool {
 
 	errsList := errs.All()
 
-	terminal.PrintErrorMessage(
+	terminal.Error(
 		"Found %s %s. First %s %s:\n",
 		fmtutil.PrettyNum(errs.Num()),
 		pluralize.Pluralize(errs.Num(), "problem", "problems"),
@@ -454,7 +454,7 @@ func printCheckErrorsInfo(errs errutil.Errors) bool {
 	)
 
 	for i := 0; i < mathutil.Min(errs.Num(), checkMaxErrNum); i++ {
-		terminal.PrintErrorMessage(" • %v", errsList[i])
+		terminal.Error(" • %v", errsList[i])
 	}
 
 	return false

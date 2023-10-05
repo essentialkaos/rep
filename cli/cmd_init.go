@@ -25,7 +25,7 @@ func cmdInit(ctx *context, args options.Arguments) bool {
 
 	for _, arch := range archList {
 		if !sliceutil.Contains(supportedArchs, arch) {
-			terminal.PrintErrorMessage("Architecture %q is not supported (typo?)", arch)
+			terminal.Error("Architecture %q is not supported (typo?)", arch)
 			return false
 		}
 	}
@@ -33,7 +33,7 @@ func cmdInit(ctx *context, args options.Arguments) bool {
 	err := ctx.Repo.Initialize(archList)
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
+		terminal.Error(err.Error())
 		return false
 	}
 

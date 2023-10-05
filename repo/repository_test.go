@@ -337,7 +337,9 @@ func (s *RepoSuite) TestRepositoryInfo(c *C) {
 	c.Assert(err, NotNil)
 	_, err = r.Testing.collectPackagePayloadInfo("", "")
 	c.Assert(err, NotNil)
-	_, err = r.Testing.collectPackageChangelogInfo("", "")
+	err = r.Testing.appendPackageChangelogInfo(nil, "", "")
+	c.Assert(err, NotNil)
+	err = r.Testing.appendPackageChangelogInfo(&Package{}, "", "")
 	c.Assert(err, NotNil)
 	_, _, err = r.Testing.collectPackageBasicInfo("", "")
 	c.Assert(err, NotNil)
@@ -403,13 +405,13 @@ func (s *RepoSuite) TestSubRepositoryAddPackage(c *C) {
 
 	err = r.Testing.AddPackage("../testdata/test-package-1.0.0-0.el7.x86_64.rpm")
 	c.Assert(err, NotNil)
-	c.Assert(err, ErrorMatches, `Can't add file to repository: Repository allows only singed packages`)
+	c.Assert(err, ErrorMatches, `Can't add file to repository: Repository allows only signed packages`)
 
-	r.SigningKey = &sign.Key{}
+	r.SigningKey = &sign.ArmoredKey{}
 
 	err = r.Testing.AddPackage("../testdata/test-package-1.0.0-0.el7.x86_64.rpm")
 	c.Assert(err, NotNil)
-	c.Assert(err, ErrorMatches, `Can't add file to repository: Private key is empty`)
+	c.Assert(err, ErrorMatches, `Can't add file to repository: Key is empty`)
 
 	r.SigningKey = nil
 

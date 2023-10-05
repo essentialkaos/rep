@@ -13,7 +13,7 @@
 
 <br/>
 
-`rep` is a YUM repository management utility.
+`rep` is a DNF/YUM repository management utility.
 
 ### Usage demo
 

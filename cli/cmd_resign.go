@@ -26,8 +26,12 @@ import (
 // cmdSign is 'resign' command handler
 func cmdResign(ctx *context, args options.Arguments) bool {
 	if !options.GetB(OPT_FORCE) {
-		terminal.PrintWarnMessage("▲ This command will re-sign all packages in the repo. This action")
-		terminal.PrintWarnMessage("  can take a lot of time (depending on how many packages you have).\n")
+		terminal.Warn("Command can take a lot of time",
+			`This command will re-sign all packages in the repo. Re-sign process requires 
+rewriting {*}every{!} package in repository and can take a lot of time (depending on 
+how many packages you have and how big they are).`)
+
+		fmtc.NewLine()
 
 		ok, err := terminal.ReadAnswer("Do you really want to re-sign all packages?", "n")
 
@@ -38,22 +42,22 @@ func cmdResign(ctx *context, args options.Arguments) bool {
 		fmtc.NewLine()
 	}
 
-	privateKey, ok := getRepoPrivateKey(ctx.Repo)
+	key, ok := getRepoSigningKey(ctx.Repo)
 
 	if !ok {
 		return false
 	}
 
-	return resignAllPackages(ctx, privateKey)
+	return resignAllPackages(ctx, key)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // resignAllPackages re-singes all packages in testing and release repositories
-func resignAllPackages(ctx *context, privateKey *sign.PrivateKey) bool {
+func resignAllPackages(ctx *context, key *sign.Key) bool {
 	var isResigned bool
 
-	if !resignRepoPackages(ctx, privateKey, ctx.Repo.Testing) {
+	if !resignRepoPackages(ctx, key, ctx.Repo.Testing) {
 		ctx.Logger.Get(data.REPO_TESTING).Print("Packages re-signing finished with error")
 		return false
 	} else {
@@ -61,7 +65,7 @@ func resignAllPackages(ctx *context, privateKey *sign.PrivateKey) bool {
 		fmtc.NewLine()
 	}
 
-	if !resignRepoPackages(ctx, privateKey, ctx.Repo.Release) {
+	if !resignRepoPackages(ctx, key, ctx.Repo.Release) {
 		ctx.Logger.Get(data.REPO_RELEASE).Print("Packages re-signing finished with error")
 		return false
 	} else {
@@ -78,13 +82,13 @@ func resignAllPackages(ctx *context, privateKey *sign.PrivateKey) bool {
 }
 
 // resignRepoPackages re-signs all packages in given repository
-func resignRepoPackages(ctx *context, privateKey *sign.PrivateKey, r *repo.SubRepository) bool {
+func resignRepoPackages(ctx *context, key *sign.Key, r *repo.SubRepository) bool {
 	stack, err := r.List("", true)
 
 	ctx.Logger.Get(r.Name).Print("Started packages re-signing")
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
+		terminal.Error(err.Error())
 		return false
 	}
 
@@ -96,7 +100,7 @@ func resignRepoPackages(ctx *context, privateKey *sign.PrivateKey, r *repo.SubRe
 	tmpDir, err := ctx.Temp.MkDir("rep")
 
 	if err != nil {
-		terminal.PrintErrorMessage("Can't create temporary directory: %v", err)
+		terminal.Error("Can't create temporary directory: %v", err)
 		return false
 	}
 
@@ -119,11 +123,11 @@ func resignRepoPackages(ctx *context, privateKey *sign.PrivateKey, r *repo.SubRe
 		fileName := path.Base(filePath)
 		tmpFile := path.Join(tmpDir, fileName)
 
-		err = sign.Sign(filePath, tmpFile, privateKey)
+		err = sign.SignPackage(filePath, tmpFile, key)
 
 		if err != nil {
 			pb.Finish()
-			terminal.PrintErrorMessage("Can't re-sign package: %v", err)
+			terminal.Error("Can't re-sign package: %v", err)
 			return false
 		}
 
@@ -131,7 +135,7 @@ func resignRepoPackages(ctx *context, privateKey *sign.PrivateKey, r *repo.SubRe
 
 		if err != nil {
 			pb.Finish()
-			terminal.PrintErrorMessage("Can't re-sign package: %v", err)
+			terminal.Error("Can't re-sign package: %v", err)
 			return false
 		}
 

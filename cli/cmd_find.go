@@ -26,7 +26,7 @@ func cmdFind(ctx *context, args options.Arguments) bool {
 	searchRequest, err := query.Parse(args.Strings())
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
+		terminal.Error(err.Error())
 		return false
 	}
 
@@ -90,7 +90,7 @@ func findAndShowPackages(r *repo.SubRepository, searchRequest *query.Request) bo
 	stack, err := findPackages(r, searchRequest)
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
+		terminal.Error(err.Error())
 		return false
 	}
 

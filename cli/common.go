@@ -155,7 +155,7 @@ func runCommand(repoCfg *knf.Config, cmdName string, cmdArgs options.Arguments) 
 	ctx, err := getRepoContext(repoCfg)
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error() + "\n")
+		terminal.Error(err.Error() + "\n")
 		return false
 	}
 
@@ -178,7 +178,7 @@ func runCommand(repoCfg *knf.Config, cmdName string, cmdArgs options.Arguments) 
 
 	if cmd.RequireLock() {
 		if !checkForLock() {
-			terminal.PrintErrorMessage("Can't run command due to lock\n")
+			terminal.Error("Can't run command due to lock\n")
 			return false
 		}
 
@@ -222,7 +222,7 @@ func checkCommand(cmdName string, args options.Arguments) bool {
 	}
 
 	if len(args) < cmd.MinArgs {
-		terminal.PrintErrorMessage("Command '%s' requires more arguments (at least %d)\n", cmdName, cmd.MinArgs)
+		terminal.Error("Command '%s' requires more arguments (at least %d)\n", cmdName, cmd.MinArgs)
 		return false
 	}
 
@@ -357,13 +357,13 @@ func getRepoFSStorage(repoCfg *knf.Config) (*fs.Storage, error) {
 			Deltas:         knf.GetB(INDEX_DELTAS),
 			NumDeltas:      knf.GetI(INDEX_NUM_DELTAS),
 			MDFilenames:    knf.GetS(INDEX_MD_FILENAMES, index.MDF_SIMPLE),
-			CompressType:   knf.GetS(INDEX_REVISION, index.COMPRESSION_BZ2),
 			CheckSum:       knf.GetS(INDEX_CHECKSUM, index.CHECKSUM_SHA256),
 			ChangelogLimit: knf.GetI(INDEX_CHANGELOG_LIMIT),
 			Distro:         knf.GetS(INDEX_DISTRO),
 			Content:        knf.GetS(INDEX_CONTENT),
 			Revision:       knf.GetS(INDEX_REVISION),
 			Workers:        knf.GetI(INDEX_WORKERS, 0),
+			CompressType:   knf.GetS(INDEX_COMPRESSION_TYPE, index.COMPRESSION_XZ),
 		},
 	)
 }
@@ -413,7 +413,7 @@ func checkRPMFiles(files []string) bool {
 		err := fsutil.ValidatePerms("FRS", file)
 
 		if err != nil {
-			terminal.PrintErrorMessage(err.Error())
+			terminal.Error(err.Error())
 			hasErrors = true
 		}
 	}
@@ -428,22 +428,22 @@ func isSignRequired(r *repo.SubRepository, files []string) bool {
 	}
 
 	// We don't decrypt key, because we can check signature without decrypting
-	privateKey, err := r.Parent.SigningKey.Get(nil)
+	key, err := r.Parent.SigningKey.Read(nil)
 
 	if err != nil {
 		return true
 	}
 
 	for _, file := range files {
-		hasSignature, err := sign.HasSignature(file)
+		isSigned, err := sign.IsPackageSigned(file)
 
-		if err != nil || !hasSignature {
+		if err != nil || !isSigned {
 			return true
 		}
 
-		isSigned, err := sign.IsSigned(file, privateKey)
+		isSignValid, err := sign.IsPackageSignatureValid(file, key)
 
-		if err != nil || !isSigned {
+		if err != nil || !isSignValid {
 			return true
 		}
 	}
@@ -451,10 +451,10 @@ func isSignRequired(r *repo.SubRepository, files []string) bool {
 	return false
 }
 
-// getRepoPrivateKey reads password and decrypts repository private key
-func getRepoPrivateKey(r *repo.Repository) (*sign.PrivateKey, bool) {
+// getRepoSigningKey reads password and decrypts repository private key
+func getRepoSigningKey(r *repo.Repository) (*sign.Key, bool) {
 	if r.SigningKey == nil {
-		terminal.PrintWarnMessage("No signing key defined in configuration file")
+		terminal.Warn("No signing key defined in configuration file")
 		return nil, false
 	}
 
@@ -471,16 +471,16 @@ func getRepoPrivateKey(r *repo.Repository) (*sign.PrivateKey, bool) {
 
 	fmtc.NewLine()
 
-	privateKey, err := r.SigningKey.Get(password)
+	key, err := r.SigningKey.Read(password)
 
 	password.Destroy()
 
 	if err != nil {
-		terminal.PrintErrorMessage("Can't decrypt private key (wrong passphrase?)")
+		terminal.Error("Can't decrypt the secret key (wrong passphrase?)")
 		return nil, false
 	}
 
-	return privateKey, true
+	return key, true
 }
 
 // smartPackageSearch uses queary search or simple search based on given command

@@ -26,12 +26,12 @@ func cmdRelease(ctx *context, args options.Arguments) bool {
 	stack, filter, err := smartPackageSearch(ctx.Repo.Testing, args)
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
+		terminal.Error(err.Error())
 		return false
 	}
 
 	if stack.IsEmpty() {
-		terminal.PrintWarnMessage("No packages found")
+		terminal.Warn("No packages found")
 		return false
 	}
 
@@ -105,7 +105,7 @@ func releasePackageFile(ctx *context, file repo.PackageFile) bool {
 		spinner.Update("Can't release {?package}%s{!}%s", fileName, archTag)
 
 		spinner.Done(false)
-		terminal.PrintErrorMessage("   %v", err)
+		terminal.Error("   %v", err)
 
 		return false
 	}

@@ -15,7 +15,7 @@
 
 Summary:        YUM repository management utility
 Name:           rep
-Version:        3.1.2
+Version:        3.2.0
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache 2.0
@@ -107,6 +107,13 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Thu Oct 05 2023 Anton Novojilov <andy@essentialkaos.com> - 3.2.0-0
+- Added xz compression support for repository metadata
+- Added zst compression support for repository metadata
+- Added changelog date to 'info' command output
+- Improved changelog record search
+- Fixed bug with using compression type defined in configuration file
+
 * Tue Jun 27 2023 Anton Novojilov <andy@essentialkaos.com> - 3.1.2-0
 - Minor UI fix
 - Dependencies update

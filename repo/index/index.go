@@ -37,9 +37,10 @@ const (
 )
 
 const (
-	COMPRESSION_GZ  = "gz"
-	COMPRESSION_BZ2 = "bz2"
-	COMPRESSION_XZ  = "xz"
+	COMPRESSION_GZ   = "gz"
+	COMPRESSION_BZ2  = "bz2"
+	COMPRESSION_XZ   = "xz"
+	COMPRESSION_ZSTD = "zstd"
 )
 
 const (
@@ -98,13 +99,14 @@ var CompressionMethods = []string{
 	COMPRESSION_GZ,
 	COMPRESSION_BZ2,
 	COMPRESSION_XZ,
+	COMPRESSION_ZSTD,
 }
 
 // DefaultOptions is default options
 var DefaultOptions = &Options{
 	Update:       true,
 	MDFilenames:  MDF_SIMPLE,
-	CompressType: COMPRESSION_BZ2,
+	CompressType: COMPRESSION_XZ,
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -296,9 +298,15 @@ func (o *Options) ToArgs() []string {
 	}
 
 	if o.CompressType != "" {
-		args = append(args, "--compress-type="+o.CompressType)
+		args = append(args,
+			"--compress-type="+o.CompressType,
+			"--general-compress-type="+o.CompressType,
+		)
 	} else {
-		args = append(args, "--compress-type="+COMPRESSION_BZ2)
+		args = append(args,
+			"--compress-type="+COMPRESSION_BZ2,
+			"--general-compress-type="+COMPRESSION_BZ2,
+		)
 	}
 
 	if o.Zchunk {

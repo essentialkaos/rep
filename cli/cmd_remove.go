@@ -30,7 +30,7 @@ func cmdRemove(ctx *context, args options.Arguments) bool {
 	testingStack, filter, err = smartPackageSearch(ctx.Repo.Testing, args)
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
+		terminal.Error(err.Error())
 		return false
 	}
 
@@ -38,13 +38,13 @@ func cmdRemove(ctx *context, args options.Arguments) bool {
 		releaseStack, _, err = smartPackageSearch(ctx.Repo.Release, args)
 
 		if err != nil {
-			terminal.PrintErrorMessage(err.Error())
+			terminal.Error(err.Error())
 			return false
 		}
 	}
 
 	if testingStack.IsEmpty() && releaseStack.IsEmpty() {
-		terminal.PrintWarnMessage("No packages found")
+		terminal.Warn("No packages found")
 		return false
 	}
 
@@ -153,7 +153,7 @@ func removePackageFile(ctx *context, r *repo.SubRepository, file repo.PackageFil
 		)
 
 		spinner.Done(false)
-		terminal.PrintErrorMessage("   %v", err)
+		terminal.Error("   %v", err)
 		return false
 	}
 

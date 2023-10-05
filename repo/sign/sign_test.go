@@ -8,7 +8,7 @@ package sign
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/essentialkaos/ek/v12/fsutil"
@@ -31,7 +31,7 @@ var _ = Suite(&SignSuite{})
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-func (s *SignSuite) TestSigning(c *C) {
+func (s *SignSuite) TestPackageSigning(c *C) {
 	srcDir := c.MkDir()
 	trgDir := c.MkDir()
 
@@ -40,80 +40,98 @@ func (s *SignSuite) TestSigning(c *C) {
 
 	fsutil.CopyFile("../../testdata/test-package-1.0.0-0.el7.x86_64.rpm", srcPkg, 0644)
 
-	hasSign, err := HasSignature(srcPkg)
+	hasSign, err := IsPackageSigned(srcPkg)
 
 	c.Assert(hasSign, Equals, false)
 	c.Assert(err, IsNil)
 
-	key, err := ReadKey("../../testdata/reptest.private")
+	armKey, err := ReadKey("../../testdata/reptest.private")
+
+	c.Assert(armKey, NotNil)
+	c.Assert(err, IsNil)
+
+	key, err := armKey.Read(nil)
 
 	c.Assert(key, NotNil)
 	c.Assert(err, IsNil)
 
-	privKey, err := key.Get(nil)
-
-	c.Assert(privKey, NotNil)
-	c.Assert(err, IsNil)
-
 	// Private key is encrypted
-	c.Assert(Sign(srcPkg, trgPkg, privKey), NotNil)
+	c.Assert(SignPackage(srcPkg, trgPkg, key), NotNil)
 
 	password, _ := secstr.NewSecureString("test1234TEST")
-	privKey, err = key.Get(password)
+	key, err = armKey.Read(password)
 
-	c.Assert(privKey, NotNil)
+	c.Assert(key, NotNil)
 	c.Assert(err, IsNil)
 
-	isSigned, err := IsSigned(srcPkg, privKey)
+	isSigned, err := IsPackageSignatureValid(srcPkg, key)
 
 	c.Assert(isSigned, Equals, false)
 	c.Assert(err, IsNil)
 
-	c.Assert(Sign(srcPkg, trgPkg, privKey), IsNil)
+	c.Assert(SignPackage(srcPkg, trgPkg, key), IsNil)
 
-	isSigned, err = IsSigned(trgPkg, privKey)
+	isSigned, err = IsPackageSignatureValid(trgPkg, key)
 
 	c.Assert(isSigned, Equals, true)
 	c.Assert(err, IsNil)
 }
 
-func (s *SignSuite) TestReadKey(c *C) {
-	key, err := ReadKey("../../testdata/reptest.private")
-	c.Assert(key, NotNil)
-	c.Assert(err, IsNil)
+func (s *SignSuite) TestFileSigning(c *C) {
+	tmpDir := c.MkDir()
+	armKey, err := ReadKey("../../testdata/reptest.private")
 
-	privKey, err := key.Get(nil)
-	c.Assert(privKey, NotNil)
+	c.Assert(armKey, NotNil)
 	c.Assert(err, IsNil)
 
 	password, _ := secstr.NewSecureString("test1234TEST")
-	privKey, err = key.Get(password)
-	c.Assert(privKey, NotNil)
+	key, err := armKey.Read(password)
+
+	c.Assert(key, NotNil)
+	c.Assert(err, IsNil)
+
+	os.WriteFile(tmpDir+"/temp.txt", []byte("TEST1234ABCD!@#$"), 0644)
+
+	c.Assert(SignFile(tmpDir+"/temp.txt", key), IsNil)
+
+	c.Assert(SignFile(tmpDir+"/temp.txt", nil), NotNil)
+	c.Assert(SignFile("_unknown_", key), NotNil)
+	c.Assert(SignFile("/etc/passwd", key), NotNil)
+}
+
+func (s *SignSuite) TestReadKey(c *C) {
+	armKey, err := ReadKey("../../testdata/reptest.private")
+	c.Assert(armKey, NotNil)
+	c.Assert(err, IsNil)
+
+	key, err := armKey.Read(nil)
+	c.Assert(key, NotNil)
+	c.Assert(err, IsNil)
+
+	password, _ := secstr.NewSecureString("test1234TEST")
+	key, err = armKey.Read(password)
+	c.Assert(key, NotNil)
 	c.Assert(err, IsNil)
 
 	password, _ = secstr.NewSecureString("123")
-	privKey, err = key.Get(password)
+	key, err = armKey.Read(password)
 	c.Assert(err, ErrorMatches, "openpgp: invalid data: private key checksum failure")
 
 	_, err = ReadKey("/_unknown_")
 	c.Assert(err, ErrorMatches, "open /_unknown_: no such file or directory")
 
 	tmpFile := c.MkDir() + "/key.private"
-	ioutil.WriteFile(tmpFile, []byte("TEST"), 0640)
+	os.WriteFile(tmpFile, []byte("TEST"), 0640)
 	_, err = ReadKey(tmpFile)
 	c.Assert(err, ErrorMatches, "openpgp: invalid argument: no armored data found")
 
-	key = &Key{false, []byte{}}
-	_, err = key.Get(password)
-	c.Assert(err, ErrorMatches, "Private key is empty")
+	armKey = &ArmoredKey{false, []byte{}}
+	_, err = armKey.Read(password)
+	c.Assert(err, ErrorMatches, ErrKeyIsEmpty.Error())
 
-	key = &Key{false, []byte("TEST")}
-	_, err = key.Get(password)
+	armKey = &ArmoredKey{false, []byte("TEST")}
+	_, err = armKey.Read(password)
 	c.Assert(err, ErrorMatches, "openpgp: invalid argument: no armored data found")
-}
-
-func (s *SignSuite) TestEmptyKeyring(c *C) {
-
 }
 
 func (s *SignSuite) TestErrors(c *C) {
@@ -122,33 +140,33 @@ func (s *SignSuite) TestErrors(c *C) {
 	c.Assert(err, NotNil)
 	c.Assert(err, Equals, ErrKeyringIsEmpty)
 
-	key, err := ReadKey("../../testdata/reptest.private")
+	armKey, err := ReadKey("../../testdata/reptest.private")
 
 	c.Assert(err, IsNil)
-	c.Assert(key, NotNil)
-	c.Assert(key.IsEncrypted, Equals, true)
+	c.Assert(armKey, NotNil)
+	c.Assert(armKey.IsEncrypted, Equals, true)
 
 	password, _ := secstr.NewSecureString("test1234TEST")
 
-	_, err = HasSignature("_unknown_")
+	_, err = IsPackageSigned("_unknown_")
 	c.Assert(err, NotNil)
 
-	_, err = IsSigned("_unknown_", nil)
+	_, err = IsPackageSignatureValid("_unknown_", nil)
 	c.Assert(err, NotNil)
 
-	err = Sign("_unknown_", "_unknown_", nil)
+	err = SignPackage("_unknown_", "_unknown_", nil)
 	c.Assert(err, NotNil)
 
-	privKey, _ := key.Get(password)
+	key, _ := armKey.Read(password)
 
-	_, err = IsSigned("_unknown_", privKey)
+	_, err = IsPackageSignatureValid("_unknown_", key)
 	c.Assert(err, NotNil)
 
-	err = Sign("_unknown_", "_unknown_", privKey)
+	err = SignPackage("_unknown_", "_unknown_", key)
 	c.Assert(err, NotNil)
 
 	hdr, _ := readHeader("../../testdata/test-package-1.0.0-0.el7.x86_64.rpm")
-	_, err = checkSignature(hdr, privKey)
+	_, err = checkSignature(hdr, key.entity.PrivateKey)
 	c.Assert(err, NotNil)
 
 	_, err = checkSignaturePacket([]byte("ABCD"), nil)

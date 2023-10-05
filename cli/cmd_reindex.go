@@ -71,7 +71,7 @@ func reindexRepository(ctx *context, r *repo.SubRepository, full bool) bool {
 	isCancelProtected = false
 
 	if err != nil {
-		terminal.PrintErrorMessage("   %v", err)
+		terminal.Error("   %v", err)
 		return false
 	}
 

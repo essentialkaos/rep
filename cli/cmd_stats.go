@@ -30,7 +30,7 @@ func cmdStats(ctx *context, args options.Arguments) bool {
 		stats, err := ctx.Repo.Release.Stats()
 
 		if err != nil {
-			terminal.PrintErrorMessage(err.Error())
+			terminal.Error(err.Error())
 			return false
 		}
 
@@ -43,7 +43,7 @@ func cmdStats(ctx *context, args options.Arguments) bool {
 		stats, err := ctx.Repo.Testing.Stats()
 
 		if err != nil {
-			terminal.PrintErrorMessage(err.Error())
+			terminal.Error(err.Error())
 			return false
 		}
 

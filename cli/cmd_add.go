@@ -30,7 +30,7 @@ func cmdAdd(ctx *context, args options.Arguments) bool {
 	files = filterRPMPackages(ctx, files)
 
 	if len(files) == 0 {
-		terminal.PrintWarnMessage("There are no RPM packages to add")
+		terminal.Warn("There are no RPM packages to add")
 		return false
 	}
 
@@ -54,13 +54,13 @@ func cmdAdd(ctx *context, args options.Arguments) bool {
 		return addRPMFiles(ctx, files, nil)
 	}
 
-	privateKey, ok := getRepoPrivateKey(ctx.Repo)
+	signingKey, ok := getRepoSigningKey(ctx.Repo)
 
 	if !ok {
 		return false
 	}
 
-	return addRPMFiles(ctx, files, privateKey)
+	return addRPMFiles(ctx, files, signingKey)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -76,11 +76,11 @@ func printFilesList(files []string) {
 }
 
 // addRPMFiles adds given RPM files to testing repository
-func addRPMFiles(ctx *context, files []string, privateKey *sign.PrivateKey) bool {
+func addRPMFiles(ctx *context, files []string, signingKey *sign.Key) bool {
 	tmpDir, err := ctx.Temp.MkDir("rep")
 
 	if err != nil {
-		terminal.PrintErrorMessage("Can't create temporary directory: %v", err)
+		terminal.Error("Can't create temporary directory: %v", err)
 		return false
 	}
 
@@ -89,7 +89,7 @@ func addRPMFiles(ctx *context, files []string, privateKey *sign.PrivateKey) bool
 	var hasErrors, hasAdded bool
 
 	for _, file := range files {
-		ok := addRPMFile(ctx, file, tmpDir, privateKey)
+		ok := addRPMFile(ctx, file, tmpDir, signingKey)
 
 		if isCanceled {
 			return false
@@ -114,7 +114,7 @@ func addRPMFiles(ctx *context, files []string, privateKey *sign.PrivateKey) bool
 }
 
 // addRPMFile adds given RPM file to testing repository
-func addRPMFile(ctx *context, file, tmpDir string, privateKey *sign.PrivateKey) bool {
+func addRPMFile(ctx *context, file, tmpDir string, signingKey *sign.Key) bool {
 	var err error
 
 	fileName := path.Base(file)
@@ -162,19 +162,19 @@ func addRPMFile(ctx *context, file, tmpDir string, privateKey *sign.PrivateKey) 
 
 	pkgFile := file
 
-	if privateKey != nil {
-		isSigned, err := sign.IsSigned(file, privateKey)
+	if signingKey != nil {
+		isSignValid, err := sign.IsPackageSignatureValid(file, signingKey)
 
 		if err != nil {
 			printSpinnerAddError(fileName, fmt.Sprintf("Can't check package signature: %v", err))
 			return false
 		}
 
-		if !isSigned {
+		if !isSignValid {
 			spinner.Update("Signing {?package}%s{!}", fileName)
 
 			pkgFile = path.Join(tmpDir, fileName)
-			err = sign.Sign(file, pkgFile, privateKey)
+			err = sign.SignPackage(file, pkgFile, signingKey)
 
 			if err != nil {
 				printSpinnerAddError(fileName, fmt.Sprintf("Can't sign package: %v", err))
@@ -216,7 +216,7 @@ func addRPMFile(ctx *context, file, tmpDir string, privateKey *sign.PrivateKey) 
 func printSpinnerAddError(fileName string, err string) {
 	spinner.Update("Can't add {?package}%s{!}", fileName)
 	spinner.Done(false)
-	terminal.PrintErrorMessage("   %v", err)
+	terminal.Error("   %v", err)
 }
 
 // filterRPMPackages filters packages using repository file filter pattern

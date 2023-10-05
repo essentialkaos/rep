@@ -57,7 +57,7 @@ func findSources(r *repo.SubRepository, args options.Arguments) bool {
 	stack, _, err := smartPackageSearch(r, args)
 
 	if err != nil {
-		terminal.PrintErrorMessage(err.Error())
+		terminal.Error(err.Error())
 		return false
 	}
 

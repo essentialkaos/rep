@@ -71,13 +71,13 @@ func (s *KeygenSuite) TestFullCycle(c *C) {
 	c.Assert(privKeyData, NotNil)
 	c.Assert(pubKeyData, NotNil)
 
-	k, err := sign.LoadKey(privKeyData)
+	armKey, err := sign.LoadKey(privKeyData)
 
 	c.Assert(err, IsNil)
-	c.Assert(k, NotNil)
+	c.Assert(armKey, NotNil)
 
-	privKey, err := k.Get(p)
+	key, err := armKey.Read(p)
 
 	c.Assert(err, IsNil)
-	c.Assert(privKey, NotNil)
+	c.Assert(key, NotNil)
 }

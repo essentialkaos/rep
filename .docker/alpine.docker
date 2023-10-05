@@ -4,7 +4,7 @@ ARG REGISTRY="docker.io"
 
 ## CREATEREPO_C BUILDER ########################################################
 
-FROM ${REGISTRY}/essentialkaos/alpine:3.16 as cr-builder
+FROM ${REGISTRY}/essentialkaos/alpine:3.17 as cr-builder
 
 ARG VERSION=0.20.1
 
@@ -33,10 +33,10 @@ RUN apk add --no-cache git make gcc musl-dev && \
 
 ## FINAL IMAGE #################################################################
 
-FROM ${REGISTRY}/essentialkaos/alpine:3.16
+FROM ${REGISTRY}/essentialkaos/alpine:3.17
 
 LABEL org.opencontainers.image.title="rep" \
-      org.opencontainers.image.description="YUM repository management utility" \
+      org.opencontainers.image.description="DNF/YUM repository management utility" \
       org.opencontainers.image.vendor="ESSENTIAL KAOS" \
       org.opencontainers.image.authors="Anton Novojilov" \
       org.opencontainers.image.licenses="Apache-2.0" \
