@@ -108,6 +108,8 @@ rm -rf %{buildroot}
 
 %changelog
 * Thu Oct 05 2023 Anton Novojilov <andy@essentialkaos.com> - 3.2.0-0
+- Added xz compression support for repository metadata
+- Added zst compression support for repository metadata
 - Added changelog date to 'info' command output
 - Improved changelog record search
 

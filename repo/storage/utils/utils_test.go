@@ -54,6 +54,16 @@ func (s *UtilsSuite) TestUnpack(c *C) {
 
 	c.Assert(err, IsNil)
 	c.Assert(hash.FileHash(dbFile), Equals, dbHash)
+
+	err = UnpackDB("../../../testdata/sqlite/db.sqlite.xz", dbFile)
+
+	c.Assert(err, IsNil)
+	c.Assert(hash.FileHash(dbFile), Equals, dbHash)
+
+	err = UnpackDB("../../../testdata/sqlite/db.sqlite.zst", dbFile)
+
+	c.Assert(err, IsNil)
+	c.Assert(hash.FileHash(dbFile), Equals, dbHash)
 }
 
 func (s *UtilsSuite) TestUnpackErrors(c *C) {

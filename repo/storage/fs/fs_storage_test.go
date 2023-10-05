@@ -483,11 +483,11 @@ func (s *StorageSuite) TestStorageReindex(c *C) {
 	err = fs.Reindex(data.REPO_TESTING, data.ARCH_X64, false)
 	c.Assert(err, IsNil)
 	c.Assert(fsutil.CheckPerms("FRS", fs.dataOptions.DataDir+"/testing/x86_64/repodata/filelists.sqlite.bz2"), Equals, true)
-	c.Assert(fsutil.CheckPerms("FRS", fs.dataOptions.DataDir+"/testing/x86_64/repodata/filelists.xml.gz"), Equals, true)
+	c.Assert(fsutil.CheckPerms("FRS", fs.dataOptions.DataDir+"/testing/x86_64/repodata/filelists.xml.bz2"), Equals, true)
 	c.Assert(fsutil.CheckPerms("FRS", fs.dataOptions.DataDir+"/testing/x86_64/repodata/other.sqlite.bz2"), Equals, true)
-	c.Assert(fsutil.CheckPerms("FRS", fs.dataOptions.DataDir+"/testing/x86_64/repodata/other.xml.gz"), Equals, true)
+	c.Assert(fsutil.CheckPerms("FRS", fs.dataOptions.DataDir+"/testing/x86_64/repodata/other.xml.bz2"), Equals, true)
 	c.Assert(fsutil.CheckPerms("FRS", fs.dataOptions.DataDir+"/testing/x86_64/repodata/primary.sqlite.bz2"), Equals, true)
-	c.Assert(fsutil.CheckPerms("FRS", fs.dataOptions.DataDir+"/testing/x86_64/repodata/primary.xml.gz"), Equals, true)
+	c.Assert(fsutil.CheckPerms("FRS", fs.dataOptions.DataDir+"/testing/x86_64/repodata/primary.xml.bz2"), Equals, true)
 	c.Assert(fsutil.CheckPerms("FRS", fs.dataOptions.DataDir+"/testing/x86_64/repodata/repomd.xml"), Equals, true)
 }
 

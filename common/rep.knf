@@ -56,7 +56,7 @@
   # Number of workers to spawn to read RPMs
   workers:
 
-  # Which compression type to use (gz/bz2/xz)
+  # Which compression type to use (gz/bz2/xz/zstd)
   compression-type: bz2
 
 [log]

@@ -37,9 +37,10 @@ const (
 )
 
 const (
-	COMPRESSION_GZ  = "gz"
-	COMPRESSION_BZ2 = "bz2"
-	COMPRESSION_XZ  = "xz"
+	COMPRESSION_GZ   = "gz"
+	COMPRESSION_BZ2  = "bz2"
+	COMPRESSION_XZ   = "xz"
+	COMPRESSION_ZSTD = "zstd"
 )
 
 const (
