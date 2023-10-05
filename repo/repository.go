@@ -1085,6 +1085,10 @@ func (r *SubRepository) collectPackageBasicInfo(name, arch string) (*Package, st
 
 // appendPackageChangelogInfo appends changelog records for package
 func (r *SubRepository) appendPackageChangelogInfo(pkg *Package, pkgID, arch string) error {
+	if pkg == nil {
+		return fmt.Errorf("Can't append changelog records: package is nil")
+	}
+
 	version := fmt.Sprintf("%% - %s-%s", pkg.Version, formatReleaseVersion(pkg.Release))
 	rows, err := r.execQuery(data.DB_OTHER, arch, _SQL_INFO_CHANGELOG, pkgID, version)
 
