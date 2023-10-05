@@ -31,7 +31,7 @@ jobs:
 
     env:
       CR_REPO: rpm-software-management/createrepo_c
-      CR_VERSION: 0.20.1
+      CR_VERSION: 1.0.0
 
     steps:
       - name: Install build dependencies
