@@ -87,7 +87,7 @@ func unreleasePackagesFiles(ctx *context, files []repo.PackageFile) bool {
 		unreleased = true
 	}
 
-	if unreleased {
+	if unreleased && !options.GetB(OPT_POSTPONE_INDEX) {
 		fmtc.NewLine()
 
 		reindexRepository(ctx, ctx.Repo.Release, false)

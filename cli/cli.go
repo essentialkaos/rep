@@ -44,7 +44,7 @@ import (
 // App info
 const (
 	APP  = "rep"
-	VER  = "3.2.0"
+	VER  = "3.3.0"
 	DESC = "DNF/YUM repository management utility"
 )
 
@@ -144,22 +144,23 @@ const (
 
 // Options
 const (
-	OPT_TESTING       = "t:testing"
-	OPT_RELEASE       = "r:release"
-	OPT_ALL           = "a:all"
-	OPT_ARCH          = "aa:arch"
-	OPT_MOVE          = "m:move"
-	OPT_NO_SOURCE     = "ns:no-source"
-	OPT_IGNORE_FILTER = "if:ignore-filter"
-	OPT_FORCE         = "f:force"
-	OPT_FULL          = "F:full"
-	OPT_SHOW_ALL      = "A:show-all"
-	OPT_EPOCH         = "E:epoch"
-	OPT_STATUS        = "S:status"
-	OPT_PAGER         = "P:pager"
-	OPT_NO_COLOR      = "nc:no-color"
-	OPT_HELP          = "h:help"
-	OPT_VER           = "v:version"
+	OPT_TESTING        = "t:testing"
+	OPT_RELEASE        = "r:release"
+	OPT_ALL            = "a:all"
+	OPT_ARCH           = "aa:arch"
+	OPT_MOVE           = "m:move"
+	OPT_NO_SOURCE      = "ns:no-source"
+	OPT_IGNORE_FILTER  = "if:ignore-filter"
+	OPT_POSTPONE_INDEX = "pi:postpone-index"
+	OPT_FORCE          = "f:force"
+	OPT_FULL           = "F:full"
+	OPT_SHOW_ALL       = "A:show-all"
+	OPT_EPOCH          = "E:epoch"
+	OPT_STATUS         = "S:status"
+	OPT_PAGER          = "P:pager"
+	OPT_NO_COLOR       = "nc:no-color"
+	OPT_HELP           = "h:help"
+	OPT_VER            = "v:version"
 
 	OPT_DEBUG    = "D:debug"
 	OPT_VERB_VER = "vv:verbose-version"
@@ -180,22 +181,23 @@ const CONFIG_DIR = "/etc/rep.d"
 
 // optMap is map with supported options
 var optMap = options.Map{
-	OPT_ARCH:          {},
-	OPT_TESTING:       {Type: options.BOOL},
-	OPT_RELEASE:       {Type: options.BOOL},
-	OPT_ALL:           {Type: options.BOOL},
-	OPT_MOVE:          {Type: options.BOOL},
-	OPT_NO_SOURCE:     {Type: options.BOOL},
-	OPT_IGNORE_FILTER: {Type: options.BOOL},
-	OPT_FORCE:         {Type: options.BOOL},
-	OPT_FULL:          {Type: options.BOOL},
-	OPT_SHOW_ALL:      {Type: options.BOOL},
-	OPT_EPOCH:         {Type: options.BOOL},
-	OPT_STATUS:        {Type: options.BOOL},
-	OPT_PAGER:         {Type: options.BOOL},
-	OPT_NO_COLOR:      {Type: options.BOOL},
-	OPT_HELP:          {Type: options.BOOL},
-	OPT_VER:           {Type: options.MIXED},
+	OPT_ARCH:           {},
+	OPT_TESTING:        {Type: options.BOOL},
+	OPT_RELEASE:        {Type: options.BOOL},
+	OPT_ALL:            {Type: options.BOOL},
+	OPT_MOVE:           {Type: options.BOOL},
+	OPT_NO_SOURCE:      {Type: options.BOOL},
+	OPT_IGNORE_FILTER:  {Type: options.BOOL},
+	OPT_POSTPONE_INDEX: {Type: options.BOOL},
+	OPT_FORCE:          {Type: options.BOOL},
+	OPT_FULL:           {Type: options.BOOL},
+	OPT_SHOW_ALL:       {Type: options.BOOL},
+	OPT_EPOCH:          {Type: options.BOOL},
+	OPT_STATUS:         {Type: options.BOOL},
+	OPT_PAGER:          {Type: options.BOOL},
+	OPT_NO_COLOR:       {Type: options.BOOL},
+	OPT_HELP:           {Type: options.BOOL},
+	OPT_VER:            {Type: options.MIXED},
 
 	OPT_DEBUG:    {Type: options.BOOL},
 	OPT_VERB_VER: {Type: options.BOOL},
@@ -618,16 +620,17 @@ func genUsage() *usage.Info {
 	info.AddOption(OPT_RELEASE, "Run command only on release {s}(stable){!} repository")
 	info.AddOption(OPT_TESTING, "Run command only on testing {s}(unstable){!} repository")
 	info.AddOption(OPT_ALL, "Run command on all repositories")
-	info.AddOption(OPT_ARCH, "Package architecture {s-}(helpful with \"info\" and \"payload\" commands){!}", "arch")
-	info.AddOption(OPT_MOVE, "Move {s}(remove after successful action){!} packages {s-}(helpful with \"add\" command){!}")
-	info.AddOption(OPT_NO_SOURCE, "Ignore source packages {s-}(helpful with \"add\" command){!}")
-	info.AddOption(OPT_IGNORE_FILTER, "Ignore repository file filter {s-}(helpful with \"add\" and \"sign\" commands){!}")
-	info.AddOption(OPT_FORCE, "Answer \"yes\" for all questions")
-	info.AddOption(OPT_FULL, "Full reindex {s-}(helpful with \"reindex\" command){!}")
-	info.AddOption(OPT_SHOW_ALL, "Show all versions of packages {s-}(helpful with \"list\" command){!}")
+	info.AddOption(OPT_ARCH, `Package architecture {s-}(helpful with "info" and "payload" commands){!}`, "arch")
+	info.AddOption(OPT_MOVE, `Move {s}(remove after successful action){!} packages {s-}(helpful with "add" command){!}`)
+	info.AddOption(OPT_NO_SOURCE, `Ignore source packages {s-}(helpful with "add" command){!}`)
+	info.AddOption(OPT_IGNORE_FILTER, `Ignore repository file filter {s-}(helpful with "add" and "sign" commands){!}`)
+	info.AddOption(OPT_POSTPONE_INDEX, `Postpone repository reindex {s-}(helpful with "add", "remove", "release", and "unrelase" commands){!}`)
+	info.AddOption(OPT_FORCE, `Answer "yes" for all questions`)
+	info.AddOption(OPT_FULL, `Full reindex {s-}(helpful with "reindex" command){!}`)
+	info.AddOption(OPT_SHOW_ALL, `Show all versions of packages {s-}(helpful with "list" command){!}`)
 	info.AddOption(OPT_STATUS, "Show package status {s-}(released or not){!}")
-	info.AddOption(OPT_EPOCH, "Show epoch info {s-}(helpful with \"list\" and \"which-source\" commands){!}")
-	info.AddOption(OPT_PAGER, "Run command in \"pager\" mode {s-}(i.e. don't disable colors and don't show raw output){!}")
+	info.AddOption(OPT_EPOCH, `Show epoch info {s-}(helpful with "list" and "which-source" commands){!}`)
+	info.AddOption(OPT_PAGER, `Run command in "pager" mode {s-}(i.e. don't disable colors and don't show raw output){!}`)
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")
 	info.AddOption(OPT_VER, "Show version")

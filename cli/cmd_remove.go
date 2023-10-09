@@ -121,7 +121,7 @@ func removePackagesFiles(ctx *context, releaseFiles, testingFiles []repo.Package
 
 	isCancelProtected = false
 
-	if releaseRemoved || testingRemoved {
+	if (releaseRemoved || testingRemoved) && !options.GetB(OPT_POSTPONE_INDEX) {
 		fmtc.NewLine()
 
 		if releaseRemoved {

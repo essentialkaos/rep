@@ -15,7 +15,7 @@
 
 Summary:        YUM repository management utility
 Name:           rep
-Version:        3.2.0
+Version:        3.3.0
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache 2.0
@@ -107,6 +107,10 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Mon Oct 09 2023 Anton Novojilov <andy@essentialkaos.com> - 3.3.0-0
+- Added -pi/--postpone-index option to postpone index rebuild after some
+  commands
+
 * Thu Oct 05 2023 Anton Novojilov <andy@essentialkaos.com> - 3.2.0-0
 - Added xz compression support for repository metadata
 - Added zst compression support for repository metadata
