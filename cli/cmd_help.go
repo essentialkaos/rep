@@ -42,12 +42,12 @@ type commandExample struct {
 // Usage shows basic usage info
 func (c *commandHelp) Usage() {
 	if len(configs) > 1 && !c.isGlobal {
-		fmtc.Print("{*}Usage:{!} rep {c}{repo-id}{!}")
+		fmtc.Print("{*}Usage:{!} rep {?repo}{repo-id}{!}")
 	} else {
 		fmtc.Print("{*}Usage:{!} rep")
 	}
 
-	fmtc.Printf(" {y}%s{!}", c.command)
+	fmtc.Printf(" {?cmd}%s{!}", c.command)
 
 	cmd := c.info.GetCommand(c.command)
 
@@ -63,7 +63,7 @@ func (c *commandHelp) Usage() {
 // Shortcut shows info about shortcut version of command
 func (c *commandHelp) Shortcut() {
 	fmtc.Println("{*}Shortcut:{!}\n")
-	fmtc.Printf("  {y}%s{!} → {y}%s{!}\n\n", c.command, c.shortcut)
+	fmtc.Printf("  {?cmd}%s{!} → {?cmd}%s{!}\n\n", c.command, c.shortcut)
 }
 
 // Examples shows usage examples
@@ -76,9 +76,9 @@ func (c *commandHelp) Examples() {
 
 	for index, example := range c.examples {
 		if len(configs) > 1 && !c.isGlobal {
-			fmtc.Printf("  rep {c}{repo-id}{!} {y}%s{!} {s}%s{!}\n", c.command, example.command)
+			fmtc.Printf("  rep {c}{repo-id}{!} {?cmd}%s{!} {?arg}%s{!}\n", c.command, example.command)
 		} else {
-			fmtc.Printf("  rep {y}%s{!} {s}%s{!}\n", c.command, example.command)
+			fmtc.Printf("  rep {?cmd}%s{!} {?arg}%s{!}\n", c.command, example.command)
 		}
 
 		fmtc.Printf("{&}{s-}%s{!}\n", fmtutil.Wrap(example.desc, "  ", 88))
@@ -97,10 +97,6 @@ func (c *commandHelp) Options() {
 		return
 	}
 
-	if len(c.examples) != 0 {
-		fmtc.NewLine()
-	}
-
 	fmtc.Println("{*}Options:{!}\n")
 
 	for _, option := range c.info.Options {
@@ -114,6 +110,8 @@ func (c *commandHelp) Options() {
 
 		option.Render()
 	}
+
+	fmtc.NewLine()
 }
 
 // Paragraph renders paragraph text
@@ -146,6 +144,10 @@ func (c *commandHelp) renderArgs(args []string) string {
 
 // cmdHelp is 'help' command handler
 func cmdHelp(ctx *context, args options.Arguments) bool {
+	fmtc.NameColor("cmd", usage.DEFAULT_COMMANDS_COLOR_TAG)
+	fmtc.NameColor("arg", "{s}")
+	fmtc.NameColor("repo", "{c}")
+
 	cmdName := args.Get(0)
 
 	switch cmdName {
@@ -190,7 +192,7 @@ func cmdHelp(ctx *context, args options.Arguments) bool {
 	case COMMAND_HELP, COMMAND_SHORT_HELP:
 		helpHelp()
 	default:
-		terminal.Error("Unknown command \"%s\"", cmdName)
+		terminal.Error("Unknown command %q", cmdName)
 		return false
 	}
 
@@ -212,7 +214,7 @@ func helpAll() {
 	}
 
 	fmtc.NewLine()
-	fmtc.Println("  {s}For detailed information about command use{!} {y}help {command}{!}")
+	fmtc.Println("  {s}For detailed information about command use{!} {?cmd}help {command}{!}")
 }
 
 // helpInit shows help content about "init" command
@@ -266,9 +268,18 @@ func helpList() {
 		examples: []commandExample{
 			{"", "Show a list of all the latest versions of packages in all (release and testing) repositories"},
 			{"my-package", "Show a list of all versions of the package with the given name"},
-			{info.GetOption(OPT_TESTING).String() + " my-package", "Show a list of all package versions with the given name only in the testing repository"},
-			{"| grep my-package | grep -v '.src.'", "Show a list of packages files and filter it with grep"},
-			{info.GetOption(OPT_PAGER).String() + " | more", "View long list of packages with some pager utility (more/less)"},
+			{
+				info.GetOption(OPT_TESTING).String() + " my-package",
+				"Show a list of all package versions with the given name only in the testing repository",
+			},
+			{
+				"| grep my-package | grep -v '.src.'",
+				"Show a list of packages files and filter it with grep",
+			},
+			{
+				info.GetOption(OPT_PAGER).String() + " | more",
+				"View long list of packages with some pager utility (more/less)",
+			},
 		},
 		isGlobal: false,
 	}
@@ -277,8 +288,8 @@ func helpList() {
 	help.Paragraph("The command shows a list of all packages in the repository. By default, the command shows only the latest versions of packages within all repositories.")
 	help.Paragraph("You can filter the listing providing part of the package name. In this case, the command will show all versions of packages with the given name part.")
 	help.Shortcut()
-	help.Examples()
 	help.Options()
+	help.Examples()
 }
 
 // helpWhichSource shows help content about "which-source" command
@@ -296,10 +307,10 @@ func helpWhichSource() {
 
 	help.Usage()
 	help.Paragraph("This command shows the source package used for package building or source package created while package building. This command is very useful for package searching. You may find the source package and use it in the search query ({s}s:{!} or {s}source:{!} query prefix with {y}" + COMMAND_REMOVE + "{!}, {y}" + COMMAND_RELEASE + "{!}, and {y}" + COMMAND_UNRELEASE + "{!} commands).")
-	help.Paragraph("You can use search query syntax for package selection. For more information about query syntax, see \"rep {y}" + COMMAND_HELP + "{!} {s}" + COMMAND_FIND + "{!}\".")
+	help.Paragraph("You can use search query syntax for package selection. For more information about query syntax, see \"rep {?cmd}" + COMMAND_HELP + "{!} {?arg}" + COMMAND_FIND + "{!}\".")
 	help.Shortcut()
-	help.Examples()
 	help.Options()
+	help.Examples()
 }
 
 // helpFind shows help content about "find" command
@@ -389,8 +400,8 @@ func helpFind() {
 	help.Paragraph("You can define a few filters at once, in this case, data that match the previous filter will be filtered by the next filter in the query. For negative search use additional colon ({s}:{!}) symbol.")
 
 	help.Shortcut()
-	help.Examples()
 	help.Options()
+	help.Examples()
 }
 
 // helpInfo shows help content about "info" command
@@ -412,8 +423,8 @@ func helpInfo() {
 	help.Usage()
 	help.Paragraph("Show detailed information about a package. If the package version wasn't provided command will show information about the latest version.")
 	help.Shortcut()
-	help.Examples()
 	help.Options()
+	help.Examples()
 }
 
 // helpPayload shows help content about "payload" command
@@ -452,8 +463,8 @@ func helpPayload() {
 	)
 	fmtc.NewLine()
 	help.Shortcut()
-	help.Examples()
 	help.Options()
+	help.Examples()
 }
 
 // helpCleanup shows help content about "cleanup" command
@@ -473,6 +484,7 @@ func helpCleanup() {
 	help.Paragraph("Remove old versions of packages. Note that the number of versions only counts different versions, so different releases of the same version count as one version.")
 	help.Paragraph("You can also specify part of the source package name to filter the results and clean up outdated versions of only one package.")
 	help.Shortcut()
+	help.Options()
 	help.Examples()
 }
 
@@ -508,6 +520,7 @@ func helpSign() {
 	help.Usage()
 	help.Paragraph("Add GPG signature to RPM file or files.")
 	help.Shortcut()
+	help.Options()
 	help.Examples()
 }
 
@@ -525,6 +538,7 @@ func helpResign() {
 	help.Usage()
 	help.Paragraph("Re-sign all packages in testing and release repositories.")
 	help.Shortcut()
+	help.Options()
 	help.Examples()
 }
 
@@ -546,8 +560,8 @@ func helpAdd() {
 	help.Usage()
 	help.Paragraph("Add RPM file or files to the testing repository.")
 	help.Shortcut()
-	help.Examples()
 	help.Options()
+	help.Examples()
 }
 
 // helpRemove shows help content about "remove" command
@@ -566,11 +580,11 @@ func helpRemove() {
 	}
 
 	help.Usage()
-	help.Paragraph("Remove package or packages from the testing repository. By default, the command removes packages from the testing repository. You can use option {g}" + info.GetOption(OPT_ALL).String() + "{!} for removing packages from the testing and release repository.")
-	help.Paragraph("The command uses search query syntax for package selection. For more information about query syntax, see \"rep {y}" + COMMAND_HELP + "{!} {s}" + COMMAND_FIND + "{!}\".")
+	help.Paragraph("Remove package or packages from the testing repository. By default, the command removes packages from the testing repository. You can use option {?opt}" + info.GetOption(OPT_ALL).String() + "{!} for removing packages from the testing and release repository.")
+	help.Paragraph("The command uses search query syntax for package selection. For more information about query syntax, see \"rep {?cmd}" + COMMAND_HELP + "{!} {?arg}" + COMMAND_FIND + "{!}\".")
 	help.Shortcut()
-	help.Examples()
 	help.Options()
+	help.Examples()
 }
 
 // helpRelease shows help content about "release" command
@@ -587,10 +601,10 @@ func helpRelease() {
 
 	help.Usage()
 	help.Paragraph("Copy package or packages from the testing repository to the release repository.")
-	help.Paragraph("The command uses search query syntax for package selection. For more information about query syntax, see \"rep {y}" + COMMAND_HELP + "{!} {s}" + COMMAND_FIND + "{!}\".")
+	help.Paragraph("The command uses search query syntax for package selection. For more information about query syntax, see \"rep {?cmd}" + COMMAND_HELP + "{!} {?arg}" + COMMAND_FIND + "{!}\".")
 	help.Shortcut()
-	help.Examples()
 	help.Options()
+	help.Examples()
 }
 
 // helpUnrelease shows help content about "unrelease" command
@@ -609,10 +623,10 @@ func helpUnrelease() {
 	help.Usage()
 	help.Paragraph("Remove package or packages from the release repository.")
 	help.Paragraph("If package or packages were previously removed from the testing repository, this command will move packages from the release repository to testing.")
-	help.Paragraph("The command uses search query syntax for package selection. For more information about query syntax, see \"rep {y}" + COMMAND_HELP + "{!} {s}" + COMMAND_FIND + "{!}\".")
+	help.Paragraph("The command uses search query syntax for package selection. For more information about query syntax, see \"rep {?cmd}" + COMMAND_HELP + "{!} {?arg}" + COMMAND_FIND + "{!}\".")
 	help.Shortcut()
-	help.Examples()
 	help.Options()
+	help.Examples()
 }
 
 // helpReindex shows help content about "reindex" command
@@ -633,8 +647,8 @@ func helpReindex() {
 	help.Usage()
 	help.Paragraph("Generate repository index with createrepo utility.")
 	help.Shortcut()
-	help.Examples()
 	help.Options()
+	help.Examples()
 }
 
 // helpPurgeCache shows help content about "purge-cache" command
@@ -653,8 +667,8 @@ func helpPurgeCache() {
 	help.Usage()
 	help.Paragraph("Remove all cached SQLite databases.")
 	help.Shortcut()
-	help.Examples()
 	help.Options()
+	help.Examples()
 }
 
 // helpStats shows help content about "stats" command
@@ -674,8 +688,8 @@ func helpStats() {
 	help.Usage()
 	help.Paragraph("Show repository statistics.")
 	help.Shortcut()
-	help.Examples()
 	help.Options()
+	help.Examples()
 }
 
 // helpHelp shows help content about "help" command
