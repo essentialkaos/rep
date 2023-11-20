@@ -27,8 +27,8 @@ func showOSInfo() {
 	if err == nil {
 		fmtutil.Separator(false, "OS INFO")
 
-		printInfo(12, "Name", osInfo.Name)
-		printInfo(12, "Pretty Name", osInfo.PrettyName)
+		printInfo(12, "Name", osInfo.ColoredName())
+		printInfo(12, "Pretty Name", osInfo.ColoredPrettyName())
 		printInfo(12, "Version", osInfo.VersionID)
 		printInfo(12, "ID", osInfo.ID)
 		printInfo(12, "ID Like", osInfo.IDLike)
@@ -82,5 +82,8 @@ func showEnvInfo() {
 	crVer = strutil.Exclude(crVer, "Version: ")
 	crVer = strings.ReplaceAll(crVer, " )", ")")
 
-	printInfo(12, "createrepo_c", crVer)
+	crVer = strings.ReplaceAll(crVer, "(", "{s-}(")
+	crVer = strings.ReplaceAll(crVer, ")", "){!}")
+
+	printInfo(12, "createrepo_c", fmtc.Sprint(crVer))
 }
