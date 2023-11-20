@@ -6,7 +6,7 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230923063757-afb1ddc0824c
 	github.com/essentialkaos/check v1.4.0
 	github.com/essentialkaos/depsy v1.1.0
-	github.com/essentialkaos/ek/v12 v12.86.0
+	github.com/essentialkaos/ek/v12 v12.87.0
 	github.com/klauspost/compress v1.17.3
 	github.com/mattn/go-sqlite3 v1.14.18
 	github.com/sassoftware/go-rpmutils v0.2.0
@@ -16,7 +16,7 @@ require (
 
 require (
 	github.com/DataDog/zstd v1.5.5 // indirect
-	github.com/cloudflare/circl v1.3.3 // indirect
+	github.com/cloudflare/circl v1.3.6 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/essentialkaos/go-linenoise/v3 v3.4.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect

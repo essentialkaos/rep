@@ -604,7 +604,7 @@ func genUsage() *usage.Info {
 	info.AddCommand(COMMAND_WHICH_SOURCE, "Show source package name", "query…")
 	info.AddCommand(COMMAND_INFO, "Show info about package", "package")
 	info.AddCommand(COMMAND_PAYLOAD, "Show package payload", "package", "?type")
-	info.AddCommand(COMMAND_CLEANUP, "Remove old versions of packages", "?num")
+	info.AddCommand(COMMAND_CLEANUP, "Remove old versions of packages", "?num", "?filter")
 	info.AddCommand(COMMAND_CHECK, "Check repositories consistency", "?errors-num")
 	info.AddCommand(COMMAND_SIGN, "Sign one or more packages", "file…")
 	info.AddCommand(COMMAND_RESIGN, "Resign all packages in repository")
@@ -688,6 +688,8 @@ func genAbout(gitRev string) *usage.About {
 		Owner:         "ESSENTIAL KAOS",
 		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
 		UpdateChecker: usage.UpdateChecker{"essentialkaos/rep", update.GitHubChecker},
+
+		DescSeparator: "{s}—{!}",
 	}
 
 	if gitRev != "" {

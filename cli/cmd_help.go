@@ -81,7 +81,7 @@ func (c *commandHelp) Examples() {
 			fmtc.Printf("  rep {y}%s{!} {s}%s{!}\n", c.command, example.command)
 		}
 
-		fmtc.Printf("{s-}%s{!}\n", fmtutil.Wrap(example.desc, "  ", 88))
+		fmtc.Printf("{&}{s-}%s{!}\n", fmtutil.Wrap(example.desc, "  ", 88))
 
 		if index+1 < len(c.examples) {
 			fmtc.NewLine()
@@ -124,7 +124,7 @@ func (c *commandHelp) Paragraph(text string) {
 
 // Query renders query info
 func (c *commandHelp) Query(short, long, desc, typ string) {
-	fmtc.Printf("   {m}%2s{!} {s}or{!} {m}%-12s{!} %s {s-}(%s){!}\n", short, long, desc, typ)
+	fmtc.Printf("   {m}%2s{!} {s}or{!} {m}%-12s{!} %s {&}{s-}(%s){!}\n", short, long, desc, typ)
 }
 
 // renderArgs renders command arguments with colors
@@ -151,64 +151,44 @@ func cmdHelp(ctx *context, args options.Arguments) bool {
 	switch cmdName {
 	case "":
 		helpAll()
-
 	case COMMAND_INIT:
 		helpInit()
-
 	case COMMAND_GEN_KEY:
 		helpGenKey()
-
 	case COMMAND_LIST, COMMAND_SHORT_LIST:
 		helpList()
-
 	case COMMAND_WHICH_SOURCE, COMMAND_SHORT_WHICH_SOURCE:
 		helpWhichSource()
-
 	case COMMAND_FIND, COMMAND_SHORT_FIND:
 		helpFind()
-
 	case COMMAND_INFO, COMMAND_SHORT_INFO:
 		helpInfo()
-
 	case COMMAND_PAYLOAD, COMMAND_SHORT_PAYLOAD:
 		helpPayload()
-
 	case COMMAND_CLEANUP, COMMAND_SHORT_CLEANUP:
 		helpCleanup()
-
 	case COMMAND_CHECK, COMMAND_SHORT_CHECK:
 		helpCheck()
-
 	case COMMAND_SIGN, COMMAND_SHORT_SIGN:
 		helpSign()
-
 	case COMMAND_RESIGN, COMMAND_SHORT_RESIGN:
 		helpResign()
-
 	case COMMAND_ADD, COMMAND_SHORT_ADD:
 		helpAdd()
-
 	case COMMAND_REMOVE, COMMAND_SHORT_REMOVE:
 		helpRemove()
-
 	case COMMAND_RELEASE, COMMAND_SHORT_RELEASE:
 		helpRelease()
-
 	case COMMAND_UNRELEASE, COMMAND_SHORT_UNRELEASE:
 		helpUnrelease()
-
 	case COMMAND_REINDEX, COMMAND_SHORT_REINDEX:
 		helpReindex()
-
 	case COMMAND_PURGE_CACHE, COMMAND_SHORT_PURGE_CACHE:
 		helpPurgeCache()
-
 	case COMMAND_STATS, COMMAND_SHORT_STATS:
 		helpStats()
-
 	case COMMAND_HELP, COMMAND_SHORT_HELP:
 		helpHelp()
-
 	default:
 		terminal.Error("Unknown command \"%s\"", cmdName)
 		return false
@@ -395,14 +375,14 @@ func helpFind() {
 
 	help.Paragraph("More info about supported query data types:")
 
-	fmtc.Println("    {s-}•{!} String        Any string value")
-	fmtc.Println("    {s-}•{!} Number        Integer greater or equal to zero")
-	fmtc.Println("    {s-}•{!} Boolean       Boolean value {s}(yes/true/1 or no/false/0){!}")
-	fmtc.Println("    {s-}•{!} SemVer        Version in semantic versioning format")
-	fmtc.Println("    {s-}•{!} Dependency    Package name with or without version and release condition")
-	fmtc.Println("    {s-}•{!} Architecture  Package architecture {s}(" + strings.Join(data.ArchList, ", ") + "){!}")
-	fmtc.Println("    {s-}•{!} Size          Size {s}(b/kb/mb/gb){!} with modificators {s-}(see examples){!}")
-	fmtc.Println("    {s-}•{!} Duration      Duration in days or custom duration {s-}(see examples){!}")
+	fmtc.Println("    {s-}•{!} {&}String{!}        Any string value")
+	fmtc.Println("    {s-}•{!} {&}Number{!}        Integer greater or equal to zero")
+	fmtc.Println("    {s-}•{!} {&}Boolean{!}       Boolean value {s}(yes/true/1 or no/false/0){!}")
+	fmtc.Println("    {s-}•{!} {&}SemVer{!}        Version in semantic versioning format")
+	fmtc.Println("    {s-}•{!} {&}Dependency{!}    Package name with or without version and release condition")
+	fmtc.Println("    {s-}•{!} {&}Architecture{!}  Package architecture {s}(" + strings.Join(data.ArchList, ", ") + "){!}")
+	fmtc.Println("    {s-}•{!} {&}Size{!}          Size {s}(b/kb/mb/gb){!} with modificators {s-}(see examples){!}")
+	fmtc.Println("    {s-}•{!} {&}Duration{!}      Duration in days or custom duration {s-}(see examples){!}")
 
 	fmtc.NewLine()
 
@@ -485,11 +465,13 @@ func helpCleanup() {
 		examples: []commandExample{
 			{"5", "Remove outdated packages except the 5 latest versions"},
 			{"10", "Remove outdated packages except the 10 latest versions"},
+			{"5 nginx", "Remove outdated nginx packages except the 5 latest versions"},
 		},
 	}
 
 	help.Usage()
-	help.Paragraph("Remove old versions of packages. Note that number of versions counts only different versions, so different releases of the same version counts as one version.")
+	help.Paragraph("Remove old versions of packages. Note that the number of versions only counts different versions, so different releases of the same version count as one version.")
+	help.Paragraph("You can also specify part of the source package name to filter the results and clean up outdated versions of only one package.")
 	help.Shortcut()
 	help.Examples()
 }
