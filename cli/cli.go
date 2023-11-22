@@ -10,18 +10,18 @@ package cli
 import (
 	"fmt"
 	"os"
-	"strings"
 
-	"github.com/essentialkaos/ek/v12/env"
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fmtutil"
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/knf"
 	"github.com/essentialkaos/ek/v12/options"
+	"github.com/essentialkaos/ek/v12/pager"
 	"github.com/essentialkaos/ek/v12/progress"
 	"github.com/essentialkaos/ek/v12/signal"
 	"github.com/essentialkaos/ek/v12/system"
 	"github.com/essentialkaos/ek/v12/terminal"
+	"github.com/essentialkaos/ek/v12/terminal/tty"
 	"github.com/essentialkaos/ek/v12/usage"
 	"github.com/essentialkaos/ek/v12/usage/completion/bash"
 	"github.com/essentialkaos/ek/v12/usage/completion/fish"
@@ -257,6 +257,10 @@ func Init(gitRev string, gomod []byte) {
 		os.Exit(0)
 	}
 
+	if options.GetB(OPT_PAGER) && tty.IsTTY() {
+		pager.Setup("")
+	}
+
 	checkPermissions()
 	loadGlobalConfig()
 	validateGlobalConfig()
@@ -276,9 +280,6 @@ func Init(gitRev string, gomod []byte) {
 
 // configureUI configure user interface
 func configureUI() {
-	envVars := env.Get()
-	term := envVars.GetS("TERM")
-
 	fmtc.DisableColors = true
 	fmtutil.SizeSeparator = " "
 	fmtutil.SeparatorSymbol = "–"
@@ -302,30 +303,23 @@ func configureUI() {
 	fmtc.NameColor("package", "{m}")
 	fmtc.NameColor("repo", "{c}")
 
+	if fmtc.IsColorsSupported() {
+		fmtc.DisableColors = false
+	}
+
 	if fmtc.Is256ColorsSupported() {
 		fmtc.NameColor("package", "{#108}")
 		fmtc.NameColor("repo", "{#33}")
 		progress.DefaultSettings.BarFgColorTag = "{#33}"
 	}
 
-	if term != "" {
-		switch {
-		case strings.Contains(term, "xterm"),
-			strings.Contains(term, "color"),
-			term == "screen":
-			fmtc.DisableColors = false
-		}
-	}
-
 	if options.GetB(OPT_NO_COLOR) {
 		fmtc.DisableColors = true
 	}
 
-	if !options.GetB(OPT_PAGER) {
-		if !fsutil.IsCharacterDevice("/dev/stdout") && envVars.GetS("FAKETTY") == "" {
-			fmtc.DisableColors = true
-			rawOutput = true
-		}
+	if !tty.IsTTY() {
+		fmtc.DisableColors = true
+		rawOutput = true
 	}
 }
 
@@ -335,12 +329,12 @@ func checkPermissions() {
 
 	if err != nil {
 		terminal.Error("Can't get info about current user: %v", err)
-		os.Exit(1)
+		shutdown(1)
 	}
 
 	if !curUser.IsRoot() {
 		terminal.Error("This app requires superuser (root) privileges")
-		os.Exit(1)
+		shutdown(1)
 	}
 }
 
@@ -350,7 +344,7 @@ func loadGlobalConfig() {
 
 	if err != nil {
 		terminal.Error(err.Error())
-		os.Exit(1)
+		shutdown(1)
 	}
 }
 
@@ -385,7 +379,7 @@ func validateGlobalConfig() {
 		terminal.Error(" - %v", err)
 	}
 
-	os.Exit(1)
+	shutdown(1)
 }
 
 // loadRepoConfigs loads repositories configuration files
@@ -406,7 +400,7 @@ func loadRepoConfigs() {
 
 		if err != nil {
 			terminal.Error(err.Error())
-			os.Exit(1)
+			shutdown(1)
 		}
 
 		configs[cfg.GetS(REPOSITORY_NAME)] = cfg
@@ -450,7 +444,7 @@ func validateRepoConfigs() {
 	}
 
 	if hasErrors {
-		os.Exit(1)
+		shutdown(1)
 	}
 }
 
@@ -474,7 +468,7 @@ func configureRepoCache() {
 	}
 
 	if hasErrors {
-		os.Exit(1)
+		shutdown(1)
 	}
 }
 
@@ -542,6 +536,7 @@ func sigHandler() {
 
 // shutdown cleans temporary data and exits from CLI
 func shutdown(ec int) {
+	pager.Complete()
 	os.Exit(ec)
 }
 
@@ -630,7 +625,7 @@ func genUsage() *usage.Info {
 	info.AddOption(OPT_SHOW_ALL, `Show all versions of packages {s-}(helpful with "list" command){!}`)
 	info.AddOption(OPT_STATUS, "Show package status {s-}(released or not){!}")
 	info.AddOption(OPT_EPOCH, `Show epoch info {s-}(helpful with "list" and "which-source" commands){!}`)
-	info.AddOption(OPT_PAGER, `Run command in "pager" mode {s-}(i.e. don't disable colors and don't show raw output){!}`)
+	info.AddOption(OPT_PAGER, "Use pager for long output")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")
 	info.AddOption(OPT_VER, "Show version")
