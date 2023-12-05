@@ -27,7 +27,7 @@ Source100:      checksum.sha512
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  golang >= 1.20
+BuildRequires:  golang >= 1.21
 
 Requires:       createrepo_c
 
@@ -110,6 +110,10 @@ rm -rf %{buildroot}
 * Mon Oct 09 2023 Anton Novojilov <andy@essentialkaos.com> - 3.3.0-0
 - Added -pi/--postpone-index option to postpone index rebuild after some
   commands
+- Added package filtering for 'cleanup' command
+- Improved pagers (more/less) support
+- UI improvements
+- Fixed 'payload' command output
 
 * Thu Oct 05 2023 Anton Novojilov <andy@essentialkaos.com> - 3.2.0-0
 - Added xz compression support for repository metadata
