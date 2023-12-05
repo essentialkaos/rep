@@ -325,8 +325,7 @@ func getRepoContext(repoCfg *knf.Config) (*context, error) {
 
 // getRepoStorage configures repository storage
 func getRepoStorage(typ string, repoCfg *knf.Config) (storage.Storage, error) {
-	switch typ {
-	case storage.TYPE_FS:
+	if typ == storage.TYPE_FS {
 		return getRepoFSStorage(repoCfg)
 	}
 

@@ -195,9 +195,3 @@ func getMainPackageFromBundle(bundle repo.PackageBundle) *repo.Package {
 
 	return nil
 }
-
-// printEmptyFoundPackageList prints empty packages listing
-func printEmptyFoundPackageList(r *repo.SubRepository) {
-	fmtutil.Separator(true, strings.ToUpper(r.Name))
-	fmtc.Println("\n{s-}-- no packages --{!}\n")
-}

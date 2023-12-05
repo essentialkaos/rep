@@ -8,7 +8,6 @@ package cli
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -130,7 +129,7 @@ func generateKeys(name, email string, password *secstr.String, outputPubKeyFile 
 		return false
 	}
 
-	err = ioutil.WriteFile(outputPrivKeyFile, privKeyData, 0600)
+	err = os.WriteFile(outputPrivKeyFile, privKeyData, 0600)
 
 	if err != nil {
 		spinner.Update("Can't save private key: %v", err)
@@ -138,7 +137,7 @@ func generateKeys(name, email string, password *secstr.String, outputPubKeyFile 
 		return false
 	}
 
-	err = ioutil.WriteFile(outputPubKeyFile, pubKeyData, 0644)
+	err = os.WriteFile(outputPubKeyFile, pubKeyData, 0644)
 
 	if err != nil {
 		spinner.Update("Can't save public key: %v", err)

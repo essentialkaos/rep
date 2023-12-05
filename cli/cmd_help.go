@@ -108,7 +108,7 @@ func (c *commandHelp) Options() {
 			continue
 		}
 
-		option.Render()
+		option.Print()
 	}
 
 	fmtc.NewLine()
@@ -210,7 +210,7 @@ func helpAll() {
 			continue
 		}
 
-		c.Render()
+		c.Print()
 	}
 
 	fmtc.NewLine()

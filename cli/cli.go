@@ -549,11 +549,11 @@ func printCompletion() int {
 
 	switch options.GetS(OPT_COMPLETION) {
 	case "bash":
-		fmt.Printf(bash.Generate(info, APP))
+		fmt.Print(bash.Generate(info, APP))
 	case "fish":
-		fmt.Printf(fish.Generate(info, APP))
+		fmt.Print(fish.Generate(info, APP))
 	case "zsh":
-		fmt.Printf(zsh.Generate(info, optMap, APP))
+		fmt.Print(zsh.Generate(info, optMap, APP))
 	default:
 		return 1
 	}
@@ -569,18 +569,6 @@ func printMan() {
 			genAbout(""),
 		),
 	)
-}
-
-// genMan generates man page
-func genMan() int {
-	fmt.Println(
-		man.Generate(
-			genUsage(),
-			genAbout(""),
-		),
-	)
-
-	return 0
 }
 
 // genUsage generates usage info
