@@ -575,11 +575,14 @@ func printMan() {
 func genUsage() *usage.Info {
 	info := usage.NewInfo()
 
+	if fmtc.Is256ColorsSupported() {
+		info.AppNameColorTag = "{*}{#33}"
+	}
+
 	info.AddSpoiler(
-		"Notice that if you have more than one repository you should define its name as\n" +
-			"the first argument. You can read detailed info about every command with usage\n" +
-			"examples using {y}help{!} command.",
-	)
+		`  Note that if you have more than one repository, you should specify its name
+  as the first argument. You can read detailed information about each command
+  with usage examples by using the {y}help{!} command.`)
 
 	info.AddCommand(COMMAND_INIT, "Initialize new repository", "arch…")
 	info.AddCommand(COMMAND_GEN_KEY, "Generate keys for signing packages")
