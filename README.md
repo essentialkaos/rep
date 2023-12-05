@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://kaos.sh/r/rep"><img src="https://kaos.sh/r/rep.svg" alt="GoReportCard" /></a>
-  <a href="https://kaos.sh/l/rep"><img src="https://kaos.sh/l/e3f19767174b1fd0777d.svg" alt="Code Climate Maintainability" /></a>
+  <a href="https://kaos.sh/l/rep"><img src="https://kaos.sh/l/5876fdc611100e9f8a83.svg" alt="Code Climate Maintainability" /></a>
   <a href="https://kaos.sh/b/rep"><img src="https://kaos.sh/b/07867ea4-6025-47a8-ad18-112dd7b37a3c.svg" alt="codebeat badge" /></a>
   <a href="https://kaos.sh/w/rep/ci"><img src="https://kaos.sh/w/rep/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/w/rep/codeql"><img src="https://kaos.sh/w/rep/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
@@ -69,7 +69,7 @@ Commands
   which-source query…     Show source package name
   info package            Show info about package
   payload package type    Show package payload
-  cleanup num             Remove old versions of packages
+  cleanup num filter      Remove old versions of packages
   check errors-num        Check repositories consistency
   sign file…              Sign one or more packages
   resign                  Resign all packages in repository
@@ -84,22 +84,23 @@ Commands
 
 Options
 
-  --release, -r           Run command only on release (stable) repository
-  --testing, -t           Run command only on testing (unstable) repository
-  --all, -a               Run command on all repositories
-  --arch, -aa arch        Package architecture (helpful with "info" and "payload" commands)
-  --move, -m              Move (remove after successful action) packages (helpful with "add" command)
-  --no-source, -ns        Ignore source packages (helpful with "add" command)
-  --ignore-filter, -if    Ignore repository file filter (helpful with "add" and "sign" commands)
-  --force, -f             Answer "yes" for all questions
-  --full, -F              Full reindex (helpful with "reindex" command)
-  --show-all, -A          Show all versions of packages (helpful with "list" command)
-  --status, -S            Show package status (released or not)
-  --epoch, -E             Show epoch info (helpful with "list" and "which-source" commands)
-  --pager, -P             Run command in "pager" mode (i.e. don't disable colors and don't show raw output)
-  --no-color, -nc         Disable colors in output
-  --help, -h              Show this help message
-  --version, -v           Show version
+  --release, -r            Run command only on release (stable) repository
+  --testing, -t            Run command only on testing (unstable) repository
+  --all, -a                Run command on all repositories
+  --arch, -aa arch         Package architecture (helpful with "info" and "payload" commands)
+  --move, -m               Move (remove after successful action) packages (helpful with "add" command)
+  --no-source, -ns         Ignore source packages (helpful with "add" command)
+  --ignore-filter, -if     Ignore repository file filter (helpful with "add" and "sign" commands)
+  --postpone-index, -pi    Postpone repository reindex (helpful with "add", "remove", "release", and "unrelase" commands)
+  --force, -f              Answer "yes" for all questions
+  --full, -F               Full reindex (helpful with "reindex" command)
+  --show-all, -A           Show all versions of packages (helpful with "list" command)
+  --status, -S             Show package status (released or not)
+  --epoch, -E              Show epoch info (helpful with "list" and "which-source" commands)
+  --pager, -P              Use pager for long output
+  --no-color, -nc          Disable colors in output
+  --help, -h               Show this help message
+  --version, -v            Show versio
 ```
 
 ### CI Status

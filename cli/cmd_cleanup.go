@@ -22,8 +22,8 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// MIN_CLEANUP_VERS is minimal number of versions
-const MIN_CLEANUP_VERS = 3
+// MIN_KEEP_CLEANUP_VERS is minimal number of versions to keep
+const MIN_KEEP_CLEANUP_VERS = 3
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -32,7 +32,7 @@ func cmdCleanup(ctx *context, args options.Arguments) bool {
 	var testingStack, releaseStack repo.PackageStack
 
 	all := !options.GetB(OPT_RELEASE) && !options.GetB(OPT_TESTING)
-	keepVerNum, err := getCleanupVersionNum(args)
+	keepNum, filter, err := getCleanupOptions(args)
 
 	if err != nil {
 		terminal.Error(err.Error())
@@ -40,7 +40,7 @@ func cmdCleanup(ctx *context, args options.Arguments) bool {
 	}
 
 	if all || options.GetB(OPT_RELEASE) {
-		releaseStack, err = getStackToCleanup(ctx.Repo.Release, keepVerNum)
+		releaseStack, err = getStackToCleanup(ctx.Repo.Release, keepNum, filter)
 
 		if err != nil {
 			terminal.Error(err.Error())
@@ -49,7 +49,7 @@ func cmdCleanup(ctx *context, args options.Arguments) bool {
 	}
 
 	if all || options.GetB(OPT_TESTING) {
-		testingStack, err = getStackToCleanup(ctx.Repo.Testing, keepVerNum)
+		testingStack, err = getStackToCleanup(ctx.Repo.Testing, keepNum, filter)
 
 		if err != nil {
 			terminal.Error(err.Error())
@@ -67,28 +67,30 @@ func cmdCleanup(ctx *context, args options.Arguments) bool {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// getCleanupVersionNum returns number of versions from arguments
-func getCleanupVersionNum(args options.Arguments) (int, error) {
+// getCleanupOptions returns number of versions and filter from arguments
+func getCleanupOptions(args options.Arguments) (int, string, error) {
 	var err error
 
-	keepVerNum := MIN_CLEANUP_VERS
+	keepNum := MIN_KEEP_CLEANUP_VERS
 
 	if args.Has(0) {
-		keepVerNum, err = args.Get(0).Int()
+		keepNum, err = args.Get(0).Int()
 
 		if err != nil {
-			return 0, fmt.Errorf("Can't parse number of versions: %v", err)
+			return 0, "", fmt.Errorf("Can't parse number of versions: %v", err)
 		}
 
-		if keepVerNum < MIN_CLEANUP_VERS {
-			return 0, fmt.Errorf(
+		if keepNum < MIN_KEEP_CLEANUP_VERS {
+			return 0, "", fmt.Errorf(
 				"Number of versions can't be less than %d",
-				MIN_CLEANUP_VERS,
+				MIN_KEEP_CLEANUP_VERS,
 			)
 		}
 	}
 
-	return keepVerNum, nil
+	filter := args.Get(1).String()
+
+	return keepNum, filter, nil
 }
 
 // cleanupPackages removes packages from both repositories
@@ -121,19 +123,19 @@ func cleanupPackages(ctx *context, releaseStack, testingStack repo.PackageStack)
 }
 
 // getStackToCleanup returns stack with packages to remove
-func getStackToCleanup(r *repo.SubRepository, keepVerNum int) (repo.PackageStack, error) {
+func getStackToCleanup(r *repo.SubRepository, keepNum int, filter string) (repo.PackageStack, error) {
 	stack, err := r.List("", true)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return extractPackagesToCleanup(stack, keepVerNum), nil
+	return extractPackagesToCleanup(stack, keepNum, filter), nil
 }
 
 // extractPackagesToCleanup extracts bundles to remove from stack
 // with all packages
-func extractPackagesToCleanup(stack repo.PackageStack, keepVerNum int) repo.PackageStack {
+func extractPackagesToCleanup(stack repo.PackageStack, keepNum int, filter string) repo.PackageStack {
 	var result repo.PackageStack
 	var prevPkgName, prevPkgVer string
 	var pkgCount int
@@ -147,6 +149,10 @@ func extractPackagesToCleanup(stack repo.PackageStack, keepVerNum int) repo.Pack
 			continue
 		}
 
+		if filter != "" && !strings.HasPrefix(pkg.Src, filter) {
+			continue
+		}
+
 		switch {
 		case prevPkgName != pkg.Name:
 			pkgCount = 1
@@ -156,10 +162,9 @@ func extractPackagesToCleanup(stack repo.PackageStack, keepVerNum int) repo.Pack
 			}
 		}
 
-		prevPkgName = pkg.Name
-		prevPkgVer = pkg.Version
+		prevPkgName, prevPkgVer = pkg.Name, pkg.Version
 
-		if pkgCount > keepVerNum {
+		if pkgCount > keepNum {
 			result = append(result, bundle)
 		}
 	}
@@ -189,10 +194,4 @@ func getMainPackageFromBundle(bundle repo.PackageBundle) *repo.Package {
 	}
 
 	return nil
-}
-
-// printEmptyFoundPackageList prints empty packages listing
-func printEmptyFoundPackageList(r *repo.SubRepository) {
-	fmtutil.Separator(true, strings.ToUpper(r.Name))
-	fmtc.Println("\n{s-}-- no packages --{!}\n")
 }

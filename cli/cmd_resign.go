@@ -55,7 +55,7 @@ how many packages you have and how big they are).`)
 
 // resignAllPackages re-singes all packages in testing and release repositories
 func resignAllPackages(ctx *context, key *sign.Key) bool {
-	var isResigned bool
+	isResigned := false
 
 	if !resignRepoPackages(ctx, key, ctx.Repo.Testing) {
 		ctx.Logger.Get(data.REPO_TESTING).Print("Packages re-signing finished with error")

@@ -103,7 +103,7 @@ func addRPMFiles(ctx *context, files []string, signingKey *sign.Key) bool {
 		hasAdded = true
 	}
 
-	if hasAdded {
+	if hasAdded && !options.GetB(OPT_POSTPONE_INDEX) {
 		fmtc.NewLine()
 		reindexRepository(ctx, ctx.Repo.Testing, false)
 	}

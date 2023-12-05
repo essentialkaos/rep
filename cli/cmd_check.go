@@ -444,16 +444,17 @@ func printCheckErrorsInfo(errs errutil.Errors) bool {
 	}
 
 	errsList := errs.All()
+	maxErrs := mathutil.Min(errs.Num(), checkMaxErrNum)
 
 	terminal.Error(
 		"Found %s %s. First %s %s:\n",
 		fmtutil.PrettyNum(errs.Num()),
 		pluralize.Pluralize(errs.Num(), "problem", "problems"),
-		fmtutil.PrettyNum(checkMaxErrNum),
-		pluralize.Pluralize(checkMaxErrNum, "problem", "problems"),
+		fmtutil.PrettyNum(maxErrs),
+		pluralize.Pluralize(maxErrs, "problem", "problems"),
 	)
 
-	for i := 0; i < mathutil.Min(errs.Num(), checkMaxErrNum); i++ {
+	for i := 0; i < maxErrs; i++ {
 		terminal.Error(" • %v", errsList[i])
 	}
 
