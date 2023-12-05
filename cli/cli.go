@@ -257,10 +257,6 @@ func Init(gitRev string, gomod []byte) {
 		os.Exit(0)
 	}
 
-	if options.GetB(OPT_PAGER) && tty.IsTTY() {
-		pager.Setup("")
-	}
-
 	checkPermissions()
 	loadGlobalConfig()
 	validateGlobalConfig()
@@ -517,6 +513,12 @@ func process(args options.Arguments) bool {
 		return false
 	}
 
+	if options.GetB(OPT_PAGER) && tty.IsTTY() {
+		if pager.Setup() == nil {
+			defer pager.Complete()
+		}
+	}
+
 	// List repositories by default
 	if args.Get(1).String() == "" {
 		return runCommand(configs[repo], COMMAND_LIST, nil)
@@ -536,7 +538,6 @@ func sigHandler() {
 
 // shutdown cleans temporary data and exits from CLI
 func shutdown(ec int) {
-	pager.Complete()
 	os.Exit(ec)
 }
 
