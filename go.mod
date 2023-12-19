@@ -11,7 +11,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.18
 	github.com/sassoftware/go-rpmutils v0.2.0
 	github.com/ulikunitz/xz v0.5.11
-	golang.org/x/crypto v0.16.0
+	golang.org/x/crypto v0.17.0
 )
 
 require (
