@@ -100,7 +100,7 @@ Options
   --pager, -P              Use pager for long output
   --no-color, -nc          Disable colors in output
   --help, -h               Show this help message
-  --version, -v            Show versio
+  --version, -v            Show version
 ```
 
 ### CI Status
