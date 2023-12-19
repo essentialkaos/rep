@@ -288,8 +288,9 @@ func parseDateTermValue(termType uint8, value string, mod uint8) (*search.Term, 
 		return nil, fmt.Errorf("Can't parse \"%s\" as duration: %v", value, err)
 	}
 
-	to := time.Now().Unix()
-	from := to - dur
+	now := time.Now()
+	to := now.Unix()
+	from := now.Add(-1 * dur).Unix()
 
 	return &search.Term{Type: termType, Value: search.Range{from, to}, Modificator: mod}, nil
 }

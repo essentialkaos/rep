@@ -77,7 +77,7 @@ jobs:
         run: createrepo_c --version
 
       - name: Upload built artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: createrepo_c
           path: ${{github.workspace}}/.local/bin/createrepo_c
@@ -99,7 +99,7 @@ jobs:
 
     steps:
       - name: Download pre-built artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: createrepo_c
           path: ${{github.workspace}}/.local/bin
@@ -127,9 +127,10 @@ jobs:
           path: ${{env.SRC_DIR}}
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
+          cache: false
 
       - uses: actions/cache@v3
         id: cache-deps
