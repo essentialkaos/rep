@@ -16,7 +16,7 @@ require (
 
 require (
 	github.com/DataDog/zstd v1.5.5 // indirect
-	github.com/cloudflare/circl v1.3.6 // indirect
+	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/essentialkaos/go-linenoise/v3 v3.4.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
