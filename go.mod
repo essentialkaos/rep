@@ -9,7 +9,7 @@ require (
 	github.com/essentialkaos/ek/v12 v12.98.0
 	github.com/klauspost/compress v1.17.4
 	github.com/mattn/go-sqlite3 v1.14.20
-	github.com/sassoftware/go-rpmutils v0.2.0
+	github.com/sassoftware/go-rpmutils v0.3.0
 	github.com/ulikunitz/xz v0.5.11
 	golang.org/x/crypto v0.18.0
 )
@@ -17,7 +17,6 @@ require (
 require (
 	github.com/DataDog/zstd v1.5.5 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/essentialkaos/go-linenoise/v3 v3.4.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
