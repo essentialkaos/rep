@@ -8,7 +8,7 @@ require (
 	github.com/essentialkaos/depsy v1.1.0
 	github.com/essentialkaos/ek/v12 v12.99.0
 	github.com/klauspost/compress v1.17.6
-	github.com/mattn/go-sqlite3 v1.14.21
+	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/sassoftware/go-rpmutils v0.3.0
 	github.com/ulikunitz/xz v0.5.11
 	golang.org/x/crypto v0.18.0
