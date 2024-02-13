@@ -1258,7 +1258,7 @@ func parsePayloadList(dir, objs, types string) []PayloadObject {
 	var result []PayloadObject
 
 	for i := 0; i < len(types); i++ {
-		obj := strutil.ReadField(objs, i, false, "/")
+		obj := strutil.ReadField(objs, i, false, '/')
 
 		switch types[i] {
 		case 'd':

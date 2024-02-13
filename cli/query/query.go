@@ -331,8 +331,8 @@ func parseSizeTermValue(value string, mod uint8) (*search.Term, error) {
 		to = 1024 * 1024 * 1024
 
 	case strings.Contains(value, "-"):
-		from = fmtutil.ParseSize(strutil.ReadField(value, 0, false, "-"))
-		to = fmtutil.ParseSize(strutil.ReadField(value, 1, false, "-"))
+		from = fmtutil.ParseSize(strutil.ReadField(value, 0, false, '-'))
+		to = fmtutil.ParseSize(strutil.ReadField(value, 1, false, '-'))
 
 	default:
 		size := fmtutil.ParseSize(value)
