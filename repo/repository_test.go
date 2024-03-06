@@ -555,6 +555,7 @@ func (s *RepoSuite) TestSubRepositoryFind(c *C) {
 
 	ps, err = r.Testing.Find(search.Query{&search.Term{Value: false}})
 	c.Assert(err, NotNil)
+	c.Assert(ps, HasLen, 0)
 
 	ps, err = r.Testing.Find(search.Query{search.TermName("git-all")})
 	c.Assert(err, IsNil)

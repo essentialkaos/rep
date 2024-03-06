@@ -549,6 +549,8 @@ func (s *StorageSuite) TestStorageHasArch(c *C) {
 func (s *StorageSuite) TestStorageErrorsNotInitialized(c *C) {
 	fs, err := NewStorage(genStorageOptions(c, ""), index.DefaultOptions)
 
+	c.Assert(err, IsNil)
+
 	_, err = fs.GetDB(data.REPO_RELEASE, data.ARCH_X64, data.DB_PRIMARY)
 
 	c.Assert(err, ErrorMatches, `Can't find DB connection: Repository storage is not initialized`)

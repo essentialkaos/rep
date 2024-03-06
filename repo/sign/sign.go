@@ -17,8 +17,8 @@ import (
 
 	"github.com/sassoftware/go-rpmutils"
 
-	"golang.org/x/crypto/openpgp"
-	"golang.org/x/crypto/openpgp/packet"
+	"golang.org/x/crypto/openpgp"        //nolint:staticcheck
+	"golang.org/x/crypto/openpgp/packet" //nolint:staticcheck
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
