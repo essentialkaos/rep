@@ -240,6 +240,21 @@ func (p PackageFiles) HasArch(arch string) bool {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// PackageBundle returns size of package bundle
+func (b PackageBundle) Size() int {
+	size := 0
+
+	for _, pkg := range b {
+		if pkg != nil {
+			size++
+		}
+	}
+
+	return size
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // HasMultiBundles returns true if stack contains bundle with more than 1 package
 func (s PackageStack) HasMultiBundles() bool {
 	if s.IsEmpty() {
@@ -248,7 +263,7 @@ func (s PackageStack) HasMultiBundles() bool {
 
 	for _, bundle := range s {
 		if bundle != nil {
-			if len(bundle) > 1 {
+			if bundle.Size() > 1 {
 				return true
 			}
 		}
