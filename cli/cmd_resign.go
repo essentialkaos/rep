@@ -61,7 +61,7 @@ func resignAllPackages(ctx *context, key *sign.Key) bool {
 		ctx.Logger.Get(data.REPO_TESTING).Print("Packages re-signing finished with error")
 		return false
 	} else {
-		isResigned = true
+		isResigned = true //nolint:ineffassign
 		fmtc.NewLine()
 	}
 

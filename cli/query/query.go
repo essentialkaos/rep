@@ -199,7 +199,7 @@ func parseTerm(rawTerm string) (*search.Term, error) {
 
 	if name != "" {
 		if termType == search.TERM_UNKNOWN {
-			return nil, fmt.Errorf("Unknown query term \"%s\"", name)
+			return nil, fmt.Errorf("Unknown query term %q", name)
 		}
 	} else {
 		termType = 255 // term without name = name prefix search
@@ -285,7 +285,7 @@ func parseDateTermValue(termType uint8, value string, mod uint8) (*search.Term, 
 	dur, err := timeutil.ParseDuration(value, 'd')
 
 	if err != nil {
-		return nil, fmt.Errorf("Can't parse \"%s\" as duration: %v", value, err)
+		return nil, fmt.Errorf("Can't parse %q as duration: %v", value, err)
 	}
 
 	now := time.Now()
@@ -337,8 +337,8 @@ func parseSizeTermValue(value string, mod uint8) (*search.Term, error) {
 	default:
 		size := fmtutil.ParseSize(value)
 		diff := uint64(float64(size) * 0.2)
-		from = mathutil.BetweenU64(size-diff, 0, 1024*1024*1024)
-		to = mathutil.BetweenU64(size+diff, 0, 1024*1024*1024)
+		from = mathutil.Between(size-diff, 0, 1024*1024*1024)
+		to = mathutil.Between(size+diff, 0, 1024*1024*1024)
 	}
 
 	if from > to {
@@ -354,7 +354,7 @@ func parseDepTermValue(termType uint8, value string, mod uint8) (*search.Term, e
 
 	if dep.Flag != data.COMP_FLAG_ANY {
 		if dep.Epoch == "" && dep.Version == "" && dep.Release == "" {
-			return nil, fmt.Errorf("Can't use \"%v\" - condition without value", value)
+			return nil, fmt.Errorf("Can't use %q - condition without value", value)
 		}
 	}
 
@@ -380,9 +380,7 @@ func extractTermInfo(rawTerm string) (string, string, bool) {
 		return "", rawTerm, false
 	}
 
-	sepIndex := strings.Index(rawTerm, ":")
-	name := rawTerm[:sepIndex]
-	value := rawTerm[sepIndex+1:]
+	name, value, _ := strings.Cut(rawTerm, ":")
 	isNegative := false
 
 	if strings.HasPrefix(value, ":") {

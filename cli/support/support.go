@@ -55,6 +55,10 @@ func showApplicationInfo(app, ver, gitRev string) {
 		runtime.GOOS, runtime.GOARCH,
 	))
 
+	if gitRev == "" {
+		gitRev = extractGitRevFromBuildInfo()
+	}
+
 	if gitRev != "" {
 		if !fmtc.DisableColors && fmtc.IsTrueColorSupported() {
 			printInfo(7, "Git SHA", gitRev+getHashColorBullet(gitRev))
