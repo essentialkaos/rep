@@ -16,9 +16,9 @@ import (
 
 const (
 	PKG_TYPE_CONDITIONAL uint8 = 0
-	PKG_TYPE_OPTIONAL          = 1
-	PKG_TYPE_DEFAULT           = 2
-	PKG_TYPE_MANDATORY         = 3
+	PKG_TYPE_OPTIONAL    uint8 = 1
+	PKG_TYPE_DEFAULT     uint8 = 2
+	PKG_TYPE_MANDATORY   uint8 = 3
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //

@@ -9,7 +9,7 @@ package groups
 
 import (
 	"encoding/xml"
-	"io/ioutil"
+	"os"
 	"sort"
 	"strings"
 	"testing"
@@ -41,7 +41,7 @@ func (s *GroupsSuite) TestReadingErrors(c *C) {
 	c.Assert(err, NotNil)
 	c.Assert(comps, IsNil)
 
-	err = ioutil.WriteFile(s.TmpDir+"/test.xml", []byte("TEST:TEST"), 0600)
+	err = os.WriteFile(s.TmpDir+"/test.xml", []byte("TEST:TEST"), 0600)
 
 	c.Assert(err, IsNil)
 

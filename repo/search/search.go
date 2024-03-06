@@ -53,11 +53,11 @@ const (
 
 const (
 	DEP_FLAG_ANY DepFlag = 0
-	DEP_FLAG_EQ          = 1 // =
-	DEP_FLAG_LT          = 2 // <
-	DEP_FLAG_LE          = 3 // <=
-	DEP_FLAG_GT          = 4 // >
-	DEP_FLAG_GE          = 5 // >=
+	DEP_FLAG_EQ  DepFlag = 1 // =
+	DEP_FLAG_LT  DepFlag = 2 // <
+	DEP_FLAG_LE  DepFlag = 3 // <=
+	DEP_FLAG_GT  DepFlag = 4 // >
+	DEP_FLAG_GE  DepFlag = 5 // >=
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //

@@ -1318,8 +1318,8 @@ func (p PackageStack) Less(i, j int) bool {
 
 	if p[i][0].Version != p[j][0].Version {
 		// Use natural sort if version is not semver
-		if strings.Trim(p[i][0].Version, ".01234567890") != p[i][0].Version ||
-			strings.Trim(p[j][0].Version, ".01234567890") != p[j][0].Version {
+		if strings.Trim(p[i][0].Version, ".0123456789") != p[i][0].Version ||
+			strings.Trim(p[j][0].Version, ".0123456789") != p[j][0].Version {
 			return sortutil.NaturalLess(p[i][0].Version, p[j][0].Version)
 		}
 

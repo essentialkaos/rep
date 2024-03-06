@@ -10,7 +10,6 @@ package meta
 import (
 	"errors"
 	"io"
-	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -70,7 +69,7 @@ func (s *MetaSuite) TestReadingErrors(c *C) {
 	c.Assert(err, NotNil)
 	c.Assert(index, IsNil)
 
-	err = ioutil.WriteFile(s.TmpDir+"/test.xml", []byte("TEST:TEST"), 0600)
+	err = os.WriteFile(s.TmpDir+"/test.xml", []byte("TEST:TEST"), 0600)
 
 	c.Assert(err, IsNil)
 

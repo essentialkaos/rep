@@ -9,7 +9,6 @@ package index
 
 import (
 	"errors"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -67,7 +66,7 @@ func (s *IndexSuite) TestValidate(c *C) {
 	tmpDir := c.MkDir()
 	tmpFile := tmpDir + "/comps.xml"
 
-	ioutil.WriteFile(tmpFile, []byte("TEST"), 0644)
+	os.WriteFile(tmpFile, []byte("TEST"), 0644)
 
 	opts := &Options{
 		GroupFile:      tmpFile,
