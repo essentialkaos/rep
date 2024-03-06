@@ -109,6 +109,7 @@ rm -rf %{buildroot}
 %changelog
 * Wed Mar 06 2024 Anton Novojilov <andy@essentialkaos.com> - 3.3.3-0
 - Fixed minor bug with rendering packages list
+- Code refactoring
 - Dependencies update
 
 * Mon Jan 29 2024 Anton Novojilov <andy@essentialkaos.com> - 3.3.2-0
