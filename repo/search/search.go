@@ -455,17 +455,10 @@ func genBasicTermCond(term *Term) string {
 	column := termTargetColumnMap[term.Type]
 
 	if term.Type == TERM_SOURCE {
-		if term.IsNegative() {
-			return fmt.Sprintf(
-				"(%s %s OR location_href %s OR substr(location_href, 3) %s)",
-				column, cond, cond, cond,
-			)
-		} else {
-			return fmt.Sprintf(
-				"(%s %s OR location_href %s OR substr(location_href, 3) %s)",
-				column, cond, cond, cond,
-			)
-		}
+		return fmt.Sprintf(
+			"(%s %s OR location_href %s OR substr(location_href, 3) %s)",
+			column, cond, cond, cond,
+		)
 	}
 
 	return fmt.Sprintf("%s %s", column, cond)
