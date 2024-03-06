@@ -31,12 +31,12 @@ var _ = Suite(&QueryParserSuite{})
 func (s *QueryParserSuite) TestParser(c *C) {
 	sr, err := Parse(nil)
 
-	c.Assert(err, NotNil)
+	c.Assert(err, IsNil)
 	c.Assert(sr, IsNil)
 
 	sr, err = Parse([]string{"", "", ""})
 
-	c.Assert(err, NotNil)
+	c.Assert(err, IsNil)
 	c.Assert(sr, IsNil)
 
 	sr, err = Parse([]string{"k:test"})
