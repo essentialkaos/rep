@@ -2,7 +2,7 @@ package search
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -53,11 +53,11 @@ const (
 
 const (
 	DEP_FLAG_ANY DepFlag = 0
-	DEP_FLAG_EQ          = 1 // =
-	DEP_FLAG_LT          = 2 // <
-	DEP_FLAG_LE          = 3 // <=
-	DEP_FLAG_GT          = 4 // >
-	DEP_FLAG_GE          = 5 // >=
+	DEP_FLAG_EQ  DepFlag = 1 // =
+	DEP_FLAG_LT  DepFlag = 2 // <
+	DEP_FLAG_LE  DepFlag = 3 // <=
+	DEP_FLAG_GT  DepFlag = 4 // >
+	DEP_FLAG_GE  DepFlag = 5 // >=
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -455,17 +455,10 @@ func genBasicTermCond(term *Term) string {
 	column := termTargetColumnMap[term.Type]
 
 	if term.Type == TERM_SOURCE {
-		if term.IsNegative() {
-			return fmt.Sprintf(
-				"(%s %s OR location_href %s OR substr(location_href, 3) %s)",
-				column, cond, cond, cond,
-			)
-		} else {
-			return fmt.Sprintf(
-				"(%s %s OR location_href %s OR substr(location_href, 3) %s)",
-				column, cond, cond, cond,
-			)
-		}
+		return fmt.Sprintf(
+			"(%s %s OR location_href %s OR substr(location_href, 3) %s)",
+			column, cond, cond, cond,
+		)
 	}
 
 	return fmt.Sprintf("%s %s", column, cond)

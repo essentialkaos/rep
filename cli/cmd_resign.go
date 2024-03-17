@@ -2,7 +2,7 @@ package cli
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -61,7 +61,7 @@ func resignAllPackages(ctx *context, key *sign.Key) bool {
 		ctx.Logger.Get(data.REPO_TESTING).Print("Packages re-signing finished with error")
 		return false
 	} else {
-		isResigned = true
+		isResigned = true //nolint:ineffassign
 		fmtc.NewLine()
 	}
 

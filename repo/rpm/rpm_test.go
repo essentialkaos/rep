@@ -2,13 +2,13 @@ package rpm
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
-	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 
@@ -55,13 +55,13 @@ func (s *RPMSuite) TestErrors(c *C) {
 	p2 := s.TmpDir + "/package2.rpm"
 	p3 := s.TmpDir + "/package3.rpm"
 
-	err := ioutil.WriteFile(p2, []byte(""), 0644)
+	err := os.WriteFile(p2, []byte(""), 0644)
 
 	if err != nil {
 		c.Fatal(err.Error())
 	}
 
-	err = ioutil.WriteFile(p3, []byte(strings.Repeat("DATA", 30)), 0644)
+	err = os.WriteFile(p3, []byte(strings.Repeat("DATA", 30)), 0644)
 
 	if err != nil {
 		c.Fatal(err.Error())

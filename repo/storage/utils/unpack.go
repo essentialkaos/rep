@@ -2,7 +2,7 @@ package utils
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -24,10 +24,10 @@ import (
 
 const (
 	_FORMAT_RAW  uint8 = 0
-	_FORMAT_GZIP       = 1
-	_FORMAT_BZIP       = 2
-	_FORMAT_XZ         = 3
-	_FORMAT_ZSTD       = 4
+	_FORMAT_GZIP uint8 = 1
+	_FORMAT_BZIP uint8 = 2
+	_FORMAT_XZ   uint8 = 3
+	_FORMAT_ZSTD uint8 = 4
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //

@@ -2,7 +2,7 @@ package repo
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -240,6 +240,21 @@ func (p PackageFiles) HasArch(arch string) bool {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// PackageBundle returns size of package bundle
+func (b PackageBundle) Size() int {
+	size := 0
+
+	for _, pkg := range b {
+		if pkg != nil {
+			size++
+		}
+	}
+
+	return size
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // HasMultiBundles returns true if stack contains bundle with more than 1 package
 func (s PackageStack) HasMultiBundles() bool {
 	if s.IsEmpty() {
@@ -248,7 +263,7 @@ func (s PackageStack) HasMultiBundles() bool {
 
 	for _, bundle := range s {
 		if bundle != nil {
-			if len(bundle) > 1 {
+			if bundle.Size() > 1 {
 				return true
 			}
 		}
@@ -1258,7 +1273,7 @@ func parsePayloadList(dir, objs, types string) []PayloadObject {
 	var result []PayloadObject
 
 	for i := 0; i < len(types); i++ {
-		obj := strutil.ReadField(objs, i, false, "/")
+		obj := strutil.ReadField(objs, i, false, '/')
 
 		switch types[i] {
 		case 'd':
@@ -1303,8 +1318,8 @@ func (p PackageStack) Less(i, j int) bool {
 
 	if p[i][0].Version != p[j][0].Version {
 		// Use natural sort if version is not semver
-		if strings.Trim(p[i][0].Version, ".01234567890") != p[i][0].Version ||
-			strings.Trim(p[j][0].Version, ".01234567890") != p[j][0].Version {
+		if strings.Trim(p[i][0].Version, ".0123456789") != p[i][0].Version ||
+			strings.Trim(p[j][0].Version, ".0123456789") != p[j][0].Version {
 			return sortutil.NaturalLess(p[i][0].Version, p[j][0].Version)
 		}
 

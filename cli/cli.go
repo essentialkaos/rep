@@ -2,7 +2,7 @@ package cli
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -44,7 +44,7 @@ import (
 // App info
 const (
 	APP  = "rep"
-	VER  = "3.3.2"
+	VER  = "3.3.3"
 	DESC = "DNF/YUM repository management utility"
 )
 

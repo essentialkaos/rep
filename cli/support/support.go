@@ -2,7 +2,7 @@ package support
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -54,6 +54,10 @@ func showApplicationInfo(app, ver, gitRev string) {
 		strings.TrimLeft(runtime.Version(), "go"),
 		runtime.GOOS, runtime.GOARCH,
 	))
+
+	if gitRev == "" {
+		gitRev = extractGitRevFromBuildInfo()
+	}
 
 	if gitRev != "" {
 		if !fmtc.DisableColors && fmtc.IsTrueColorSupported() {

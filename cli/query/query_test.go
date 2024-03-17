@@ -2,7 +2,7 @@ package query
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -31,10 +31,12 @@ var _ = Suite(&QueryParserSuite{})
 func (s *QueryParserSuite) TestParser(c *C) {
 	sr, err := Parse(nil)
 
+	c.Assert(err, IsNil)
 	c.Assert(sr, IsNil)
 
 	sr, err = Parse([]string{"", "", ""})
 
+	c.Assert(err, IsNil)
 	c.Assert(sr, IsNil)
 
 	sr, err = Parse([]string{"k:test"})

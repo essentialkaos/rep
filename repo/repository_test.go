@@ -2,7 +2,7 @@ package repo
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -555,6 +555,7 @@ func (s *RepoSuite) TestSubRepositoryFind(c *C) {
 
 	ps, err = r.Testing.Find(search.Query{&search.Term{Value: false}})
 	c.Assert(err, NotNil)
+	c.Assert(ps, HasLen, 0)
 
 	ps, err = r.Testing.Find(search.Query{search.TermName("git-all")})
 	c.Assert(err, IsNil)

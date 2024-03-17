@@ -2,7 +2,7 @@ package sign
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -14,7 +14,7 @@ import (
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/secstr"
 
-	"golang.org/x/crypto/openpgp/packet"
+	"golang.org/x/crypto/openpgp/packet" //nolint:staticcheck
 
 	. "github.com/essentialkaos/check"
 )
@@ -115,6 +115,7 @@ func (s *SignSuite) TestReadKey(c *C) {
 
 	password, _ = secstr.NewSecureString("123")
 	key, err = armKey.Read(password)
+	c.Assert(key, IsNil)
 	c.Assert(err, ErrorMatches, "openpgp: invalid data: private key checksum failure")
 
 	_, err = ReadKey("/_unknown_")

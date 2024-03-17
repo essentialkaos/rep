@@ -2,7 +2,7 @@ package fs
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -548,6 +548,8 @@ func (s *StorageSuite) TestStorageHasArch(c *C) {
 
 func (s *StorageSuite) TestStorageErrorsNotInitialized(c *C) {
 	fs, err := NewStorage(genStorageOptions(c, ""), index.DefaultOptions)
+
+	c.Assert(err, IsNil)
 
 	_, err = fs.GetDB(data.REPO_RELEASE, data.ARCH_X64, data.DB_PRIMARY)
 

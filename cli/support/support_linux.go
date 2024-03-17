@@ -2,7 +2,7 @@ package support
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -42,11 +42,9 @@ func showOSInfo() {
 
 	if err != nil {
 		return
-	} else {
-		if osInfo == nil {
-			fmtutil.Separator(false, "SYSTEM INFO")
-			printInfo(12, "Name", systemInfo.OS)
-		}
+	} else if osInfo == nil {
+		fmtutil.Separator(false, "SYSTEM INFO")
+		printInfo(12, "Name", systemInfo.OS)
 	}
 
 	printInfo(12, "Arch", systemInfo.Arch)

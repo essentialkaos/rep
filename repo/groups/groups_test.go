@@ -2,14 +2,14 @@ package groups
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
 	"encoding/xml"
-	"io/ioutil"
+	"os"
 	"sort"
 	"strings"
 	"testing"
@@ -41,7 +41,7 @@ func (s *GroupsSuite) TestReadingErrors(c *C) {
 	c.Assert(err, NotNil)
 	c.Assert(comps, IsNil)
 
-	err = ioutil.WriteFile(s.TmpDir+"/test.xml", []byte("TEST:TEST"), 0600)
+	err = os.WriteFile(s.TmpDir+"/test.xml", []byte("TEST:TEST"), 0600)
 
 	c.Assert(err, IsNil)
 
