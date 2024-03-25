@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/ProtonMail/go-crypto v1.0.0
 	github.com/essentialkaos/check v1.4.0
-	github.com/essentialkaos/ek/v12 v12.109.0
+	github.com/essentialkaos/ek/v12 v12.111.0
 	github.com/klauspost/compress v1.17.7
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/sassoftware/go-rpmutils v0.3.0
