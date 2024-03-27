@@ -10,6 +10,8 @@ package cli
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fmtutil"
@@ -19,6 +21,9 @@ import (
 	"github.com/essentialkaos/ek/v12/pager"
 	"github.com/essentialkaos/ek/v12/progress"
 	"github.com/essentialkaos/ek/v12/signal"
+	"github.com/essentialkaos/ek/v12/strutil"
+	"github.com/essentialkaos/ek/v12/support"
+	"github.com/essentialkaos/ek/v12/support/deps"
 	"github.com/essentialkaos/ek/v12/system"
 	"github.com/essentialkaos/ek/v12/terminal"
 	"github.com/essentialkaos/ek/v12/terminal/tty"
@@ -34,8 +39,6 @@ import (
 	knfr "github.com/essentialkaos/ek/v12/knf/validators/regexp"
 	knfs "github.com/essentialkaos/ek/v12/knf/validators/system"
 
-	"github.com/essentialkaos/rep/v3/cli/support"
-
 	"github.com/essentialkaos/rep/v3/repo/index"
 )
 
@@ -44,7 +47,7 @@ import (
 // App info
 const (
 	APP  = "rep"
-	VER  = "3.3.3"
+	VER  = "3.3.4"
 	DESC = "DNF/YUM repository management utility"
 )
 
@@ -250,7 +253,11 @@ func Init(gitRev string, gomod []byte) {
 		genAbout(gitRev).Print(options.GetS(OPT_VER))
 		os.Exit(0)
 	case options.GetB(OPT_VERB_VER):
-		support.Print(APP, VER, gitRev, gomod)
+		support.Collect(APP, VER).
+			WithRevision(gitRev).
+			WithDeps(deps.Extract(gomod)).
+			WithApps(getCreaterepoVersion(false)).
+			Print()
 		os.Exit(0)
 	case options.GetB(OPT_HELP) || len(args) == 0:
 		genUsage().Print()
@@ -543,6 +550,30 @@ func shutdown(ec int) {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// getCreaterepoVersion returns version of installed createrepo_c
+func getCreaterepoVersion(short bool) support.App {
+	cmd := exec.Command("createrepo_c", "--version")
+	out, err := cmd.Output()
+
+	if err != nil {
+		return support.App{"createrepo_c", ""}
+	}
+
+	crVer := strings.Trim(string(out), "\n\r")
+	crVer = strutil.Exclude(crVer, "Version: ")
+
+	if short {
+		return support.App{
+			"createrepo_c",
+			strutil.ReadField(crVer, 0, false, ' '),
+		}
+	}
+
+	crVer = strings.ReplaceAll(crVer, " )", ")")
+
+	return support.App{"createrepo_c", crVer}
+}
+
 // printCompletion prints completion for given shell
 func printCompletion() int {
 	info := genUsage()
@@ -686,6 +717,15 @@ func genAbout(gitRev string) *usage.About {
 	if fmtc.Is256ColorsSupported() {
 		about.AppNameColorTag = "{*}{#33}"
 		about.VersionColorTag = "{#33}"
+	}
+
+	crInfo := getCreaterepoVersion(true)
+
+	if crInfo.Version != "" {
+		about.Environment = append(
+			about.Environment,
+			usage.EnvironmentInfo{crInfo.Name, crInfo.Version},
+		)
 	}
 
 	return about
