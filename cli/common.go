@@ -362,7 +362,7 @@ func getRepoFSStorage(repoCfg *knf.Config) (*fs.Storage, error) {
 			Content:        knf.GetS(INDEX_CONTENT),
 			Revision:       knf.GetS(INDEX_REVISION),
 			Workers:        knf.GetI(INDEX_WORKERS, 0),
-			CompressType:   knf.GetS(INDEX_COMPRESSION_TYPE, index.COMPRESSION_XZ),
+			CompressType:   knf.GetS(INDEX_COMPRESSION_TYPE, index.COMPRESSION_BZ2),
 		},
 	)
 }
