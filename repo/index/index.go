@@ -171,24 +171,27 @@ func Generate(path string, options *Options, full bool) error {
 // Clone creates options copy
 func (o *Options) Clone() *Options {
 	return &Options{
+		User:      o.User,
+		Group:     o.Group,
+		DirPerms:  o.DirPerms,
+		FilePerms: o.FilePerms,
+
 		GroupFile:      o.GroupFile,
-		Pretty:         o.Pretty,
-		Update:         o.Update,
-		Split:          o.Split,
-		SkipSymlinks:   o.SkipSymlinks,
-		Deltas:         o.Deltas,
-		NumDeltas:      o.NumDeltas,
 		CheckSum:       o.CheckSum,
-		ChangelogLimit: o.ChangelogLimit,
 		MDFilenames:    o.MDFilenames,
 		CompressType:   o.CompressType,
 		Distro:         o.Distro,
 		Content:        o.Content,
 		Revision:       o.Revision,
+		NumDeltas:      o.NumDeltas,
+		ChangelogLimit: o.ChangelogLimit,
 		Workers:        o.Workers,
+		Pretty:         o.Pretty,
+		Update:         o.Update,
+		Split:          o.Split,
+		SkipSymlinks:   o.SkipSymlinks,
+		Deltas:         o.Deltas,
 		Zchunk:         o.Zchunk,
-		User:           o.User,
-		Group:          o.Group,
 	}
 }
 

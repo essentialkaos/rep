@@ -15,7 +15,7 @@
 
 Summary:        YUM repository management utility
 Name:           rep
-Version:        3.3.4
+Version:        3.3.5
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache 2.0
@@ -107,6 +107,11 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Fri Apr 19 2024 Anton Novojilov <andy@essentialkaos.com> - 3.3.5-0
+- Fixed bug with changing permissions on repodata after full reindex
+- Code refactoring
+- Dependencies update
+
 * Thu Mar 21 2024 Anton Novojilov <andy@essentialkaos.com> - 3.3.4-0
 - Improved support information gathering
 - Code refactoring
