@@ -21,14 +21,14 @@ RUN apk add --no-cache bash-completion bzip2-dev cmake curl-dev expat-dev \
 
 ## GO BUILDER ##################################################################
 
-FROM golang:alpine as go-builder
+FROM ${REGISTRY}/essentialkaos/golang:alpine3.18 as go-builder
 
 WORKDIR /go/src/github.com/essentialkaos/rep
 
 COPY . .
 
 # hadolint ignore=DL3018
-RUN apk add --no-cache git make gcc musl-dev && \
+RUN apk add --no-cache gcc musl-dev && \
     make deps && make all
 
 ## FINAL IMAGE #################################################################
