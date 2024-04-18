@@ -6,7 +6,7 @@ ARG REGISTRY="docker.io"
 
 FROM ${REGISTRY}/essentialkaos/alpine:3.18 as cr-builder
 
-ARG VERSION=0.20.1
+ARG VERSION=1.1.0
 
 # hadolint ignore=DL3003,DL3018
 RUN apk add --no-cache bash-completion bzip2-dev cmake curl-dev expat-dev \
