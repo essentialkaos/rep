@@ -204,12 +204,12 @@ func (s *IndexSuite) TestCreaterepo(c *C) {
 	err := Generate(repoDir, DefaultOptions, true)
 
 	c.Assert(err, IsNil)
-	c.Assert(fsutil.IsExist(repoDir+"/repodata/filelists.sqlite.xz"), Equals, true)
-	c.Assert(fsutil.IsExist(repoDir+"/repodata/filelists.xml.xz"), Equals, true)
-	c.Assert(fsutil.IsExist(repoDir+"/repodata/other.sqlite.xz"), Equals, true)
-	c.Assert(fsutil.IsExist(repoDir+"/repodata/other.xml.xz"), Equals, true)
-	c.Assert(fsutil.IsExist(repoDir+"/repodata/primary.sqlite.xz"), Equals, true)
-	c.Assert(fsutil.IsExist(repoDir+"/repodata/primary.xml.xz"), Equals, true)
+	c.Assert(fsutil.IsExist(repoDir+"/repodata/filelists.sqlite.bz2"), Equals, true)
+	c.Assert(fsutil.IsExist(repoDir+"/repodata/filelists.xml.bz2"), Equals, true)
+	c.Assert(fsutil.IsExist(repoDir+"/repodata/other.sqlite.bz2"), Equals, true)
+	c.Assert(fsutil.IsExist(repoDir+"/repodata/other.xml.bz2"), Equals, true)
+	c.Assert(fsutil.IsExist(repoDir+"/repodata/primary.sqlite.bz2"), Equals, true)
+	c.Assert(fsutil.IsExist(repoDir+"/repodata/primary.xml.bz2"), Equals, true)
 	c.Assert(fsutil.IsExist(repoDir+"/repodata/repomd.xml"), Equals, true)
 }
 

@@ -44,7 +44,7 @@ func (s *LoggerSuite) TestLogger(c *C) {
 	l.Flush()
 	l.Get("unknown").Print("TEST3")
 
-	c.Assert(fsutil.IsNonEmpty(tmpDir+"/testing.log"), Equals, true)
+	c.Assert(fsutil.IsEmpty(tmpDir+"/testing.log"), Equals, false)
 }
 
 func (s *LoggerSuite) TestErrors(c *C) {
