@@ -15,6 +15,7 @@ import (
 	"github.com/essentialkaos/ek/v12/pluralize"
 	"github.com/essentialkaos/ek/v12/progress"
 	"github.com/essentialkaos/ek/v12/terminal"
+	"github.com/essentialkaos/ek/v12/terminal/input"
 
 	"github.com/essentialkaos/rep/v3/repo"
 	"github.com/essentialkaos/rep/v3/repo/data"
@@ -33,7 +34,7 @@ how many packages you have and how big they are).`)
 
 		fmtc.NewLine()
 
-		ok, err := terminal.ReadAnswer("Do you really want to re-sign all packages?", "n")
+		ok, err := input.ReadAnswer("Do you really want to re-sign all packages?", "n")
 
 		if err != nil || !ok {
 			return false

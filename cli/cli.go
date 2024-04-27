@@ -26,6 +26,7 @@ import (
 	"github.com/essentialkaos/ek/v12/support/deps"
 	"github.com/essentialkaos/ek/v12/system"
 	"github.com/essentialkaos/ek/v12/terminal"
+	"github.com/essentialkaos/ek/v12/terminal/input"
 	"github.com/essentialkaos/ek/v12/terminal/tty"
 	"github.com/essentialkaos/ek/v12/usage"
 	"github.com/essentialkaos/ek/v12/usage/completion/bash"
@@ -289,10 +290,10 @@ func configureUI() {
 	fmtutil.SeparatorColorTag = "{s}"
 	fmtutil.SeparatorTitleColorTag = "{*}"
 
-	terminal.Prompt = "› "
-	terminal.MaskSymbol = "•"
-	terminal.MaskSymbolColorTag = "{s-}"
-	terminal.TitleColorTag = "{s}"
+	input.Prompt = "› "
+	input.MaskSymbol = "•"
+	input.MaskSymbolColorTag = "{s-}"
+	input.TitleColorTag = "{s}"
 
 	progress.DefaultSettings.NameColorTag = "{*}"
 	progress.DefaultSettings.PercentColorTag = "{*}"

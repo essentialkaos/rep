@@ -21,6 +21,7 @@ import (
 	"github.com/essentialkaos/ek/v12/path"
 	"github.com/essentialkaos/ek/v12/secstr"
 	"github.com/essentialkaos/ek/v12/terminal"
+	"github.com/essentialkaos/ek/v12/terminal/input"
 	"github.com/essentialkaos/ek/v12/tmp"
 
 	"github.com/essentialkaos/rep/v3/cli/logger"
@@ -461,7 +462,7 @@ func getRepoSigningKey(r *repo.Repository) (*sign.Key, bool) {
 	var password *secstr.String
 
 	if r.SigningKey.IsEncrypted {
-		password, err = terminal.ReadPasswordSecure("Enter passphrase to unlock the secret key", true)
+		password, err = input.ReadPasswordSecure("Enter passphrase to unlock the secret key", true)
 
 		if err != nil {
 			return nil, false

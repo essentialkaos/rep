@@ -14,6 +14,7 @@ import (
 	"github.com/essentialkaos/ek/v12/path"
 	"github.com/essentialkaos/ek/v12/spinner"
 	"github.com/essentialkaos/ek/v12/terminal"
+	"github.com/essentialkaos/ek/v12/terminal/input"
 
 	"github.com/essentialkaos/rep/v3/repo"
 	"github.com/essentialkaos/rep/v3/repo/data"
@@ -67,7 +68,7 @@ func removePackages(ctx *context, releaseStack, testingStack repo.PackageStack, 
 		fmtutil.Separator(true)
 		fmtc.NewLine()
 
-		ok, err := terminal.ReadAnswer("Do you really want to remove these packages?", "n")
+		ok, err := input.ReadAnswer("Do you really want to remove these packages?", "n")
 
 		if err != nil || !ok {
 			return false

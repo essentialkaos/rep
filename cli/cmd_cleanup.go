@@ -16,6 +16,7 @@ import (
 	"github.com/essentialkaos/ek/v12/fmtutil"
 	"github.com/essentialkaos/ek/v12/options"
 	"github.com/essentialkaos/ek/v12/terminal"
+	"github.com/essentialkaos/ek/v12/terminal/input"
 
 	"github.com/essentialkaos/rep/v3/repo"
 )
@@ -107,7 +108,7 @@ func cleanupPackages(ctx *context, releaseStack, testingStack repo.PackageStack)
 		fmtutil.Separator(true)
 		fmtc.NewLine()
 
-		ok, err := terminal.ReadAnswer("Do you really want to remove these packages?", "n")
+		ok, err := input.ReadAnswer("Do you really want to remove these packages?", "n")
 
 		if err != nil || !ok {
 			return false

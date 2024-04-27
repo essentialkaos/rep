@@ -19,6 +19,7 @@ import (
 	"github.com/essentialkaos/ek/v12/secstr"
 	"github.com/essentialkaos/ek/v12/spinner"
 	"github.com/essentialkaos/ek/v12/terminal"
+	"github.com/essentialkaos/ek/v12/terminal/input"
 
 	"github.com/essentialkaos/rep/v3/repo/sign/keygen"
 )
@@ -48,7 +49,7 @@ func cmdGenKey(ctx *context, args options.Arguments) bool {
 	var name, email, outputPubKeyFile string
 
 	for {
-		name, err = terminal.Read("Key name", true)
+		name, err = input.Read("Key name", true)
 
 		if err != nil {
 			return false
@@ -72,7 +73,7 @@ func cmdGenKey(ctx *context, args options.Arguments) bool {
 	fmtc.NewLine()
 
 	for {
-		email, err = terminal.Read("Email address", true)
+		email, err = input.Read("Email address", true)
 
 		if err != nil {
 			return false
@@ -89,7 +90,7 @@ func cmdGenKey(ctx *context, args options.Arguments) bool {
 	fmtc.NewLine()
 
 	for {
-		password, err = terminal.ReadPasswordSecure("Passphrase", true)
+		password, err = input.ReadPasswordSecure("Passphrase", true)
 
 		if err != nil {
 			return false
@@ -100,7 +101,7 @@ func cmdGenKey(ctx *context, args options.Arguments) bool {
 		if passwd.GetPasswordBytesStrength(password.Data) < passwd.STRENGTH_MEDIUM {
 			terminal.Warn("Given passphrase is not strong enough.\n")
 
-			ok, _ := terminal.ReadAnswer("Use this passphrase anyway?", "n")
+			ok, _ := input.ReadAnswer("Use this passphrase anyway?", "n")
 
 			fmtc.NewLine()
 

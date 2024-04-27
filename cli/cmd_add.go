@@ -16,6 +16,7 @@ import (
 	"github.com/essentialkaos/ek/v12/path"
 	"github.com/essentialkaos/ek/v12/spinner"
 	"github.com/essentialkaos/ek/v12/terminal"
+	"github.com/essentialkaos/ek/v12/terminal/input"
 
 	"github.com/essentialkaos/rep/v3/repo/data"
 	"github.com/essentialkaos/rep/v3/repo/rpm"
@@ -41,7 +42,7 @@ func cmdAdd(ctx *context, args options.Arguments) bool {
 	if !options.GetB(OPT_FORCE) {
 		printFilesList(files)
 
-		ok, err := terminal.ReadAnswer("Do you want to add these packages?", "n")
+		ok, err := input.ReadAnswer("Do you want to add these packages?", "n")
 
 		if err != nil || !ok {
 			return false
