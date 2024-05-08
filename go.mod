@@ -10,7 +10,6 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/sassoftware/go-rpmutils v0.4.0
 	github.com/ulikunitz/xz v0.5.12
-	golang.org/x/crypto v0.23.0
 )
 
 require (
@@ -22,5 +21,6 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
+	golang.org/x/crypto v0.23.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 )
