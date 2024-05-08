@@ -8,7 +8,7 @@ require (
 	github.com/essentialkaos/ek/v12 v12.123.2
 	github.com/klauspost/compress v1.17.8
 	github.com/mattn/go-sqlite3 v1.14.22
-	github.com/sassoftware/go-rpmutils v0.3.0
+	github.com/sassoftware/go-rpmutils v0.4.0
 	github.com/ulikunitz/xz v0.5.12
 	golang.org/x/crypto v0.23.0
 )
