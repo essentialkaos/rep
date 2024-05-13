@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/ProtonMail/go-crypto v1.0.0
 	github.com/essentialkaos/check v1.4.0
-	github.com/essentialkaos/ek/v12 v12.123.2
+	github.com/essentialkaos/ek/v12 v12.124.0
 	github.com/klauspost/compress v1.17.8
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/sassoftware/go-rpmutils v0.4.0
