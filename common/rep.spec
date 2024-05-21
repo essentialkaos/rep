@@ -13,7 +13,7 @@
 
 ################################################################################
 
-Summary:        YUM repository management utility
+Summary:        DNF/YUM repository management utility
 Name:           rep
 Version:        3.4.0
 Release:        0%{?dist}
@@ -36,7 +36,7 @@ Provides:       %{name} = %{version}-%{release}
 ################################################################################
 
 %description
-YUM repository management utility.
+DNF/YUM repository management utility.
 
 ################################################################################
 
