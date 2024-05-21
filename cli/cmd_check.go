@@ -24,6 +24,7 @@ import (
 	"github.com/essentialkaos/ek/v12/strutil"
 	"github.com/essentialkaos/ek/v12/system"
 	"github.com/essentialkaos/ek/v12/terminal"
+	"github.com/essentialkaos/ek/v12/terminal/input"
 
 	"github.com/essentialkaos/rep/v3/repo"
 	"github.com/essentialkaos/rep/v3/repo/sign"
@@ -481,7 +482,7 @@ func waitForUserToContinue() bool {
 	}
 
 	fmtc.NewLine()
-	ok, _ := terminal.ReadAnswer("Continue?", "Y")
+	ok, _ := input.ReadAnswer("Continue?", "Y")
 
 	return ok
 }

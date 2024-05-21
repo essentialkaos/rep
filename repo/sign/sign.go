@@ -17,8 +17,8 @@ import (
 
 	"github.com/sassoftware/go-rpmutils"
 
-	"golang.org/x/crypto/openpgp"        //nolint:staticcheck
-	"golang.org/x/crypto/openpgp/packet" //nolint:staticcheck
+	"github.com/ProtonMail/go-crypto/openpgp"
+	"github.com/ProtonMail/go-crypto/openpgp/packet"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -241,8 +241,6 @@ func getSigKeyID(genPkt packet.Packet) uint64 {
 	switch pkt := genPkt.(type) {
 	case *packet.Signature:
 		return getSigV4KeyID(pkt)
-	case *packet.SignatureV3:
-		return getSigV3KeyID(pkt)
 	}
 
 	return 0
@@ -252,15 +250,6 @@ func getSigKeyID(genPkt packet.Packet) uint64 {
 func getSigV4KeyID(pkt *packet.Signature) uint64 {
 	if pkt != nil {
 		return *pkt.IssuerKeyId
-	}
-
-	return 0
-}
-
-// getSigKeyID returns signature V3 key ID
-func getSigV3KeyID(pkt *packet.SignatureV3) uint64 {
-	if pkt != nil {
-		return pkt.IssuerKeyId
 	}
 
 	return 0

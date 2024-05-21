@@ -14,7 +14,7 @@ import (
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/secstr"
 
-	"golang.org/x/crypto/openpgp/packet" //nolint:staticcheck
+	"github.com/ProtonMail/go-crypto/openpgp/packet"
 
 	. "github.com/essentialkaos/check"
 )
@@ -173,11 +173,7 @@ func (s *SignSuite) TestErrors(c *C) {
 	_, err = checkSignaturePacket([]byte("ABCD"), nil)
 	c.Assert(err, NotNil)
 
-	sigV3 := &packet.SignatureV3{IssuerKeyId: 287}
-	c.Assert(getSigKeyID(sigV3), Equals, uint64(287))
-
 	c.Assert(getSigV4KeyID(nil), Equals, uint64(0))
-	c.Assert(getSigV3KeyID(nil), Equals, uint64(0))
 
 	sig := &packet.SymmetricKeyEncrypted{}
 	c.Assert(getSigKeyID(sig), Equals, uint64(0))

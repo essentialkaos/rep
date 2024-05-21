@@ -15,7 +15,7 @@
 
 Summary:        YUM repository management utility
 Name:           rep
-Version:        3.3.5
+Version:        3.7.0
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache 2.0
@@ -107,6 +107,12 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Sat Apr 27 2024 Anton Novojilov <andy@essentialkaos.com> - 3.3.6-0
+- v3 signature support deprecated due to migration to
+  github.com/ProtonMail/go-crypto/openpgp
+- Code refactoring
+- Dependencies update
+
 * Fri Apr 19 2024 Anton Novojilov <andy@essentialkaos.com> - 3.3.5-0
 - Fixed bug with changing permissions on repodata after full reindex
 - Code refactoring
