@@ -48,7 +48,7 @@ import (
 // App info
 const (
 	APP  = "rep"
-	VER  = "3.7.0"
+	VER  = "3.4.0"
 	DESC = "DNF/YUM repository management utility"
 )
 
