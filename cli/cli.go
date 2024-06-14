@@ -612,9 +612,9 @@ func genUsage() *usage.Info {
 	}
 
 	info.AddSpoiler(
-		`  Note that if you have more than one repository, you should specify its name
-  as the first argument. You can read detailed information about each command
-  with usage examples by using the {y}help{!} command.`)
+		`  Note that if you have more than one repository, you should specify its name as the
+  first argument. You can read detailed information about each command with usage
+  examples by using the {y}help{!} command.`)
 
 	info.AddCommand(COMMAND_INIT, "Initialize new repository", "arch…")
 	info.AddCommand(COMMAND_GEN_KEY, "Generate keys for signing packages")
@@ -639,16 +639,16 @@ func genUsage() *usage.Info {
 	info.AddOption(OPT_RELEASE, "Run command only on release {s}(stable){!} repository")
 	info.AddOption(OPT_TESTING, "Run command only on testing {s}(unstable){!} repository")
 	info.AddOption(OPT_ALL, "Run command on all repositories")
-	info.AddOption(OPT_ARCH, `Package architecture {s-}(helpful with "info" and "payload" commands){!}`, "arch")
-	info.AddOption(OPT_MOVE, `Move {s}(remove after successful action){!} packages {s-}(helpful with "add" command){!}`)
-	info.AddOption(OPT_NO_SOURCE, `Ignore source packages {s-}(helpful with "add" command){!}`)
-	info.AddOption(OPT_IGNORE_FILTER, `Ignore repository file filter {s-}(helpful with "add" and "sign" commands){!}`)
-	info.AddOption(OPT_POSTPONE_INDEX, `Postpone repository reindex {s-}(helpful with "add", "remove", "release", and "unrelase" commands){!}`)
+	info.AddOption(OPT_ARCH, `Package architecture`, "arch")
+	info.AddOption(OPT_MOVE, `Move {s}(remove after successful action){!} packages`)
+	info.AddOption(OPT_NO_SOURCE, `Ignore source packages`)
+	info.AddOption(OPT_IGNORE_FILTER, `Ignore repository file filter`)
+	info.AddOption(OPT_POSTPONE_INDEX, `Postpone repository reindex`)
 	info.AddOption(OPT_FORCE, `Answer "yes" for all questions`)
-	info.AddOption(OPT_FULL, `Full reindex {s-}(helpful with "reindex" command){!}`)
-	info.AddOption(OPT_SHOW_ALL, `Show all versions of packages {s-}(helpful with "list" command){!}`)
+	info.AddOption(OPT_FULL, `Full reindex`)
+	info.AddOption(OPT_SHOW_ALL, `Show all versions of packages`)
 	info.AddOption(OPT_STATUS, "Show package status {s-}(released or not){!}")
-	info.AddOption(OPT_EPOCH, `Show epoch info {s-}(helpful with "list" and "which-source" commands){!}`)
+	info.AddOption(OPT_EPOCH, `Show epoch info`)
 	info.AddOption(OPT_PAGER, "Use pager for long output")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")
