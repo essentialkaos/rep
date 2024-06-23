@@ -13,9 +13,9 @@
 
 ################################################################################
 
-Summary:        YUM repository management utility
+Summary:        DNF/YUM repository management utility
 Name:           rep
-Version:        3.4.0
+Version:        3.4.1
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache 2.0
@@ -36,7 +36,7 @@ Provides:       %{name} = %{version}-%{release}
 ################################################################################
 
 %description
-YUM repository management utility.
+DNF/YUM repository management utility.
 
 ################################################################################
 
@@ -44,13 +44,15 @@ YUM repository management utility.
 %{crc_check}
 
 %setup -q
-
-%build
 if [[ ! -d "%{name}/vendor" ]] ; then
-  echo "This package requires vendored dependencies"
+  echo -e "----\nThis package requires vendored dependencies\n----"
+  exit 1
+elif [[ -f "%{name}/%{name}" ]] ; then
+  echo -e "----\nSources must not contain precompiled binaries\n----"
   exit 1
 fi
 
+%build
 pushd %{name}
   %{__make} %{?_smp_mflags} all
 popd
@@ -107,6 +109,10 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Sun Jun 23 2024 Anton Novojilov <andy@essentialkaos.com> - 3.4.1-0
+- Code refactoring
+- Dependencies update
+
 * Sat Apr 27 2024 Anton Novojilov <andy@essentialkaos.com> - 3.4.0-0
 - v3 signature support deprecated due to migration to
   github.com/ProtonMail/go-crypto/openpgp
