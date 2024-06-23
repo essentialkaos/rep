@@ -48,7 +48,7 @@ import (
 // App info
 const (
 	APP  = "rep"
-	VER  = "3.4.0"
+	VER  = "3.4.1"
 	DESC = "DNF/YUM repository management utility"
 )
 
@@ -232,13 +232,9 @@ var rawOutput = false
 func Init(gitRev string, gomod []byte) {
 	args, errs := options.Parse(optMap)
 
-	if len(errs) != 0 {
-		terminal.Error("Can't parse options:")
-
-		for _, err := range errs {
-			terminal.Error("  %v\n", err)
-		}
-
+	if !errs.IsEmpty() {
+		terminal.Error("Options parsing errors:")
+		terminal.Error(errs.String())
 		os.Exit(1)
 	}
 
@@ -595,12 +591,7 @@ func printCompletion() int {
 
 // printMan prints man page
 func printMan() {
-	fmt.Println(
-		man.Generate(
-			genUsage(),
-			genAbout(""),
-		),
-	)
+	fmt.Println(man.Generate(genUsage(), genAbout("")))
 }
 
 // genUsage generates usage info
