@@ -104,8 +104,6 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          path: ${{env.SRC_DIR}}
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -114,15 +112,12 @@ jobs:
           cache: false
 
       - name: Download dependencies
-        working-directory: ${{env.SRC_DIR}}
         run: make deps
 
       - name: Build binary
-        working-directory: ${{env.SRC_DIR}}
         run: make all
 
       - name: Run tests
-        working-directory: ${{env.SRC_DIR}}
         run: make test COVERAGE_FILE=cover.out
 
       - name: Send coverage data
@@ -130,7 +125,6 @@ jobs:
         env:
           COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          path: ${{env.SRC_DIR}}
           profile: cover.out
           parallel: true
           flag-name: linux-${{ matrix.go }}
