@@ -13,10 +13,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/essentialkaos/ek/v12/fmtutil"
-	"github.com/essentialkaos/ek/v12/mathutil"
-	"github.com/essentialkaos/ek/v12/strutil"
-	"github.com/essentialkaos/ek/v12/timeutil"
+	"github.com/essentialkaos/ek/v13/fmtutil"
+	"github.com/essentialkaos/ek/v13/mathutil"
+	"github.com/essentialkaos/ek/v13/strutil"
+	"github.com/essentialkaos/ek/v13/timeutil"
 
 	"github.com/essentialkaos/rep/v3/repo/data"
 	"github.com/essentialkaos/rep/v3/repo/search"

@@ -11,9 +11,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/essentialkaos/ek/v12/log"
-	"github.com/essentialkaos/ek/v12/path"
-	"github.com/essentialkaos/ek/v12/system"
+	"github.com/essentialkaos/ek/v13/log"
+	"github.com/essentialkaos/ek/v13/path"
+	"github.com/essentialkaos/ek/v13/system"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //

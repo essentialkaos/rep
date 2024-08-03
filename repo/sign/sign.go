@@ -12,8 +12,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/essentialkaos/ek/v12/directio"
-	"github.com/essentialkaos/ek/v12/secstr"
+	"github.com/essentialkaos/ek/v13/directio"
+	"github.com/essentialkaos/ek/v13/secstr"
 
 	"github.com/sassoftware/go-rpmutils"
 

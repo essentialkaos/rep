@@ -8,10 +8,10 @@ package cli
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
-	"github.com/essentialkaos/ek/v12/fmtc"
-	"github.com/essentialkaos/ek/v12/options"
-	"github.com/essentialkaos/ek/v12/sliceutil"
-	"github.com/essentialkaos/ek/v12/terminal"
+	"github.com/essentialkaos/ek/v13/fmtc"
+	"github.com/essentialkaos/ek/v13/options"
+	"github.com/essentialkaos/ek/v13/sliceutil"
+	"github.com/essentialkaos/ek/v13/terminal"
 
 	"github.com/essentialkaos/rep/v3/repo/data"
 )

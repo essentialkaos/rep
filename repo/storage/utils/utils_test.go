@@ -11,7 +11,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/essentialkaos/ek/v12/hash"
+	"github.com/essentialkaos/ek/v13/hash"
 
 	. "github.com/essentialkaos/check"
 )
