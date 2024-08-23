@@ -1,10 +1,10 @@
 [repository]
 
   # Repository name
-  name: 7
+  name: 9
 
   # File filter checks all files by given glob
-  file-filter: *.el7.*
+  file-filter: *.el9.*
 
   # Allow to replace packages already presented in repository
   replace: true
