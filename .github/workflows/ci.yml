@@ -141,6 +141,7 @@ jobs:
   SendCoverage:
     name: Send Coverage
     runs-on: ubuntu-latest
+    if: success() || failure()
 
     needs: Go
 
