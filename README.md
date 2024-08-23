@@ -44,7 +44,7 @@ export REP_DIR=/opt/rep
 # Create repository configuration in /opt/rep/conf (use common/repository.knf.example as an example)
 
 rep init src x86_64
-rep add my-package.el7.x86_64.rpm
+rep add my-package.el8.x86_64.rpm
 ```
 
 Official Docker images with `rep`:
