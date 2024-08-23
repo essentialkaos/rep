@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   BuildCreaterepo:
-    name: BuildCreaterepo
+    name: Build createrepo_c
     runs-on: ubuntu-latest
 
     env:
