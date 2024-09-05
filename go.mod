@@ -14,7 +14,7 @@ require (
 
 require (
 	github.com/DataDog/zstd v1.5.6 // indirect
-	github.com/cloudflare/circl v1.3.9 // indirect
+	github.com/cloudflare/circl v1.4.0 // indirect
 	github.com/essentialkaos/depsy v1.3.0 // indirect
 	github.com/essentialkaos/go-linenoise/v3 v3.6.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
@@ -22,5 +22,5 @@ require (
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/crypto v0.26.0 // indirect
-	golang.org/x/sys v0.24.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
 )
