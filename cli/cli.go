@@ -13,32 +13,32 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/essentialkaos/ek/v12/fmtc"
-	"github.com/essentialkaos/ek/v12/fmtutil"
-	"github.com/essentialkaos/ek/v12/fsutil"
-	"github.com/essentialkaos/ek/v12/knf"
-	"github.com/essentialkaos/ek/v12/options"
-	"github.com/essentialkaos/ek/v12/pager"
-	"github.com/essentialkaos/ek/v12/progress"
-	"github.com/essentialkaos/ek/v12/signal"
-	"github.com/essentialkaos/ek/v12/strutil"
-	"github.com/essentialkaos/ek/v12/support"
-	"github.com/essentialkaos/ek/v12/support/deps"
-	"github.com/essentialkaos/ek/v12/system"
-	"github.com/essentialkaos/ek/v12/terminal"
-	"github.com/essentialkaos/ek/v12/terminal/input"
-	"github.com/essentialkaos/ek/v12/terminal/tty"
-	"github.com/essentialkaos/ek/v12/usage"
-	"github.com/essentialkaos/ek/v12/usage/completion/bash"
-	"github.com/essentialkaos/ek/v12/usage/completion/fish"
-	"github.com/essentialkaos/ek/v12/usage/completion/zsh"
-	"github.com/essentialkaos/ek/v12/usage/man"
-	"github.com/essentialkaos/ek/v12/usage/update"
+	"github.com/essentialkaos/ek/v13/fmtc"
+	"github.com/essentialkaos/ek/v13/fmtutil"
+	"github.com/essentialkaos/ek/v13/fsutil"
+	"github.com/essentialkaos/ek/v13/knf"
+	"github.com/essentialkaos/ek/v13/options"
+	"github.com/essentialkaos/ek/v13/pager"
+	"github.com/essentialkaos/ek/v13/progress"
+	"github.com/essentialkaos/ek/v13/signal"
+	"github.com/essentialkaos/ek/v13/strutil"
+	"github.com/essentialkaos/ek/v13/support"
+	"github.com/essentialkaos/ek/v13/support/deps"
+	"github.com/essentialkaos/ek/v13/system"
+	"github.com/essentialkaos/ek/v13/terminal"
+	"github.com/essentialkaos/ek/v13/terminal/input"
+	"github.com/essentialkaos/ek/v13/terminal/tty"
+	"github.com/essentialkaos/ek/v13/usage"
+	"github.com/essentialkaos/ek/v13/usage/completion/bash"
+	"github.com/essentialkaos/ek/v13/usage/completion/fish"
+	"github.com/essentialkaos/ek/v13/usage/completion/zsh"
+	"github.com/essentialkaos/ek/v13/usage/man"
+	"github.com/essentialkaos/ek/v13/usage/update"
 
-	knfv "github.com/essentialkaos/ek/v12/knf/validators"
-	knff "github.com/essentialkaos/ek/v12/knf/validators/fs"
-	knfr "github.com/essentialkaos/ek/v12/knf/validators/regexp"
-	knfs "github.com/essentialkaos/ek/v12/knf/validators/system"
+	knfv "github.com/essentialkaos/ek/v13/knf/validators"
+	knff "github.com/essentialkaos/ek/v13/knf/validators/fs"
+	knfr "github.com/essentialkaos/ek/v13/knf/validators/regexp"
+	knfs "github.com/essentialkaos/ek/v13/knf/validators/system"
 
 	"github.com/essentialkaos/rep/v3/repo/index"
 )
@@ -48,7 +48,7 @@ import (
 // App info
 const (
 	APP  = "rep"
-	VER  = "3.4.1"
+	VER  = "3.5.0"
 	DESC = "DNF/YUM repository management utility"
 )
 
@@ -351,10 +351,10 @@ func loadGlobalConfig() {
 // validateGlobalConfig validates global configuration file properties
 func validateGlobalConfig() {
 	validators := []*knf.Validator{
-		{STORAGE_DATA, knfv.Empty, nil},
-		{STORAGE_CACHE, knfv.Empty, nil},
-		{LOG_DIR, knfv.Empty, nil},
-		{TEMP_DIR, knfv.Empty, nil},
+		{STORAGE_DATA, knfv.Set, nil},
+		{STORAGE_CACHE, knfv.Set, nil},
+		{LOG_DIR, knfv.Set, nil},
+		{TEMP_DIR, knfv.Set, nil},
 
 		{STORAGE_DATA, knff.Perms, "DRWX"},
 		{STORAGE_CACHE, knff.Perms, "DRWX"},
@@ -362,9 +362,9 @@ func validateGlobalConfig() {
 		{LOG_DIR, knff.Perms, "DWX"},
 		{TEMP_DIR, knff.Perms, "DRWX"},
 
-		{INDEX_CHECKSUM, knfv.NotContains, index.CheckSumMethods},
-		{INDEX_MD_FILENAMES, knfv.NotContains, index.MDFilenames},
-		{INDEX_COMPRESSION_TYPE, knfv.NotContains, index.CompressionMethods},
+		{INDEX_CHECKSUM, knfv.SetToAny, index.CheckSumMethods},
+		{INDEX_MD_FILENAMES, knfv.SetToAny, index.MDFilenames},
+		{INDEX_COMPRESSION_TYPE, knfv.SetToAny, index.CompressionMethods},
 	}
 
 	errs := knf.Validate(validators)

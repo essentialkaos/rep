@@ -12,14 +12,14 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/essentialkaos/ek/v12/fmtc"
-	"github.com/essentialkaos/ek/v12/fsutil"
-	"github.com/essentialkaos/ek/v12/options"
-	"github.com/essentialkaos/ek/v12/passwd"
-	"github.com/essentialkaos/ek/v12/secstr"
-	"github.com/essentialkaos/ek/v12/spinner"
-	"github.com/essentialkaos/ek/v12/terminal"
-	"github.com/essentialkaos/ek/v12/terminal/input"
+	"github.com/essentialkaos/ek/v13/fmtc"
+	"github.com/essentialkaos/ek/v13/fsutil"
+	"github.com/essentialkaos/ek/v13/options"
+	"github.com/essentialkaos/ek/v13/passwd"
+	"github.com/essentialkaos/ek/v13/secstr"
+	"github.com/essentialkaos/ek/v13/spinner"
+	"github.com/essentialkaos/ek/v13/terminal"
+	"github.com/essentialkaos/ek/v13/terminal/input"
 
 	"github.com/essentialkaos/rep/v3/repo/sign/keygen"
 )

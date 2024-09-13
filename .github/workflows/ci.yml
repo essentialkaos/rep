@@ -1,37 +1,21 @@
 name: CI
 
 on:
-  push:
-    branches: [master, develop]
-  pull_request:
-    branches: [master]
-  schedule:
-    - cron: '0 11 */15 * *'
-  workflow_dispatch:
-    inputs:
-      force_run:
-        description: 'Force workflow run'
-        required: true
-        type: choice
-        options: [yes, no]
+  workflow_call:
 
 permissions:
   actions: read
   contents: read
   statuses: write
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   BuildCreaterepo:
-    name: BuildCreaterepo
+    name: Build createrepo_c
     runs-on: ubuntu-latest
 
     env:
       CR_REPO: rpm-software-management/createrepo_c
-      CR_VERSION: 1.1.0
+      CR_VERSION: 1.1.4
 
     steps:
       - name: Install build dependencies
@@ -90,14 +74,20 @@ jobs:
 
     needs: BuildCreaterepo
 
-    env:
-      SRC_DIR: src/github.com/${{ github.repository }}
-
     strategy:
       matrix:
-        go: [ '1.21.x', '1.22.x' ]
+        go: [ '1.22.x', '1.23.x' ]
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+          cache: false
+
       - name: Download pre-built artifacts
         uses: actions/download-artifact@v4
         with:
@@ -121,69 +111,52 @@ jobs:
       - name: Print createrepo_c version info
         run: createrepo_c --version
 
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          path: ${{env.SRC_DIR}}
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ matrix.go }}
-          cache: false
-
-      - uses: actions/cache@v4
-        id: cache-deps
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-essentialkaos-rep-${{ matrix.go }}-${{ hashFiles('**/go.sum') }}
-
       - name: Download dependencies
-        working-directory: ${{env.SRC_DIR}}
-        if: steps.cache-deps.outputs.cache-hit != 'true'
         run: make deps
 
       - name: Build binary
-        working-directory: ${{env.SRC_DIR}}
         run: make all
 
       - name: Run tests
-        working-directory: ${{env.SRC_DIR}}
         run: make test COVERAGE_FILE=cover.out
 
-      - name: Send coverage data
+      - name: Send coverage data to Coveralls
         uses: essentialkaos/goveralls-action@v2
         env:
           COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          path: ${{env.SRC_DIR}}
           profile: cover.out
           parallel: true
           flag-name: linux-${{ matrix.go }}
 
-      - name: Generate HTML coverage report
-        uses: essentialkaos/htmlcov-action@v1
-        if: ${{ github.event_name == 'pull_request' }}
-        with:
-          path: ${{env.SRC_DIR}}
-          profile: cover.out
-          output: coverage-report-${{runner.os}}-${{matrix.go}}
+      - name: Send coverage data to Codacy
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        run: |
+          bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+          --force-coverage-parser go \
+          -r cover.out \
+          --partial
 
   SendCoverage:
     name: Send Coverage
     runs-on: ubuntu-latest
+    if: success() || failure()
 
     needs: Go
 
     steps:
-      - name: Finish parallel tests
+      - name: Finish parallel tests (Coveralls)
         uses: essentialkaos/goveralls-action@v2
         env:
           COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           parallel-finished: true
+
+      - name: Finish parallel tests (Codacy)
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh) final
 
   Perfecto:
     name: Perfecto
@@ -205,7 +178,7 @@ jobs:
       - name: Check specs with Perfecto
         uses: essentialkaos/perfecto-action@v2
         with:
-          files: common/rep.spec
+          files: common/*.spec
 
   Shellcheck:
     name: Shellcheck
@@ -250,59 +223,3 @@ jobs:
       - name: Check spelling
         continue-on-error: true
         uses: crate-ci/typos@master
-
-  DockerBuild:
-    name: Docker Build Check
-    runs-on: ubuntu-latest
-
-    needs: [Hadolint, Shellcheck, Perfecto]
-
-    env:
-      REGISTRY: ghcr.io
-
-    strategy:
-      matrix:
-        image: [ 'alpine' ]
-
-    steps:
-      - name: Check event type
-        run: |
-          if [[ "${{github.event_name}}" != "pull_request" ]] ; then
-            echo "::notice::Event type is not 'pull_request', all job actions will be skipped"
-          fi
-
-          # This step is a hack for needs+if issue with actions
-          # More info about issue: https://github.com/actions/runner/issues/491
-
-      - name: Checkout
-        uses: actions/checkout@v4
-        if: ${{ github.event_name == 'pull_request' }}
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-        if: ${{ github.event_name == 'pull_request' && env.DOCKERHUB_USERNAME != '' }}
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        if: ${{ github.event_name == 'pull_request' }}
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build Docker image
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          docker build --build-arg REGISTRY=${REGISTRY} -f .docker/${{matrix.image}}.docker -t ${{matrix.image}} .
-
-      - name: Show info about built Docker image
-        uses: essentialkaos/docker-info-action@v1
-        if: ${{ github.event_name == 'pull_request' }}
-        with:
-          image: ${{matrix.image}}
-          show-labels: true

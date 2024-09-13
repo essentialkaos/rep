@@ -15,7 +15,7 @@
 
 Summary:        DNF/YUM repository management utility
 Name:           rep
-Version:        3.4.1
+Version:        3.5.0
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache 2.0
@@ -109,6 +109,10 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Sat Aug 03 2024 Anton Novojilov <andy@essentialkaos.com> - 3.5.0-0
+- Migrated to v13 version of ek package
+- Code refactoring
+
 * Sun Jun 23 2024 Anton Novojilov <andy@essentialkaos.com> - 3.4.1-0
 - Code refactoring
 - Dependencies update

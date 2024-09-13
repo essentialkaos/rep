@@ -3,8 +3,9 @@
 <p align="center">
   <a href="https://kaos.sh/r/rep"><img src="https://kaos.sh/r/rep.svg" alt="GoReportCard" /></a>
   <a href="https://kaos.sh/l/rep"><img src="https://kaos.sh/l/5876fdc611100e9f8a83.svg" alt="Code Climate Maintainability" /></a>
-  <a href="https://kaos.sh/b/rep"><img src="https://kaos.sh/b/07867ea4-6025-47a8-ad18-112dd7b37a3c.svg" alt="codebeat badge" /></a>
-  <a href="https://kaos.sh/w/rep/ci"><img src="https://kaos.sh/w/rep/ci.svg" alt="GitHub Actions CI Status" /></a>
+  <a href="https://kaos.sh/y/ek"><img src="https://kaos.sh/y/ba1bd149e31f4a00abf72ac930aedac9.svg" alt="Codacy badge" /></a>
+  <br/>
+  <a href="https://kaos.sh/w/rep/ci-push"><img src="https://kaos.sh/w/rep/ci-push.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/w/rep/codeql"><img src="https://kaos.sh/w/rep/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="#license"><img src=".github/images/license.svg"/></a>
 </p>
@@ -24,8 +25,8 @@
 #### From [ESSENTIAL KAOS Public Repository](https://kaos.sh/kaos-repo)
 
 ```bash
-sudo yum install -y https://pkgs.kaos.st/kaos-repo-latest.el$(grep 'CPE_NAME' /etc/os-release | tr -d '"' | cut -d':' -f5).noarch.rpm
-sudo yum install rep
+sudo dnf install -y https://pkgs.kaos.st/kaos-repo-latest.el$(grep 'CPE_NAME' /etc/os-release | tr -d '"' | cut -d':' -f5).noarch.rpm
+sudo dnf install rep
 ```
 
 #### Containers
@@ -43,7 +44,7 @@ export REP_DIR=/opt/rep
 # Create repository configuration in /opt/rep/conf (use common/repository.knf.example as an example)
 
 rep init src x86_64
-rep add my-package.el7.x86_64.rpm
+rep add my-package.el8.x86_64.rpm
 ```
 
 Official Docker images with `rep`:
@@ -59,8 +60,8 @@ Official Docker images with `rep`:
 
 | Branch | Status |
 |--------|--------|
-| `master` | [![CI](https://kaos.sh/w/rep/ci.svg?branch=master)](https://kaos.sh/w/rep/ci?query=branch:master) |
-| `develop` | [![CI](https://kaos.sh/w/rep/ci.svg?branch=develop)](https://kaos.sh/w/rep/ci?query=branch:develop) |
+| `master` | [![CI](https://kaos.sh/w/rep/ci-push.svg?branch=master)](https://kaos.sh/w/rep/ci-push?query=branch:master) |
+| `develop` | [![CI](https://kaos.sh/w/rep/ci-push.svg?branch=develop)](https://kaos.sh/w/rep/ci-push?query=branch:develop) |
 
 ### License
 

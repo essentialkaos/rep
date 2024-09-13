@@ -10,7 +10,7 @@ package keygen
 import (
 	"testing"
 
-	"github.com/essentialkaos/ek/v12/secstr"
+	"github.com/essentialkaos/ek/v13/secstr"
 
 	"github.com/essentialkaos/rep/v3/repo/sign"
 

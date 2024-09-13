@@ -11,8 +11,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/essentialkaos/ek/v12/fsutil"
-	"github.com/essentialkaos/ek/v12/secstr"
+	"github.com/essentialkaos/ek/v13/fsutil"
+	"github.com/essentialkaos/ek/v13/secstr"
 
 	"github.com/ProtonMail/go-crypto/openpgp/packet"
 

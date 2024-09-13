@@ -12,8 +12,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/essentialkaos/ek/v12/path"
-	"github.com/essentialkaos/ek/v12/strutil"
+	"github.com/essentialkaos/ek/v13/path"
+	"github.com/essentialkaos/ek/v13/strutil"
 
 	"github.com/essentialkaos/rep/v3/repo/data"
 )
