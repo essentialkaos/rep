@@ -5,7 +5,7 @@ go 1.22.8
 require (
 	github.com/ProtonMail/go-crypto v1.0.0
 	github.com/essentialkaos/check v1.4.1
-	github.com/essentialkaos/ek/v13 v13.8.0
+	github.com/essentialkaos/ek/v13 v13.8.1
 	github.com/klauspost/compress v1.17.11
 	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/sassoftware/go-rpmutils v0.4.0
