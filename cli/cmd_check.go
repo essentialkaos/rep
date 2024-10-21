@@ -10,7 +10,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/essentialkaos/ek/v13/errutil"
+	"github.com/essentialkaos/ek/v13/errors"
 	"github.com/essentialkaos/ek/v13/fmtc"
 	"github.com/essentialkaos/ek/v13/fmtutil"
 	"github.com/essentialkaos/ek/v13/fsutil"
@@ -111,7 +111,7 @@ func checkRepositoriesData(r *repo.Repository, releaseStack, testingStack repo.P
 
 // checkRepositoriesConsistency check consistency between release and testing repositories
 func checkRepositoriesConsistency(releaseIndex, testingIndex map[string]*repo.Package) bool {
-	var errs errutil.Errors
+	errs := errors.NewBundle()
 
 	fmtc.Println("{*}[1/4]{!} Checking consistency between {?repo}testing{!} and {?repo}release{!} repository…")
 
@@ -158,7 +158,7 @@ func checkRepositoriesConsistency(releaseIndex, testingIndex map[string]*repo.Pa
 
 // checkRepositoriesCRCInfo validates checksum info
 func checkRepositoriesCRCInfo(r *repo.Repository, releaseIndex, testingIndex map[string]*repo.Package) bool {
-	var errs errutil.Errors
+	errs := errors.NewBundle()
 
 	fmtc.Println("\n{*}[2/4]{!} Validating checksum data…")
 
@@ -184,8 +184,8 @@ func checkRepositoriesCRCInfo(r *repo.Repository, releaseIndex, testingIndex map
 }
 
 // checkRepositoryCRCInfo validates checksum for all repository files
-func checkRepositoryCRCInfo(pb *progress.Bar, r *repo.SubRepository, index map[string]*repo.Package) errutil.Errors {
-	var errs errutil.Errors
+func checkRepositoryCRCInfo(pb *progress.Bar, r *repo.SubRepository, index map[string]*repo.Package) *errors.Bundle {
+	errs := errors.NewBundle()
 
 	for _, pkgName := range getSortedPackageIndexKeys(index) {
 		for _, file := range index[pkgName].Files {
@@ -208,7 +208,7 @@ func checkRepositoryCRCInfo(pb *progress.Bar, r *repo.SubRepository, index map[s
 
 // checkRepositoriesPermissions checks packages permissions in release and testing repositories
 func checkRepositoriesPermissions(r *repo.Repository, releaseIndex, testingIndex map[string]*repo.Package) bool {
-	var errs errutil.Errors
+	errs := errors.NewBundle()
 
 	fmtc.Println("\n{*}[3/4]{!} Validating permissions…")
 
@@ -234,8 +234,8 @@ func checkRepositoriesPermissions(r *repo.Repository, releaseIndex, testingIndex
 }
 
 // checkRepositoryPermissions checks packages permissions in given repository
-func checkRepositoryPermissions(pb *progress.Bar, r *repo.SubRepository, index map[string]*repo.Package) errutil.Errors {
-	var errs errutil.Errors
+func checkRepositoryPermissions(pb *progress.Bar, r *repo.SubRepository, index map[string]*repo.Package) *errors.Bundle {
+	errs := errors.NewBundle()
 
 	userID, groupID := -1, -1
 
@@ -337,7 +337,7 @@ func checkRepositoryPermissions(pb *progress.Bar, r *repo.SubRepository, index m
 
 // checkRepositoriesSignatures checks packages signatures in release and testing repositories
 func checkRepositoriesSignatures(r *repo.Repository, releaseIndex, testingIndex map[string]*repo.Package) bool {
-	var errs errutil.Errors
+	errs := errors.NewBundle()
 
 	fmtc.Println("\n{*}[4/4]{!} Validating packages signatures…")
 
@@ -371,8 +371,8 @@ func checkRepositoriesSignatures(r *repo.Repository, releaseIndex, testingIndex 
 }
 
 // checkRepositorySignatures checks packages signatures in given repository
-func checkRepositorySignatures(pb *progress.Bar, r *repo.SubRepository, key *sign.Key, index map[string]*repo.Package) errutil.Errors {
-	var errs errutil.Errors
+func checkRepositorySignatures(pb *progress.Bar, r *repo.SubRepository, key *sign.Key, index map[string]*repo.Package) *errors.Bundle {
+	errs := errors.NewBundle()
 
 	for _, pkgName := range getSortedPackageIndexKeys(index) {
 		for _, file := range index[pkgName].Files {
@@ -438,8 +438,8 @@ func getSortedPackageIndexKeys(index map[string]*repo.Package) []string {
 }
 
 // printCheckErrorsInfo prints info about check errors
-func printCheckErrorsInfo(errs errutil.Errors) bool {
-	if !errs.HasErrors() {
+func printCheckErrorsInfo(errs *errors.Bundle) bool {
+	if errs.IsEmpty() {
 		fmtc.Println("{g}No problems found{!}")
 		return true
 	}
