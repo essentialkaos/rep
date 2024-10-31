@@ -298,6 +298,7 @@ func configureUI() {
 	input.MaskSymbol = "•"
 	input.MaskSymbolColorTag = "{s-}"
 	input.TitleColorTag = "{s}"
+	input.NewLine = true
 
 	progress.DefaultSettings.NameColorTag = "{*}"
 	progress.DefaultSettings.PercentColorTag = "{*}"

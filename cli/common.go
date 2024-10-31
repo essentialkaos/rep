@@ -462,14 +462,15 @@ func getRepoSigningKey(r *repo.Repository) (*sign.Key, bool) {
 	var password *secstr.String
 
 	if r.SigningKey.IsEncrypted {
-		password, err = input.ReadPasswordSecure("Enter passphrase to unlock the secret key", true)
+		password, err = input.ReadPasswordSecure(
+			"Enter passphrase to unlock the secret key",
+			input.NotEmpty,
+		)
 
 		if err != nil {
 			return nil, false
 		}
 	}
-
-	fmtc.NewLine()
 
 	key, err := r.SigningKey.Read(password)
 

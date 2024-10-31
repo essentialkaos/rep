@@ -39,8 +39,6 @@ how many packages you have and how big they are).`)
 		if err != nil || !ok {
 			return false
 		}
-
-		fmtc.NewLine()
 	}
 
 	key, ok := getRepoSigningKey(ctx.Repo)

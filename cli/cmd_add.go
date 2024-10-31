@@ -47,8 +47,6 @@ func cmdAdd(ctx *context, args options.Arguments) bool {
 		if err != nil || !ok {
 			return false
 		}
-
-		fmtc.NewLine()
 	}
 
 	if !isSignRequired(ctx.Repo.Testing, files) {

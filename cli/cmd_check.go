@@ -482,6 +482,7 @@ func waitForUserToContinue() bool {
 	}
 
 	fmtc.NewLine()
+
 	ok, _ := input.ReadAnswer("Continue?", "Y")
 
 	return ok
