@@ -68,56 +68,56 @@ func printPackageInfo(r *repo.Repository, pkg *repo.Package, releaseDate time.Ti
 
 // printPackageBasicInfo prints basic package info
 func printPackageBasicInfo(r *repo.Repository, pkg *repo.Package, releaseDate time.Time) {
-	fmtc.Printf("{*}%-16s{!}%s\n", "Name", pkg.Name)
-	fmtc.Printf("{*}%-16s{!}%s\n", "Summary", pkg.Info.Summary)
-	fmtc.Printf("{*}%-14s{!}{s-}%s:{!}%s\n", "Version", pkg.Epoch, pkg.Version)
-	fmtc.Printf("{*}%-16s{!}%s\n", "Release", pkg.Release)
+	fmtc.Printfn("{*}%-16s{!}%s", "Name", pkg.Name)
+	fmtc.Printfn("{*}%-16s{!}%s", "Summary", pkg.Info.Summary)
+	fmtc.Printfn("{*}%-14s{!}{s-}%s:{!}%s", "Version", pkg.Epoch, pkg.Version)
+	fmtc.Printfn("{*}%-16s{!}%s", "Release", pkg.Release)
 
 	if pkg.Info.Group != "" {
-		fmtc.Printf("{*}%-16s{!}%s\n", "Group", pkg.Info.Group)
+		fmtc.Printfn("{*}%-16s{!}%s", "Group", pkg.Info.Group)
 	}
 
 	if pkg.Info.URL != "" {
-		fmtc.Printf("{*}%-16s{!}%s\n", "URL", pkg.Info.URL)
+		fmtc.Printfn("{*}%-16s{!}%s", "URL", pkg.Info.URL)
 	}
 
 	if pkg.Info.License != "" {
-		fmtc.Printf("{*}%-16s{!}%s\n", "License", pkg.Info.License)
+		fmtc.Printfn("{*}%-16s{!}%s", "License", pkg.Info.License)
 	}
 
 	if pkg.Info.Packager != "" {
-		fmtc.Printf("{*}%-16s{!}%s\n", "Packager", pkg.Info.Packager)
+		fmtc.Printfn("{*}%-16s{!}%s", "Packager", pkg.Info.Packager)
 	}
 
 	if pkg.Info.Vendor != "" {
-		fmtc.Printf("{*}%-16s{!}%s\n", "Vendor", pkg.Info.Vendor)
+		fmtc.Printfn("{*}%-16s{!}%s", "Vendor", pkg.Info.Vendor)
 	}
 
 	fmtc.NewLine()
 
 	if !releaseDate.IsZero() {
-		fmtc.Printf("{*}%-16s{!}testing release\n", "Repository")
+		fmtc.Printfn("{*}%-16s{!}testing release", "Repository")
 	} else {
-		fmtc.Printf("{*}%-16s{!}testing\n", "Repository")
+		fmtc.Printfn("{*}%-16s{!}testing", "Repository")
 	}
 
 	fmtc.NewLine()
 
-	fmtc.Printf(
-		"{*}%-16s{!}%s {s-}(%s){!}\n", "Built",
+	fmtc.Printfn(
+		"{*}%-16s{!}%s {s-}(%s){!}", "Built",
 		timeutil.Format(pkg.Info.DateBuild, "%d/%m/%Y %H:%M"),
 		getDaysSinceDate(pkg.Info.DateBuild),
 	)
 
-	fmtc.Printf(
-		"{*}%-16s{!}%s {s-}(%s){!}\n", "Added",
+	fmtc.Printfn(
+		"{*}%-16s{!}%s {s-}(%s){!}", "Added",
 		timeutil.Format(pkg.Info.DateAdded, "%d/%m/%Y %H:%M"),
 		getDaysSinceDate(pkg.Info.DateAdded),
 	)
 
 	if !releaseDate.IsZero() {
-		fmtc.Printf(
-			"{*}%-16s{!}%s {s-}(%s){!}\n", "Released",
+		fmtc.Printfn(
+			"{*}%-16s{!}%s {s-}(%s){!}", "Released",
 			timeutil.Format(releaseDate, "%d/%m/%Y %H:%M"),
 			getDaysSinceDate(releaseDate),
 		)
@@ -126,29 +126,29 @@ func printPackageBasicInfo(r *repo.Repository, pkg *repo.Package, releaseDate ti
 	fmtc.NewLine()
 
 	if len(pkg.Files) != 0 {
-		fmtc.Printf(
-			"{*}%-16s{!}%s\n", "RPM File",
+		fmtc.Printfn(
+			"{*}%-16s{!}%s", "RPM File",
 			getPackageFileInfoWithMark(r, pkg.Files[0], !releaseDate.IsZero()),
 		)
-		fmtc.Printf(
-			"{*}%-16s{!}%s\n", "Checksum",
+		fmtc.Printfn(
+			"{*}%-16s{!}%s", "Checksum",
 			getPackageFileCRCWithMark(r, pkg.Files[0], !releaseDate.IsZero()),
 		)
 		fmtc.NewLine()
 	}
 
 	if pkg.Src != "" {
-		fmtc.Printf("{*}%-16s{!}%s\n", "Source File", pkg.Src)
+		fmtc.Printfn("{*}%-16s{!}%s", "Source File", pkg.Src)
 		fmtc.NewLine()
 	}
 
-	fmtc.Printf(
-		"{*}%-16s{!}%s\n", "Package size",
+	fmtc.Printfn(
+		"{*}%-16s{!}%s", "Package size",
 		fmtutil.PrettySize(pkg.Info.SizePackage, " "),
 	)
 
-	fmtc.Printf(
-		"{*}%-16s{!}%s\n", "Payload size",
+	fmtc.Printfn(
+		"{*}%-16s{!}%s", "Payload size",
 		fmtutil.PrettySize(pkg.Info.SizeInstalled, " "),
 	)
 
@@ -163,14 +163,14 @@ func printPackagePayloadInfo(payload repo.PackagePayload) {
 
 	for i, obj := range payload {
 		if i == 0 {
-			fmtc.Printf("{*}%-16s{!}%s\n", "Payload", formatPayloadPath(obj.Path))
+			fmtc.Printfn("{*}%-16s{!}%s", "Payload", formatPayloadPath(obj.Path))
 		} else {
-			fmtc.Printf("{*}%-16s{!}%s\n", "", formatPayloadPath(obj.Path))
+			fmtc.Printfn("{*}%-16s{!}%s", "", formatPayloadPath(obj.Path))
 		}
 
 		if i == INFO_MAX_OBJECTS {
-			fmtc.Printf(
-				"{*}%-16s{!}{s}+%d more{!}\n", "",
+			fmtc.Printfn(
+				"{*}%-16s{!}{s}+%d more{!}", "",
 				len(payload)-INFO_MAX_OBJECTS,
 			)
 
@@ -191,9 +191,9 @@ func printPackageRequiresInfo(reqs []data.Dependency) {
 
 	for i, dep := range reqs {
 		if i == 0 {
-			fmtc.Printf("{*}%-16s{!}%s\n", "Requires", formatDepName(dep, true))
+			fmtc.Printfn("{*}%-16s{!}%s", "Requires", formatDepName(dep, true))
 		} else {
-			fmtc.Printf("{*}%-16s{!}%s\n", "", formatDepName(dep, true))
+			fmtc.Printfn("{*}%-16s{!}%s", "", formatDepName(dep, true))
 		}
 	}
 
@@ -208,9 +208,9 @@ func printPackageProvidesInfo(provs []data.Dependency) {
 
 	for i, dep := range provs {
 		if i == 0 {
-			fmtc.Printf("{*}%-16s{!}%s\n", "Provides", formatDepName(dep, true))
+			fmtc.Printfn("{*}%-16s{!}%s", "Provides", formatDepName(dep, true))
 		} else {
-			fmtc.Printf("{*}%-16s{!}%s\n", "", formatDepName(dep, true))
+			fmtc.Printfn("{*}%-16s{!}%s", "", formatDepName(dep, true))
 		}
 	}
 
@@ -223,14 +223,14 @@ func printPackageChangelogInfo(changelog *repo.PackageChangelog) {
 		return
 	}
 
-	fmtc.Printf(
-		"{*}%-16s{!}{*s}%s{!} {s}%s{!}\n", "Changelog",
+	fmtc.Printfn(
+		"{*}%-16s{!}{*s}%s{!} {s}%s{!}", "Changelog",
 		timeutil.Format(changelog.Date, "%a %b %d %Y"),
 		changelog.Author,
 	)
 
 	for _, rec := range changelog.Records {
-		fmtc.Printf("%-16s%s\n", "", rec)
+		fmtc.Printfn("%-16s%s", "", rec)
 	}
 
 	fmtc.NewLine()

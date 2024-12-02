@@ -309,16 +309,16 @@ func configureUI() {
 	progress.DefaultSettings.IsSize = false
 	progress.DefaultSettings.WindowSizeSec = 60.0
 
-	fmtc.NameColor("package", "{m}")
-	fmtc.NameColor("repo", "{c}")
+	fmtc.AddColor("package", "{m}")
+	fmtc.AddColor("repo", "{c}")
 
 	if fmtc.IsColorsSupported() {
 		fmtc.DisableColors = false
 	}
 
 	if fmtc.Is256ColorsSupported() {
-		fmtc.NameColor("package", "{#108}")
-		fmtc.NameColor("repo", "{#33}")
+		fmtc.AddColor("package", "{#108}")
+		fmtc.AddColor("repo", "{#33}")
 		progress.DefaultSettings.BarFgColorTag = "{#33}"
 	}
 

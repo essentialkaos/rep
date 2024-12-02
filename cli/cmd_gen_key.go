@@ -83,7 +83,7 @@ func generateKeys(name, email string, password *secstr.String, outputPubKeyFile 
 	privKeyData, pubKeyData, err := keygen.Generate(name, email, password)
 
 	if err != nil {
-		spinner.Update(err.Error())
+		spinner.Update("Can't generate key: %v", err.Error())
 		spinner.Done(false)
 		return false
 	}
@@ -112,8 +112,8 @@ func generateKeys(name, email string, password *secstr.String, outputPubKeyFile 
 
 	fmtc.NewLine()
 
-	fmtc.Printf("{g}Private key saved as {*}%s{!}\n", outputPrivKeyFile)
-	fmtc.Printf("{g}Public key saved as {*}%s{!}\n", outputPubKeyFile)
+	fmtc.Printfn("{g}Private key saved as {*}%s{!}", outputPrivKeyFile)
+	fmtc.Printfn("{g}Public key saved as {*}%s{!}", outputPubKeyFile)
 
 	return true
 }

@@ -116,7 +116,7 @@ func printPackageStackSources(r *repo.SubRepository, stack repo.PackageStack) {
 
 			switch index {
 			case 0:
-				fmtc.Printf("{s}[{!} {*}%s{!} {s}]{!}"+pkgInfo+"\n", pkg.Src)
+				fmtc.Printfn("{s}[{!} {*}%s{!} {s}]{!}"+pkgInfo, pkg.Src)
 			default:
 				fmtc.Printf(
 					"{s-}[ %s ]{!}"+pkgInfo+"\n",

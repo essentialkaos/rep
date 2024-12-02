@@ -68,7 +68,7 @@ func cmdAdd(ctx *context, args options.Arguments) bool {
 func printFilesList(files []string) {
 	for _, file := range files {
 		filename := path.Base(file)
-		fmtc.Printf("{s-}•{!} {?package}%s{!}\n", filename)
+		fmtc.Printfn("{s-}•{!} {?package}%s{!}", filename)
 	}
 
 	fmtc.NewLine()

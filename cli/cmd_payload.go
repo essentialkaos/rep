@@ -70,7 +70,7 @@ func printPackagePayload(pkg *repo.Package, payloadType string) {
 			archColoredTag = "[unknown]"
 		}
 
-		fmtc.Printf(" ▾ "+archColoredTag+" {*}%s{!} {s-}(%s){!}\n", pkg.FullName(), pkg.Info.Summary)
+		fmtc.Printfn(" ▾ "+archColoredTag+" {*}%s{!} {s-}(%s){!}", pkg.FullName(), pkg.Info.Summary)
 
 		fmtutil.Separator(false)
 	}
@@ -151,26 +151,26 @@ func printPackageFilesTree(pkg *repo.Package) {
 			}
 
 			if pkg.ArchFlags == data.ARCH_FLAG_SRC && index == 0 {
-				fmtc.Printf(" {*}%s.src.cpio{!}\n", pkg.FullName())
+				fmtc.Printfn(" {*}%s.src.cpio{!}", pkg.FullName())
 			} else {
-				fmtc.Printf(" {*}%s{!}\n", objDir)
+				fmtc.Printfn(" {*}%s{!}", objDir)
 			}
 
 			if !obj.IsDir {
 				if nextObjDir == objDir {
 					if !nextObjIsDir {
-						fmtc.Printf(" {s}├─{!} %s\n", lscolors.Colorize(objName))
+						fmtc.Printfn(" {s}├─{!} %s", lscolors.Colorize(objName))
 					} else {
-						fmtc.Printf(" {s}└─{!} %s\n", lscolors.Colorize(objName))
+						fmtc.Printfn(" {s}└─{!} %s", lscolors.Colorize(objName))
 					}
 				} else {
-					fmtc.Printf(" {s}└─{!} %s\n", lscolors.Colorize(objName))
+					fmtc.Printfn(" {s}└─{!} %s", lscolors.Colorize(objName))
 				}
 			} else {
 				if nextObjDir == objDir {
-					fmtc.Printf(" {s}├─{!} {*}%s{!}\n", objName)
+					fmtc.Printfn(" {s}├─{!} {*}%s{!}", objName)
 				} else {
-					fmtc.Printf(" {s}└─{!} {*}%s{!}\n", objName)
+					fmtc.Printfn(" {s}└─{!} {*}%s{!}", objName)
 				}
 			}
 
@@ -178,15 +178,15 @@ func printPackageFilesTree(pkg *repo.Package) {
 		} else {
 			if !obj.IsDir {
 				if nextObjDir == objDir {
-					fmtc.Printf(" {s}├─{!} %s\n", lscolors.Colorize(objName))
+					fmtc.Printfn(" {s}├─{!} %s", lscolors.Colorize(objName))
 				} else {
-					fmtc.Printf(" {s}└─{!} %s\n", lscolors.Colorize(objName))
+					fmtc.Printfn(" {s}└─{!} %s", lscolors.Colorize(objName))
 				}
 			} else {
 				if nextObjDir == objDir {
-					fmtc.Printf(" {s}├─{!} {*}%s{!}\n", objName)
+					fmtc.Printfn(" {s}├─{!} {*}%s{!}", objName)
 				} else if nextObjDir != objDir+"/"+objName {
-					fmtc.Printf(" {s}└─{!} {*}%s{!}\n", objName)
+					fmtc.Printfn(" {s}└─{!} {*}%s{!}", objName)
 				}
 			}
 		}

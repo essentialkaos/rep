@@ -527,7 +527,7 @@ func printQueryDebug(searchRequest *query.Request) {
 		db, qrs := term.SQL()
 
 		for _, qr := range qrs {
-			fmtc.Printf("{s-}{%d|%s} %s → %s{!}\n", index, db, term, qr)
+			fmtc.Printfn("{s-}{%d|%s} %s → %s{!}", index, db, term, qr)
 		}
 	}
 

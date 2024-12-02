@@ -92,7 +92,7 @@ func resignRepoPackages(ctx *context, key *sign.Key, r *repo.SubRepository) bool
 	}
 
 	if stack.IsEmpty() {
-		fmtc.Printf("There are no packages in {*}{?repo}%s{!} repository. Nothing to re-sign.\n", r.Name)
+		fmtc.Printfn("There are no packages in {*}{?repo}%s{!} repository. Nothing to re-sign.", r.Name)
 		return true
 	}
 
