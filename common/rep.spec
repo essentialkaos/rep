@@ -111,6 +111,7 @@ rm -rf %{buildroot}
 %changelog
 * Fri Sep 13 2024 Anton Novojilov <andy@essentialkaos.com> - 3.5.1-0
 - Code refactoring
+- Dependencies update
 
 * Sat Aug 03 2024 Anton Novojilov <andy@essentialkaos.com> - 3.5.0-0
 - Migrated to v13 version of ek package
