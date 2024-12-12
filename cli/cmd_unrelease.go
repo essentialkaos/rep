@@ -54,8 +54,6 @@ func unreleasePackages(ctx *context, stack repo.PackageStack, filter string) boo
 		if err != nil || !ok {
 			return false
 		}
-
-		fmtc.NewLine()
 	}
 
 	files := stack.FlattenFiles()

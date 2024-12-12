@@ -9,6 +9,7 @@ package cli
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/essentialkaos/ek/v13/fmtc"
@@ -63,7 +64,7 @@ func (c *commandHelp) Usage() {
 // Shortcut shows info about shortcut version of command
 func (c *commandHelp) Shortcut() {
 	fmtc.Println("{*}Shortcut:{!}\n")
-	fmtc.Printf("  {?cmd}%s{!} → {?cmd}%s{!}\n\n", c.command, c.shortcut)
+	fmtc.Printfn("  {?cmd}%s{!} → {?cmd}%s{!}\n", c.command, c.shortcut)
 }
 
 // Examples shows usage examples
@@ -76,12 +77,12 @@ func (c *commandHelp) Examples() {
 
 	for index, example := range c.examples {
 		if len(configs) > 1 && !c.isGlobal {
-			fmtc.Printf("  rep {c}{repo-id}{!} {?cmd}%s{!} {?arg}%s{!}\n", c.command, example.command)
+			fmtc.Printfn("  rep {c}{repo-id}{!} {?cmd}%s{!} {?arg}%s{!}", c.command, example.command)
 		} else {
-			fmtc.Printf("  rep {?cmd}%s{!} {?arg}%s{!}\n", c.command, example.command)
+			fmtc.Printfn("  rep {?cmd}%s{!} {?arg}%s{!}", c.command, example.command)
 		}
 
-		fmtc.Printf("{&}{s-}%s{!}\n", fmtutil.Wrap(example.desc, "  ", 88))
+		fmtc.Printfn("{&}{s-}%s{!}", fmtutil.Wrap(example.desc, "  ", 88))
 
 		if index+1 < len(c.examples) {
 			fmtc.NewLine()
@@ -104,7 +105,7 @@ func (c *commandHelp) Options() {
 			continue
 		}
 
-		if !sliceutil.Contains(cmd.BoundOptions, option.Long) {
+		if !slices.Contains(cmd.BoundOptions, option.Long) {
 			continue
 		}
 
@@ -122,7 +123,7 @@ func (c *commandHelp) Paragraph(text string) {
 
 // Query renders query info
 func (c *commandHelp) Query(short, long, desc, typ string) {
-	fmtc.Printf("   {m}%2s{!} {s}or{!} {m}%-12s{!} %s {&}{s-}(%s){!}\n", short, long, desc, typ)
+	fmtc.Printfn("   {m}%2s{!} {s}or{!} {m}%-12s{!} %s {&}{s-}(%s){!}", short, long, desc, typ)
 }
 
 // renderArgs renders command arguments with colors
@@ -144,9 +145,9 @@ func (c *commandHelp) renderArgs(args []string) string {
 
 // cmdHelp is 'help' command handler
 func cmdHelp(ctx *context, args options.Arguments) bool {
-	fmtc.NameColor("cmd", usage.DEFAULT_COMMANDS_COLOR_TAG)
-	fmtc.NameColor("arg", "{s}")
-	fmtc.NameColor("repo", "{c}")
+	fmtc.AddColor("cmd", usage.DEFAULT_COMMANDS_COLOR_TAG)
+	fmtc.AddColor("arg", "{s}")
+	fmtc.AddColor("repo", "{c}")
 
 	cmdName := args.Get(0)
 
@@ -233,9 +234,9 @@ func helpInit() {
 
 	for _, arch := range sliceutil.Exclude(data.ArchList, data.ARCH_NOARCH) {
 		if fmtc.Is256ColorsSupported() {
-			fmtc.Printf("    {s-}•{!} "+archColorsExt[arch]+"%s{!}\n", arch)
+			fmtc.Printfn("    {s-}•{!} "+archColorsExt[arch]+"%s{!}", arch)
 		} else {
-			fmtc.Printf("    {s-}•{!} "+archColors[arch]+"%s{!}\n", arch)
+			fmtc.Printfn("    {s-}•{!} "+archColors[arch]+"%s{!}", arch)
 		}
 	}
 
@@ -449,16 +450,16 @@ func helpPayload() {
 	help.Usage()
 	help.Paragraph("Show information about package payload.")
 	fmtc.Println("{*}Payload type:{!}\n")
-	fmtc.Printf(
-		"  {m}%-8s{!} {s}or{!} {m}%-6s{!} %s {s}(used by default){!}\n", "files", "f",
+	fmtc.Printfn(
+		"  {m}%-8s{!} {s}or{!} {m}%-6s{!} %s {s}(used by default){!}", "files", "f",
 		"Files and directories",
 	)
-	fmtc.Printf(
-		"  {m}%-8s{!} {s}or{!} {m}%-6s{!} %s\n", "requires", "reqs",
+	fmtc.Printfn(
+		"  {m}%-8s{!} {s}or{!} {m}%-6s{!} %s", "requires", "reqs",
 		"Required dependencies",
 	)
-	fmtc.Printf(
-		"  {m}%-8s{!} {s}or{!} {m}%-6s{!} %s\n", "provides", "provs",
+	fmtc.Printfn(
+		"  {m}%-8s{!} {s}or{!} {m}%-6s{!} %s", "provides", "provs",
 		"Provided dependencies",
 	)
 	fmtc.NewLine()

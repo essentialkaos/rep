@@ -113,8 +113,6 @@ func cleanupPackages(ctx *context, releaseStack, testingStack repo.PackageStack)
 		if err != nil || !ok {
 			return false
 		}
-
-		fmtc.NewLine()
 	}
 
 	testingFiles := testingStack.FlattenFiles()

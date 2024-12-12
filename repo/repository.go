@@ -34,17 +34,15 @@ import (
 const (
 	_SQL_LIST_ALL       = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages;`
 	_SQL_LIST_LATEST    = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages GROUP BY name HAVING MAX(pkgKey);`
-	_SQL_LIST_BY_NAME   = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages WHERE (name || "-" || version || "-" || release) LIKE ? ORDER BY rpm_sourcerpm;`
+	_SQL_LIST_BY_NAME   = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages WHERE (name || "-" || version || "-" || release) LIKE @filter ORDER BY rpm_sourcerpm;`
 	_SQL_FIND_BY_KEYS   = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages WHERE pkgKey in (%s);`
-	_SQL_EXIST          = `SELECT time_file FROM packages WHERE name = ? AND version = ? AND release = ? AND epoch = ?;`
-	_SQL_CONTAINS_ONE   = `SELECT pkgKey FROM filelist WHERE length(filetypes) = 1 AND (dirname || "/" || filenames) GLOB ?;`
-	_SQL_CONTAINS_MANY  = `SELECT pkgKey FROM filelist WHERE length(filetypes) > 1 AND filelist_globber(?, dirname, filenames);`
+	_SQL_EXIST          = `SELECT time_file FROM packages WHERE name = @name AND version = @version AND release = @release AND epoch = @epoch;`
 	_SQL_STATS          = `SELECT SUM(size_package),COUNT(*) FROM packages;`
-	_SQL_INFO_BASE      = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href,summary,description,url,time_file,time_build,rpm_license,rpm_vendor,rpm_group,size_package,size_installed FROM packages WHERE (name || "-" || version || "-" || release) LIKE ? GROUP BY name HAVING MAX(time_build) LIMIT 1;`
-	_SQL_INFO_FILES     = `SELECT f.dirname,f.filenames,f.filetypes FROM filelist f INNER JOIN packages p ON f.pkgKey = p.pkgKey WHERE p.pkgId = ? ORDER BY f.dirname,f.filenames;`
-	_SQL_INFO_REQUIRES  = `SELECT r.name,r.flags,r.epoch,r.version,r.release FROM requires r INNER JOIN packages p ON r.pkgKey = p.pkgKey WHERE p.pkgId = ? ORDER BY r.name;`
-	_SQL_INFO_PROVIDES  = `SELECT r.name,r.flags,r.epoch,r.version,r.release FROM provides r INNER JOIN packages p ON r.pkgKey = p.pkgKey WHERE p.pkgId = ? ORDER BY r.name;`
-	_SQL_INFO_CHANGELOG = `SELECT c.author,c.date,c.changelog FROM changelog c INNER JOIN packages p ON c.pkgKey = p.pkgKey WHERE p.pkgId = ? AND c.author LIKE ? ORDER BY c.date DESC LIMIT 1;`
+	_SQL_INFO_BASE      = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href,summary,description,url,time_file,time_build,rpm_license,rpm_vendor,rpm_group,size_package,size_installed FROM packages WHERE (name || "-" || version || "-" || release) LIKE @name GROUP BY name HAVING MAX(time_build) LIMIT 1;`
+	_SQL_INFO_FILES     = `SELECT f.dirname,f.filenames,f.filetypes FROM filelist f INNER JOIN packages p ON f.pkgKey = p.pkgKey WHERE p.pkgId = @id ORDER BY f.dirname,f.filenames;`
+	_SQL_INFO_REQUIRES  = `SELECT r.name,r.flags,r.epoch,r.version,r.release FROM requires r INNER JOIN packages p ON r.pkgKey = p.pkgKey WHERE p.pkgId = @id ORDER BY r.name;`
+	_SQL_INFO_PROVIDES  = `SELECT r.name,r.flags,r.epoch,r.version,r.release FROM provides r INNER JOIN packages p ON r.pkgKey = p.pkgKey WHERE p.pkgId = @id ORDER BY r.name;`
+	_SQL_INFO_CHANGELOG = `SELECT c.author,c.date,c.changelog FROM changelog c INNER JOIN packages p ON c.pkgKey = p.pkgKey WHERE p.pkgId = @id AND c.author LIKE @version ORDER BY c.date DESC LIMIT 1;`
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -634,7 +632,10 @@ func (r *SubRepository) List(filter string, all bool) (PackageStack, error) {
 	case !all && filter == "":
 		psb, err = r.listPackages(_SQL_LIST_LATEST)
 	default:
-		psb, err = r.listPackages(_SQL_LIST_BY_NAME, "%"+sanitizeInput(filter)+"%")
+		psb, err = r.listPackages(
+			_SQL_LIST_BY_NAME,
+			sql.Named("filter", "%"+sanitizeInput(filter)+"%"),
+		)
 	}
 
 	if err != nil {
@@ -790,7 +791,7 @@ func (r *SubRepository) getRepoStats(arch string) (int, int64, error) {
 }
 
 // listPackages returns basic packages info
-func (r *SubRepository) listPackages(query string, args ...interface{}) (*packageStackBuilder, error) {
+func (r *SubRepository) listPackages(query string, args ...sql.NamedArg) (*packageStackBuilder, error) {
 	psb := &packageStackBuilder{
 		Index: make(map[string]int),
 		Data:  make([]PackageBundle, 0),
@@ -818,7 +819,7 @@ func (r *SubRepository) listPackages(query string, args ...interface{}) (*packag
 }
 
 // listArchPackages appends basic packages info for given arch to stack
-func (r *SubRepository) listArchPackages(psb *packageStackBuilder, arch string, query string, args ...interface{}) error {
+func (r *SubRepository) listArchPackages(psb *packageStackBuilder, arch string, query string, args ...sql.NamedArg) error {
 	rows, err := r.execQuery(data.DB_PRIMARY, arch, query, args...)
 
 	if err != nil {
@@ -974,7 +975,10 @@ func (r *SubRepository) searchArchPackages(arch, targetDB string, queries []stri
 func (r *SubRepository) hasPackage(pkg *Package, arch string) (bool, time.Time, error) {
 	rows, err := r.execQuery(
 		data.DB_PRIMARY, arch, _SQL_EXIST,
-		pkg.Name, pkg.Version, pkg.Release, pkg.Epoch,
+		sql.Named("name", pkg.Name),
+		sql.Named("version", pkg.Version),
+		sql.Named("release", pkg.Release),
+		sql.Named("epoch", pkg.Epoch),
 	)
 
 	if err != nil {
@@ -1043,7 +1047,10 @@ func (r *SubRepository) getPackageInfo(name, arch string) (*Package, error) {
 func (r *SubRepository) collectPackageBasicInfo(name, arch string) (*Package, string, error) {
 	name = sanitizeInput(name) + "%"
 
-	rows, err := r.execQuery(data.DB_PRIMARY, arch, _SQL_INFO_BASE, name)
+	rows, err := r.execQuery(
+		data.DB_PRIMARY, arch, _SQL_INFO_BASE,
+		sql.Named("name", name),
+	)
 
 	if err != nil {
 		return nil, "", fmt.Errorf("Can't collect basic package info: %w", err)
@@ -1105,7 +1112,11 @@ func (r *SubRepository) appendPackageChangelogInfo(pkg *Package, pkgID, arch str
 	}
 
 	version := fmt.Sprintf("%% - %s-%s", pkg.Version, formatReleaseVersion(pkg.Release))
-	rows, err := r.execQuery(data.DB_OTHER, arch, _SQL_INFO_CHANGELOG, pkgID, version)
+	rows, err := r.execQuery(
+		data.DB_OTHER, arch, _SQL_INFO_CHANGELOG,
+		sql.Named("id", pkgID),
+		sql.Named("version", version),
+	)
 
 	if err != nil {
 		return fmt.Errorf("Can't execute query for collecting changelog records: %w", err)
@@ -1137,7 +1148,10 @@ func (r *SubRepository) appendPackageChangelogInfo(pkg *Package, pkgID, arch str
 
 // collectPackagePayloadInfo collects info about package payload
 func (r *SubRepository) collectPackagePayloadInfo(pkgID, arch string) ([]PayloadObject, error) {
-	rows, err := r.execQuery(data.DB_FILELISTS, arch, _SQL_INFO_FILES, pkgID)
+	rows, err := r.execQuery(
+		data.DB_FILELISTS, arch, _SQL_INFO_FILES,
+		sql.Named("id", pkgID),
+	)
 
 	if err != nil {
 		return nil, fmt.Errorf("Can't execute query for collecting payload info: %w", err)
@@ -1165,7 +1179,10 @@ func (r *SubRepository) collectPackagePayloadInfo(pkgID, arch string) ([]Payload
 
 // collectPackageDepInfo collects requires/provides info
 func (r *SubRepository) collectPackageDepInfo(pkgID, arch, query string) ([]data.Dependency, error) {
-	rows, err := r.execQuery(data.DB_PRIMARY, arch, query, pkgID)
+	rows, err := r.execQuery(
+		data.DB_PRIMARY, arch, query,
+		sql.Named("id", pkgID),
+	)
 
 	if err != nil {
 		return nil, fmt.Errorf("Can't execute query for collecting requires/provides data: %w", err)
@@ -1209,7 +1226,7 @@ func (r *SubRepository) collectPackageDepInfo(pkgID, arch, query string) ([]data
 }
 
 // execQuery execs SQL query over DB
-func (r *SubRepository) execQuery(dbType, arch, query string, args ...interface{}) (*sql.Rows, error) {
+func (r *SubRepository) execQuery(dbType, arch, query string, args ...sql.NamedArg) (*sql.Rows, error) {
 	arch = r.guessArch(arch)
 	archDir := data.SupportedArchs[arch].Dir
 
@@ -1223,7 +1240,7 @@ func (r *SubRepository) execQuery(dbType, arch, query string, args ...interface{
 		return nil, fmt.Errorf("Can't get DB from storage: %w", err)
 	}
 
-	return db.Query(query, args...)
+	return db.Query(query, sqlArgToAny(args)...)
 }
 
 // guessArch tries to guess real package arch
@@ -1295,6 +1312,17 @@ func formatReleaseVersion(r string) string {
 	}
 
 	return r[:i]
+}
+
+// sqlArgToAny converts sql.NamedArg slice into any slice
+func sqlArgToAny(s []sql.NamedArg) []any {
+	result := make([]any, len(s))
+
+	for i := 0; i < len(s); i++ {
+		result[i] = s[i]
+	}
+
+	return result
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

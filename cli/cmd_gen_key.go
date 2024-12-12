@@ -8,6 +8,7 @@ package cli
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -48,69 +49,26 @@ func cmdGenKey(ctx *context, args options.Arguments) bool {
 	var password *secstr.String
 	var name, email, outputPubKeyFile string
 
-	for {
-		name, err = input.Read("Key name", true)
+	name, err = input.Read("Key name", input.NotEmpty, inputValidatorKeyName{})
 
-		if err != nil {
-			return false
-		}
-
-		if !repoKeyNameValidator.MatchString(name) {
-			terminal.Error("\nGiven name is invalid\n")
-			continue
-		}
-
-		outputPubKeyFile = "RPM-GPG-KEY-" + strings.ReplaceAll(name, " ", "-")
-
-		if fsutil.IsExist(outputPubKeyFile) {
-			terminal.Error("\nPublic key file for given name (%s) already exists\n", outputPubKeyFile)
-			continue
-		}
-
-		break
+	if err != nil {
+		return false
 	}
 
-	fmtc.NewLine()
+	outputPubKeyFile = "RPM-GPG-KEY-" + strings.ReplaceAll(name, " ", "-")
 
-	for {
-		email, err = input.Read("Email address", true)
+	email, err = input.Read("Email address", input.NotEmpty, inputValidatorEmail{})
 
-		if err != nil {
-			return false
-		}
-
-		if !emailValidator.MatchString(email) {
-			terminal.Error("\nGiven email address is invalid\n")
-			continue
-		}
-
-		break
+	if err != nil {
+		return false
 	}
 
-	fmtc.NewLine()
+	password, err = input.ReadPasswordSecure(
+		"Passphrase", input.NotEmpty, inputValidatorPassword{},
+	)
 
-	for {
-		password, err = input.ReadPasswordSecure("Passphrase", true)
-
-		if err != nil {
-			return false
-		}
-
-		fmtc.NewLine()
-
-		if passwd.GetPasswordBytesStrength(password.Data) < passwd.STRENGTH_MEDIUM {
-			terminal.Warn("Given passphrase is not strong enough.\n")
-
-			ok, _ := input.ReadAnswer("Use this passphrase anyway?", "n")
-
-			fmtc.NewLine()
-
-			if ok {
-				break
-			}
-		} else {
-			break
-		}
+	if err != nil {
+		return false
 	}
 
 	return generateKeys(name, email, password, outputPubKeyFile)
@@ -125,7 +83,7 @@ func generateKeys(name, email string, password *secstr.String, outputPubKeyFile 
 	privKeyData, pubKeyData, err := keygen.Generate(name, email, password)
 
 	if err != nil {
-		spinner.Update(err.Error())
+		spinner.Update("Can't generate key: %v", err.Error())
 		spinner.Done(false)
 		return false
 	}
@@ -154,8 +112,49 @@ func generateKeys(name, email string, password *secstr.String, outputPubKeyFile 
 
 	fmtc.NewLine()
 
-	fmtc.Printf("{g}Private key saved as {*}%s{!}\n", outputPrivKeyFile)
-	fmtc.Printf("{g}Public key saved as {*}%s{!}\n", outputPubKeyFile)
+	fmtc.Printfn("{g}Private key saved as {*}%s{!}", outputPrivKeyFile)
+	fmtc.Printfn("{g}Public key saved as {*}%s{!}", outputPubKeyFile)
 
 	return true
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+type inputValidatorKeyName struct{}
+type inputValidatorEmail struct{}
+type inputValidatorPassword struct{}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// Validate validates key name input
+func (v inputValidatorKeyName) Validate(input string) (string, error) {
+	if !repoKeyNameValidator.MatchString(input) {
+		return "", fmt.Errorf("Given name is invalid")
+	}
+
+	outputPubKeyFile := "RPM-GPG-KEY-" + strings.ReplaceAll(input, " ", "-")
+
+	if fsutil.IsExist(outputPubKeyFile) {
+		return "", fmt.Errorf("Public key file for given name (%s) already exists", outputPubKeyFile)
+	}
+
+	return input, nil
+}
+
+// Validate validates email input
+func (v inputValidatorEmail) Validate(input string) (string, error) {
+	if !emailValidator.MatchString(input) {
+		return "", fmt.Errorf("Given email address is invalid")
+	}
+
+	return input, nil
+}
+
+// Validate validates key password input
+func (v inputValidatorPassword) Validate(input string) (string, error) {
+	if passwd.GetPasswordStrength(input) < passwd.STRENGTH_MEDIUM {
+		return "", fmt.Errorf("Given passphrase is not strong enough")
+	}
+
+	return input, nil
 }

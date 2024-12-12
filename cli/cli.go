@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/essentialkaos/ek/v13/errors"
 	"github.com/essentialkaos/ek/v13/fmtc"
 	"github.com/essentialkaos/ek/v13/fmtutil"
 	"github.com/essentialkaos/ek/v13/fsutil"
@@ -48,7 +49,7 @@ import (
 // App info
 const (
 	APP  = "rep"
-	VER  = "3.5.0"
+	VER  = "3.5.1"
 	DESC = "DNF/YUM repository management utility"
 )
 
@@ -234,7 +235,7 @@ func Init(gitRev string, gomod []byte) {
 
 	if !errs.IsEmpty() {
 		terminal.Error("Options parsing errors:")
-		terminal.Error(errs.String())
+		terminal.Error(errs.Error("- "))
 		os.Exit(1)
 	}
 
@@ -261,13 +262,20 @@ func Init(gitRev string, gomod []byte) {
 		os.Exit(0)
 	}
 
-	checkPermissions()
-	loadGlobalConfig()
-	validateGlobalConfig()
-	loadRepoConfigs()
-	validateRepoConfigs()
-	configureRepoCache()
-	configureSignalHandlers()
+	err := errors.Chain(
+		checkPermissions,
+		loadGlobalConfig,
+		validateGlobalConfig,
+		loadRepoConfigs,
+		validateRepoConfigs,
+		configureRepoCache,
+		configureSignalHandlers,
+	)
+
+	if err != nil {
+		terminal.Error(err.Error())
+		shutdown(1)
+	}
 
 	ok := process(args)
 
@@ -290,6 +298,7 @@ func configureUI() {
 	input.MaskSymbol = "•"
 	input.MaskSymbolColorTag = "{s-}"
 	input.TitleColorTag = "{s}"
+	input.NewLine = true
 
 	progress.DefaultSettings.NameColorTag = "{*}"
 	progress.DefaultSettings.PercentColorTag = "{*}"
@@ -300,16 +309,16 @@ func configureUI() {
 	progress.DefaultSettings.IsSize = false
 	progress.DefaultSettings.WindowSizeSec = 60.0
 
-	fmtc.NameColor("package", "{m}")
-	fmtc.NameColor("repo", "{c}")
+	fmtc.AddColor("package", "{m}")
+	fmtc.AddColor("repo", "{c}")
 
 	if fmtc.IsColorsSupported() {
 		fmtc.DisableColors = false
 	}
 
 	if fmtc.Is256ColorsSupported() {
-		fmtc.NameColor("package", "{#108}")
-		fmtc.NameColor("repo", "{#33}")
+		fmtc.AddColor("package", "{#108}")
+		fmtc.AddColor("repo", "{#33}")
 		progress.DefaultSettings.BarFgColorTag = "{#33}"
 	}
 
@@ -324,33 +333,34 @@ func configureUI() {
 }
 
 // checkPermissions checks that user has enough permissions
-func checkPermissions() {
+func checkPermissions() error {
 	curUser, err := system.CurrentUser()
 
 	if err != nil {
-		terminal.Error("Can't get info about current user: %v", err)
-		shutdown(1)
+		return fmt.Errorf("Can't get info about current user: %w", err)
 	}
 
 	if !curUser.IsRoot() {
-		terminal.Error("This app requires superuser (root) privileges")
-		shutdown(1)
+		return fmt.Errorf("This app requires superuser (root) privileges")
 	}
+
+	return nil
 }
 
 // loadGlobalConfig loads global configuration file
-func loadGlobalConfig() {
+func loadGlobalConfig() error {
 	err := knf.Global(CONFIG_FILE)
 
 	if err != nil {
-		terminal.Error(err.Error())
-		shutdown(1)
+		return fmt.Errorf("Can't load global coniguration: %w", err)
 	}
+
+	return nil
 }
 
 // validateGlobalConfig validates global configuration file properties
-func validateGlobalConfig() {
-	validators := []*knf.Validator{
+func validateGlobalConfig() error {
+	validators := knf.Validators{
 		{STORAGE_DATA, knfv.Set, nil},
 		{STORAGE_CACHE, knfv.Set, nil},
 		{LOG_DIR, knfv.Set, nil},
@@ -369,26 +379,20 @@ func validateGlobalConfig() {
 
 	errs := knf.Validate(validators)
 
-	if len(errs) == 0 {
-		return
+	if !errs.IsEmpty() {
+		return fmt.Errorf("Error while global configuration file validation: %w", errs.First())
 	}
 
-	terminal.Error("Errors while global configuration file validation:")
-
-	for _, err := range errs {
-		terminal.Error(" - %v", err)
-	}
-
-	shutdown(1)
+	return nil
 }
 
 // loadRepoConfigs loads repositories configuration files
-func loadRepoConfigs() {
+func loadRepoConfigs() error {
 	filter := fsutil.ListingFilter{MatchPatterns: []string{"*.knf"}}
 	configFiles := fsutil.List(CONFIG_DIR, false, filter)
 
 	if len(configFiles) == 0 {
-		return
+		return nil
 	}
 
 	fsutil.ListToAbsolute(CONFIG_DIR, configFiles)
@@ -399,59 +403,49 @@ func loadRepoConfigs() {
 		cfg, err := knf.Read(cf)
 
 		if err != nil {
-			terminal.Error(err.Error())
-			shutdown(1)
+			return err
 		}
 
 		configs[cfg.GetS(REPOSITORY_NAME)] = cfg
 	}
+
+	return nil
 }
 
 // validateRepoConfigs validates repositories configuration files
-func validateRepoConfigs() {
-	var hasErrors bool
-
+func validateRepoConfigs() error {
 	for _, cfg := range configs {
-		validators := []*knf.Validator{
+		validators := knf.Validators{
 			{PERMISSIONS_USER, knfs.User, nil},
 			{PERMISSIONS_GROUP, knfs.Group, nil},
 			{REPOSITORY_NAME, knfr.Regexp, repoNamePattern},
 		}
 
-		if cfg.HasProp(SIGN_KEY) {
-			validators = append(validators,
-				&knf.Validator{SIGN_KEY, knff.Perms, "FR"},
-				&knf.Validator{SIGN_KEY, knff.FileMode, os.FileMode(0600)},
-			)
-		}
+		validators = validators.AddIf(
+			cfg.HasProp(SIGN_KEY),
+			knf.Validators{
+				{SIGN_KEY, knff.Perms, "FR"},
+				{SIGN_KEY, knff.FileMode, os.FileMode(0600)},
+			},
+		)
 
 		errs := cfg.Validate(validators)
 
-		if len(errs) == 0 {
+		if errs.IsEmpty() {
 			continue
 		}
 
-		hasErrors = true
-
-		terminal.Error(
-			"Errors while repository configuration file validation (%s):",
-			cfg.File(),
+		return fmt.Errorf(
+			"Error while repository configuration file validation (%s): %w",
+			cfg.File(), errs.First(),
 		)
-
-		for _, err := range errs {
-			terminal.Error(" - %v", err)
-		}
 	}
 
-	if hasErrors {
-		shutdown(1)
-	}
+	return nil
 }
 
 // configureRepoCache configures cache for repository data
-func configureRepoCache() {
-	var hasErrors bool
-
+func configureRepoCache() error {
 	cacheDir := knf.GetS(STORAGE_CACHE)
 
 	for repo := range configs {
@@ -461,24 +455,23 @@ func configureRepoCache() {
 			err := os.Mkdir(repoCacheDir, 0700)
 
 			if err != nil {
-				terminal.Error(err.Error())
-				hasErrors = true
+				return err
 			}
 		}
 	}
 
-	if hasErrors {
-		shutdown(1)
-	}
+	return nil
 }
 
 // configureSignalHandlers configures handlers for signals
-func configureSignalHandlers() {
+func configureSignalHandlers() error {
 	signal.Handlers{
 		signal.QUIT: sigHandler,
 		signal.TERM: sigHandler,
 		signal.INT:  sigHandler,
 	}.TrackAsync()
+
+	return nil
 }
 
 // getPrimaryRepoName returns primary repository name

@@ -8,6 +8,8 @@ package cli
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"slices"
+
 	"github.com/essentialkaos/ek/v13/fmtc"
 	"github.com/essentialkaos/ek/v13/options"
 	"github.com/essentialkaos/ek/v13/sliceutil"
@@ -24,7 +26,7 @@ func cmdInit(ctx *context, args options.Arguments) bool {
 	archList := args.Strings()
 
 	for _, arch := range archList {
-		if !sliceutil.Contains(supportedArchs, arch) {
+		if !slices.Contains(supportedArchs, arch) {
 			terminal.Error("Architecture %q is not supported (typo?)", arch)
 			return false
 		}

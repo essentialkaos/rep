@@ -54,8 +54,6 @@ func releasePackages(ctx *context, stack repo.PackageStack, filter string) bool 
 		if err != nil || !ok {
 			return false
 		}
-
-		fmtc.NewLine()
 	}
 
 	return releasePackagesFiles(ctx, stack.FlattenFiles())

@@ -462,14 +462,15 @@ func getRepoSigningKey(r *repo.Repository) (*sign.Key, bool) {
 	var password *secstr.String
 
 	if r.SigningKey.IsEncrypted {
-		password, err = input.ReadPasswordSecure("Enter passphrase to unlock the secret key", true)
+		password, err = input.ReadPasswordSecure(
+			"Enter passphrase to unlock the secret key",
+			input.NotEmpty,
+		)
 
 		if err != nil {
 			return nil, false
 		}
 	}
-
-	fmtc.NewLine()
 
 	key, err := r.SigningKey.Read(password)
 
@@ -526,7 +527,7 @@ func printQueryDebug(searchRequest *query.Request) {
 		db, qrs := term.SQL()
 
 		for _, qr := range qrs {
-			fmtc.Printf("{s-}{%d|%s} %s → %s{!}\n", index, db, term, qr)
+			fmtc.Printfn("{s-}{%d|%s} %s → %s{!}", index, db, term, qr)
 		}
 	}
 
