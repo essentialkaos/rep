@@ -15,7 +15,7 @@
 
 Summary:        DNF/YUM repository management utility
 Name:           rep
-Version:        3.5.1
+Version:        3.5.2
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache 2.0
@@ -109,6 +109,9 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Sat Dec 21 2024 Anton Novojilov <andy@essentialkaos.com> - 3.5.2-0
+- Downgraded go-crypto to 1.0.0 due to invalid signature with newer versions
+
 * Fri Sep 13 2024 Anton Novojilov <andy@essentialkaos.com> - 3.5.1-0
 - Code refactoring
 - Dependencies update
