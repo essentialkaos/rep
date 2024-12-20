@@ -27,7 +27,6 @@ jobs:
                               pkg-config \
                               libglib2.0-dev \
                               liblzma-dev \
-                              libsqlite0-dev \
                               libsqlite3-dev \
                               librpm-dev \
                               libzstd-dev \
