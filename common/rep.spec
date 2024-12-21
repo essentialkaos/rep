@@ -111,6 +111,7 @@ rm -rf %{buildroot}
 %changelog
 * Sat Dec 21 2024 Anton Novojilov <andy@essentialkaos.com> - 3.5.2-0
 - Downgraded go-crypto to 1.0.0 due to invalid signature with newer versions
+- Fixed formatting for warning about re-signing all packages
 
 * Fri Sep 13 2024 Anton Novojilov <andy@essentialkaos.com> - 3.5.1-0
 - Code refactoring

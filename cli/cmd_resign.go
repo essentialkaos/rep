@@ -10,6 +10,7 @@ package cli
 import (
 	"github.com/essentialkaos/ek/v13/fmtc"
 	"github.com/essentialkaos/ek/v13/fmtutil"
+	"github.com/essentialkaos/ek/v13/fmtutil/panel"
 	"github.com/essentialkaos/ek/v13/options"
 	"github.com/essentialkaos/ek/v13/path"
 	"github.com/essentialkaos/ek/v13/pluralize"
@@ -27,7 +28,7 @@ import (
 // cmdSign is 'resign' command handler
 func cmdResign(ctx *context, args options.Arguments) bool {
 	if !options.GetB(OPT_FORCE) {
-		terminal.Warn("Command can take a lot of time",
+		panel.Warn("Command can take a lot of time",
 			`This command will re-sign all packages in the repo. Re-sign process requires 
 rewriting {*}every{!} package in repository and can take a lot of time (depending on 
 how many packages you have and how big they are).`)
