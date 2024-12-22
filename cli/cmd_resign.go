@@ -28,10 +28,13 @@ import (
 // cmdSign is 'resign' command handler
 func cmdResign(ctx *context, args options.Arguments) bool {
 	if !options.GetB(OPT_FORCE) {
-		panel.Warn("Command can take a lot of time",
+		panel.Warn(
+			"Command can take a lot of time",
 			`This command will re-sign all packages in the repo. Re-sign process requires 
 rewriting {*}every{!} package in repository and can take a lot of time (depending on 
-how many packages you have and how big they are).`)
+how many packages you have and how big they are).`,
+			panel.INDENT_INNER,
+		)
 
 		fmtc.NewLine()
 
