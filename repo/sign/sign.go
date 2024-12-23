@@ -111,7 +111,7 @@ func IsPackageSignatureValid(pkgFile string, key *Key) (bool, error) {
 		return false, nil
 	}
 
-	return checkSignature(hdr, key.entity.PrivateKey)
+	return checkSignature(hdr, key)
 }
 
 // IsPackageSigned checks if package has PGP/GPG signature
@@ -214,18 +214,18 @@ func readHeader(pkgFile string) (*rpmutils.RpmHeader, error) {
 }
 
 // checkSignature checks signature from header and compare it with private key
-func checkSignature(hdr *rpmutils.RpmHeader, privateKey *packet.PrivateKey) (bool, error) {
+func checkSignature(hdr *rpmutils.RpmHeader, key *Key) (bool, error) {
 	sigBlob, err := hdr.GetBytes(rpmutils.SIG_PGP)
 
 	if err != nil {
 		return false, fmt.Errorf("Can't read signature tag: %w", err)
 	}
 
-	return checkSignaturePacket(sigBlob, privateKey)
+	return checkSignaturePacket(sigBlob, key)
 }
 
 // checkSignaturePacket checks signature packet
-func checkSignaturePacket(signature []byte, privateKey *packet.PrivateKey) (bool, error) {
+func checkSignaturePacket(signature []byte, key *Key) (bool, error) {
 	packetReader := packet.NewReader(bytes.NewReader(signature))
 	pkt, err := packetReader.Next()
 
@@ -233,24 +233,11 @@ func checkSignaturePacket(signature []byte, privateKey *packet.PrivateKey) (bool
 		return false, fmt.Errorf("Can't decode signature: %w", err)
 	}
 
-	return getSigKeyID(pkt) == privateKey.KeyId, nil
-}
+	sig, ok := pkt.(*packet.Signature)
 
-// getSigKeyID returns signature key ID
-func getSigKeyID(genPkt packet.Packet) uint64 {
-	switch pkt := genPkt.(type) {
-	case *packet.Signature:
-		return getSigV4KeyID(pkt)
+	if !ok {
+		return false, fmt.Errorf("Invalid signature data")
 	}
 
-	return 0
-}
-
-// getSigKeyID returns signature V4 key ID
-func getSigV4KeyID(pkt *packet.Signature) uint64 {
-	if pkt != nil {
-		return *pkt.IssuerKeyId
-	}
-
-	return 0
+	return *sig.IssuerKeyId == key.entity.PrivateKey.KeyId, nil
 }
