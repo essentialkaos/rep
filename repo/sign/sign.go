@@ -233,6 +233,11 @@ func checkSignaturePacket(signature []byte, key *Key) (bool, error) {
 		return false, fmt.Errorf("Can't decode signature: %w", err)
 	}
 
+	return isSignatureBaseOneKey(pkt, key)
+}
+
+// isSignatureBaseOneKey checks if signature and key have the same issuer key ID
+func isSignatureBaseOneKey(pkt packet.Packet, key *Key) (bool, error) {
 	sig, ok := pkt.(*packet.Signature)
 
 	if !ok {
