@@ -20,6 +20,8 @@ updates:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "github.com/ProtonMail/go-crypto"
 
   - package-ecosystem: "github-actions"
     directory: "/"
