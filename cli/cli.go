@@ -22,6 +22,7 @@ import (
 	"github.com/essentialkaos/ek/v13/pager"
 	"github.com/essentialkaos/ek/v13/progress"
 	"github.com/essentialkaos/ek/v13/signal"
+	"github.com/essentialkaos/ek/v13/sortutil"
 	"github.com/essentialkaos/ek/v13/strutil"
 	"github.com/essentialkaos/ek/v13/support"
 	"github.com/essentialkaos/ek/v13/support/deps"
@@ -49,7 +50,7 @@ import (
 // App info
 const (
 	APP  = "rep"
-	VER  = "3.5.2"
+	VER  = "3.5.3"
 	DESC = "DNF/YUM repository management utility"
 )
 
@@ -476,15 +477,28 @@ func configureSignalHandlers() error {
 
 // getPrimaryRepoName returns primary repository name
 func getPrimaryRepoName() string {
+	var repos []string
+
 	for repo := range configs {
-		return repo
+		repos = append(repos, repo)
 	}
 
-	return ""
+	if len(repos) == 1 {
+		return repos[0]
+	}
+
+	sortutil.StringsNatural(repos)
+
+	return repos[len(repos)-1]
 }
 
 // process starts command processing
 func process(args options.Arguments) bool {
+	if len(configs) == 0 {
+		terminal.Warn("No repository configuration files were found")
+		return false
+	}
+
 	if len(configs) == 1 && configs[args.Get(0).String()] == nil {
 		args = args.Unshift(getPrimaryRepoName())
 	}
@@ -494,11 +508,6 @@ func process(args options.Arguments) bool {
 	switch repo {
 	case COMMAND_HELP, COMMAND_SHORT_HELP, COMMAND_GEN_KEY:
 		return runSimpleCommand(repo, args[1:])
-	}
-
-	if len(configs) == 0 {
-		terminal.Warn("No repository configuration files were found")
-		return false
 	}
 
 	if configs[repo] == nil {
