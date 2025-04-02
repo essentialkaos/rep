@@ -7,9 +7,9 @@ toolchain go1.24.1
 require (
 	github.com/ProtonMail/go-crypto v1.1.5
 	github.com/essentialkaos/check v1.4.1
-	github.com/essentialkaos/ek/v13 v13.21.0
+	github.com/essentialkaos/ek/v13 v13.22.1
 	github.com/klauspost/compress v1.18.0
-	github.com/mattn/go-sqlite3 v1.14.24
+	github.com/mattn/go-sqlite3 v1.14.25
 	github.com/sassoftware/go-rpmutils v0.4.0
 	github.com/ulikunitz/xz v0.5.12
 )
