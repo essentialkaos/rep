@@ -204,9 +204,8 @@ func (s *Storage) Initialize(repoList, archList []string) error {
 	}
 
 	for _, arch := range archList {
-		switch {
-		case data.SupportedArchs[arch].Flag == data.ARCH_FLAG_UNKNOWN,
-			data.SupportedArchs[arch].Flag == data.ARCH_FLAG_NOARCH:
+		switch data.SupportedArchs[arch].Flag {
+		case data.ARCH_FLAG_UNKNOWN, data.ARCH_FLAG_NOARCH:
 			return fmt.Errorf("Can't initialize the new storage: Unsupported architecture %q", arch)
 		}
 	}

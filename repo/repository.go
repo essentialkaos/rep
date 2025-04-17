@@ -260,10 +260,8 @@ func (s PackageStack) HasMultiBundles() bool {
 	}
 
 	for _, bundle := range s {
-		if bundle != nil {
-			if bundle.Size() > 1 {
-				return true
-			}
+		if bundle.Size() > 1 {
+			return true
 		}
 	}
 
@@ -279,11 +277,9 @@ func (s PackageStack) GetArchsFlag() data.ArchFlag {
 	var flag data.ArchFlag
 
 	for _, bundle := range s {
-		if bundle != nil {
-			for _, pkg := range bundle {
-				if pkg != nil {
-					flag |= pkg.ArchFlags
-				}
+		for _, pkg := range bundle {
+			if pkg != nil {
+				flag |= pkg.ArchFlags
 			}
 		}
 	}
@@ -319,13 +315,9 @@ func (s PackageStack) FlattenFiles() PackageFiles {
 	var result PackageFiles
 
 	for _, bundle := range s {
-		if bundle != nil {
-			for _, pkg := range bundle {
-				if pkg != nil {
-					for _, file := range pkg.Files {
-						result = append(result, file)
-					}
-				}
+		for _, pkg := range bundle {
+			if pkg != nil {
+				result = append(result, pkg.Files...)
 			}
 		}
 	}

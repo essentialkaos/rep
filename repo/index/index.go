@@ -12,11 +12,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/essentialkaos/ek/v13/fsutil"
-	"github.com/essentialkaos/ek/v13/sliceutil"
 	"github.com/essentialkaos/ek/v13/system"
 )
 
@@ -227,15 +227,15 @@ func (o *Options) Validate() error {
 		return fmt.Errorf("ChangelogLimit can't be less than 0")
 	}
 
-	if o.CheckSum != "" && !sliceutil.Contains(CheckSumMethods, o.CheckSum) {
+	if o.CheckSum != "" && !slices.Contains(CheckSumMethods, o.CheckSum) {
 		return fmt.Errorf("Unsupported CheckSum method \"%s\"", o.CheckSum)
 	}
 
-	if o.MDFilenames != "" && !sliceutil.Contains(MDFilenames, o.MDFilenames) {
+	if o.MDFilenames != "" && !slices.Contains(MDFilenames, o.MDFilenames) {
 		return fmt.Errorf("Unsupported MDFilenames method \"%s\"", o.MDFilenames)
 	}
 
-	if o.CompressType != "" && !sliceutil.Contains(CompressionMethods, o.CompressType) {
+	if o.CompressType != "" && !slices.Contains(CompressionMethods, o.CompressType) {
 		return fmt.Errorf("Unsupported compression method \"%s\"", o.CompressType)
 	}
 
