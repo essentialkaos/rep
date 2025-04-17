@@ -4,7 +4,7 @@ ARG REGISTRY="docker.io"
 
 ## CREATEREPO_C BUILDER ########################################################
 
-FROM ${REGISTRY}/essentialkaos/alpine:3.20 as cr-builder
+FROM ${REGISTRY}/essentialkaos/alpine:3.21 as cr-builder
 
 ARG VERSION=1.1.0
 
@@ -21,7 +21,7 @@ RUN apk add --no-cache bash-completion bzip2-dev cmake curl-dev expat-dev \
 
 ## GO BUILDER ##################################################################
 
-FROM ${REGISTRY}/essentialkaos/golang:alpine3.20 as go-builder
+FROM ${REGISTRY}/essentialkaos/golang:alpine3.21 as go-builder
 
 WORKDIR /go/src/github.com/essentialkaos/rep
 
@@ -33,7 +33,7 @@ RUN apk add --no-cache gcc musl-dev && \
 
 ## FINAL IMAGE #################################################################
 
-FROM ${REGISTRY}/essentialkaos/alpine:3.20
+FROM ${REGISTRY}/essentialkaos/alpine:3.21
 
 LABEL org.opencontainers.image.title="rep" \
       org.opencontainers.image.description="DNF/YUM repository management utility" \
