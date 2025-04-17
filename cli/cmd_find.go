@@ -37,17 +37,13 @@ func cmdFind(ctx *context, args options.Arguments) bool {
 	showAll := !options.GetB(OPT_RELEASE) && !options.GetB(OPT_TESTING)
 
 	if showAll || options.GetB(OPT_RELEASE) {
-		status := findAndShowPackages(ctx.Repo.Release, searchRequest)
-
-		if status != true {
+		if !findAndShowPackages(ctx.Repo.Release, searchRequest) {
 			return false
 		}
 	}
 
 	if showAll || options.GetB(OPT_TESTING) {
-		status := findAndShowPackages(ctx.Repo.Testing, searchRequest)
-
-		if status != true {
+		if !findAndShowPackages(ctx.Repo.Testing, searchRequest) {
 			return false
 		}
 	}
@@ -110,17 +106,15 @@ func filterPackagesByReleaseStatus(r *repo.SubRepository, stack repo.PackageStac
 	}
 
 	for _, bundle := range stack {
-		if bundle != nil {
-			for index, pkg := range bundle {
-				if pkg == nil {
-					continue
-				}
+		for index, pkg := range bundle {
+			if pkg == nil {
+				continue
+			}
 
-				isReleased, _, err := r.Parent.IsPackageReleased(pkg)
+			isReleased, _, err := r.Parent.IsPackageReleased(pkg)
 
-				if err == nil && isReleased != released {
-					bundle[index] = nil
-				}
+			if err == nil && isReleased != released {
+				bundle[index] = nil
 			}
 		}
 	}

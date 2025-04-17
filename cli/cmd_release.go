@@ -87,7 +87,7 @@ func releasePackagesFiles(ctx *context, files []repo.PackageFile) bool {
 
 	isCancelProtected = false
 
-	return hasErrors == false
+	return !hasErrors
 }
 
 // releasePackageFile copies package file from testing to release repository

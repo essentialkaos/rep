@@ -74,7 +74,7 @@ func signRPMFiles(files []string, ctx *context, key *sign.Key) bool {
 
 	isCancelProtected = false
 
-	return hasErrors == false
+	return !hasErrors
 }
 
 // signRPMFile signs given RPM file

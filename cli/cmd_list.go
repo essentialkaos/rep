@@ -39,17 +39,13 @@ func cmdList(ctx *context, args options.Arguments) bool {
 	all := !options.GetB(OPT_RELEASE) && !options.GetB(OPT_TESTING)
 
 	if all || options.GetB(OPT_RELEASE) {
-		status := listPackages(ctx.Repo.Release, filter)
-
-		if status != true {
+		if !listPackages(ctx.Repo.Release, filter) {
 			return false
 		}
 	}
 
 	if all || options.GetB(OPT_TESTING) {
-		status := listPackages(ctx.Repo.Testing, filter)
-
-		if status != true {
+		if !listPackages(ctx.Repo.Testing, filter) {
 			return false
 		}
 	}

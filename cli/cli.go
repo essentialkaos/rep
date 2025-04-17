@@ -422,8 +422,7 @@ func validateRepoConfigs() error {
 			{REPOSITORY_NAME, knfr.Regexp, repoNamePattern},
 		}
 
-		validators = validators.AddIf(
-			cfg.HasProp(SIGN_KEY),
+		validators = validators.AddIf(cfg.Has(SIGN_KEY),
 			knf.Validators{
 				{SIGN_KEY, knff.Perms, "FR"},
 				{SIGN_KEY, knff.FileMode, os.FileMode(0600)},

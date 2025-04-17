@@ -98,7 +98,7 @@ func unreleasePackagesFiles(ctx *context, files []repo.PackageFile) bool {
 
 	isCancelProtected = false
 
-	return hasErrors == false
+	return !hasErrors
 }
 
 // unreleasePackageFile removes package file from repository

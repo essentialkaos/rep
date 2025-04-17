@@ -109,7 +109,7 @@ func addRPMFiles(ctx *context, files []string, signingKey *sign.Key) bool {
 
 	isCancelProtected = false
 
-	return hasErrors == false
+	return !hasErrors
 }
 
 // addRPMFile adds given RPM file to testing repository

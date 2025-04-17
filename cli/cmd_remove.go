@@ -132,7 +132,7 @@ func removePackagesFiles(ctx *context, releaseFiles, testingFiles []repo.Package
 		}
 	}
 
-	return hasErrors == false
+	return !hasErrors
 }
 
 // removePackageFile removes package file from repository
