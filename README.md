@@ -10,7 +10,7 @@
   <a href="#license"><img src=".github/images/license.svg"/></a>
 </p>
 
-<p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#ci-status">CI Status</a> • <a href="#license">License</a></p>
+<p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#ci-status">CI Status</a> • <a href="#contributing">Contributing</a> • <a href="#license">License</a></p>
 
 <br/>
 
@@ -62,6 +62,10 @@ Official Docker images with `rep`:
 |--------|--------|
 | `master` | [![CI](https://kaos.sh/w/rep/ci-push.svg?branch=master)](https://kaos.sh/w/rep/ci-push?query=branch:master) |
 | `develop` | [![CI](https://kaos.sh/w/rep/ci-push.svg?branch=develop)](https://kaos.sh/w/rep/ci-push?query=branch:develop) |
+
+### Contributing
+
+Before contributing to this project please read our [Contributing Guidelines](https://github.com/essentialkaos/.github/blob/master/CONTRIBUTING.md).
 
 ### License
 
