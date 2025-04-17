@@ -2,7 +2,6 @@
 
 <p align="center">
   <a href="https://kaos.sh/r/rep"><img src="https://kaos.sh/r/rep.svg" alt="GoReportCard" /></a>
-  <a href="https://kaos.sh/l/rep"><img src="https://kaos.sh/l/5876fdc611100e9f8a83.svg" alt="Code Climate Maintainability" /></a>
   <a href="https://kaos.sh/y/ek"><img src="https://kaos.sh/y/ba1bd149e31f4a00abf72ac930aedac9.svg" alt="Codacy badge" /></a>
   <br/>
   <a href="https://kaos.sh/w/rep/ci-push"><img src="https://kaos.sh/w/rep/ci-push.svg" alt="GitHub Actions CI Status" /></a>
