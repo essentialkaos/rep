@@ -3,3 +3,4 @@ extend-exclude = ["go.sum", "testdata/reptest.private"]
 
 [default.extend-identifiers]
 O_WRONLY = "O_WRONLY"
+typ = "typ"
