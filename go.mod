@@ -2,8 +2,6 @@ module github.com/essentialkaos/rep/v3
 
 go 1.23.6
 
-toolchain go1.24.1
-
 require (
 	github.com/ProtonMail/go-crypto v1.1.5
 	github.com/essentialkaos/check v1.4.1
