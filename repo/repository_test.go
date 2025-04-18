@@ -77,8 +77,8 @@ func (s *RepoSuite) TestPackage(c *C) {
 
 func (s *RepoSuite) TestPackageFiles(c *C) {
 	pf := PackageFiles{
-		PackageFile{"0000000", "test-package-1.0.0-0.el7.src.rpm", data.ARCH_FLAG_SRC, data.ARCH_FLAG_SRC},
-		PackageFile{"0000000", "test-package-1.0.0-0.el7.x86_64.rpm", data.ARCH_FLAG_X64, data.ARCH_FLAG_X64},
+		PackageFile{"0000000", "test-package-1.0.0-0.el7.src.rpm", uint64(1024), data.ARCH_FLAG_SRC, data.ARCH_FLAG_SRC},
+		PackageFile{"0000000", "test-package-1.0.0-0.el7.x86_64.rpm", uint64(1024), data.ARCH_FLAG_X64, data.ARCH_FLAG_X64},
 	}
 
 	c.Assert(pf.HasArch(data.ARCH_SRC), Equals, true)
@@ -104,8 +104,8 @@ func (s *RepoSuite) TestPackageStack(c *C) {
 				Release:   "0.el7",
 				ArchFlags: data.ARCH_FLAG_X64 | data.ARCH_FLAG_SRC,
 				Files: PackageFiles{
-					PackageFile{"0000000", "test-package-1.0.0-0.el7.src.rpm", data.ARCH_FLAG_SRC, data.ARCH_FLAG_SRC},
-					PackageFile{"0000000", "test-package-1.0.0-0.el7.x86_64.rpm", data.ARCH_FLAG_X64, data.ARCH_FLAG_X64},
+					PackageFile{"0000000", "test-package-1.0.0-0.el7.src.rpm", uint64(1024), data.ARCH_FLAG_SRC, data.ARCH_FLAG_SRC},
+					PackageFile{"0000000", "test-package-1.0.0-0.el7.x86_64.rpm", uint64(1024), data.ARCH_FLAG_X64, data.ARCH_FLAG_X64},
 				},
 			},
 			&Package{
@@ -114,7 +114,7 @@ func (s *RepoSuite) TestPackageStack(c *C) {
 				Release:   "0.el7",
 				ArchFlags: data.ARCH_FLAG_X64,
 				Files: PackageFiles{
-					PackageFile{"0000000", "test-package-1.0.1-0.el7.x86_64.rpm", data.ARCH_FLAG_X64, data.ARCH_FLAG_X64},
+					PackageFile{"0000000", "test-package-1.0.1-0.el7.x86_64.rpm", uint64(1024), data.ARCH_FLAG_X64, data.ARCH_FLAG_X64},
 				},
 			},
 		},
@@ -124,9 +124,9 @@ func (s *RepoSuite) TestPackageStack(c *C) {
 	c.Assert(ps.GetArchsFlag(), Equals, data.ARCH_FLAG_X64|data.ARCH_FLAG_SRC)
 	c.Assert(ps.GetArchs(), DeepEquals, []string{"src", "x86_64"})
 	c.Assert(ps.FlattenFiles(), DeepEquals, PackageFiles{
-		PackageFile{"0000000", "test-package-1.0.0-0.el7.src.rpm", data.ARCH_FLAG_SRC, data.ARCH_FLAG_SRC},
-		PackageFile{"0000000", "test-package-1.0.0-0.el7.x86_64.rpm", data.ARCH_FLAG_X64, data.ARCH_FLAG_X64},
-		PackageFile{"0000000", "test-package-1.0.1-0.el7.x86_64.rpm", data.ARCH_FLAG_X64, data.ARCH_FLAG_X64},
+		PackageFile{"0000000", "test-package-1.0.0-0.el7.src.rpm", uint64(1024), data.ARCH_FLAG_SRC, data.ARCH_FLAG_SRC},
+		PackageFile{"0000000", "test-package-1.0.0-0.el7.x86_64.rpm", uint64(1024), data.ARCH_FLAG_X64, data.ARCH_FLAG_X64},
+		PackageFile{"0000000", "test-package-1.0.1-0.el7.x86_64.rpm", uint64(1024), data.ARCH_FLAG_X64, data.ARCH_FLAG_X64},
 	})
 
 	ps = PackageStack{
@@ -187,7 +187,7 @@ func (s *RepoSuite) TestRepositoryCopyPackage(c *C) {
 
 	pkgFile := PackageFile{
 		"0000000", "test-package-1.0.0-0.el7.x86_64.rpm",
-		data.ARCH_FLAG_X64, data.ARCH_FLAG_X64,
+		uint64(1024), data.ARCH_FLAG_X64, data.ARCH_FLAG_X64,
 	}
 
 	err = r.CopyPackage(r.Testing, r.Release, pkgFile)
@@ -230,7 +230,7 @@ func (s *RepoSuite) TestRepositoryIsPackageReleased(c *C) {
 
 	pkgFile := PackageFile{
 		"0000000", "test-package-1.0.0-0.el7.x86_64.rpm",
-		data.ARCH_FLAG_X64, data.ARCH_FLAG_X64,
+		uint64(1024), data.ARCH_FLAG_X64, data.ARCH_FLAG_X64,
 	}
 
 	err = r.CopyPackage(nil, r.Release, pkgFile)
@@ -298,7 +298,7 @@ func (s *RepoSuite) TestRepositoryInfo(c *C) {
 
 	pkgFile := PackageFile{
 		"0000000", "test-package-1.0.0-0.el7.x86_64.rpm",
-		data.ARCH_FLAG_X64, data.ARCH_FLAG_X64,
+		uint64(1024), data.ARCH_FLAG_X64, data.ARCH_FLAG_X64,
 	}
 
 	err = r.CopyPackage(nil, r.Release, pkgFile)
@@ -440,7 +440,7 @@ func (s *RepoSuite) TestSubRepositoryRemovePackage(c *C) {
 
 	pkgFile := PackageFile{
 		"0000000", "test-package-1.0.0-0.el7.x86_64.rpm",
-		data.ARCH_FLAG_X64, data.ARCH_FLAG_X64,
+		uint64(1024), data.ARCH_FLAG_X64, data.ARCH_FLAG_X64,
 	}
 
 	err = r.Testing.RemovePackage(pkgFile)
@@ -626,7 +626,7 @@ func (s *RepoSuite) TestSubRepositoryGetFullPackagePath(c *C) {
 	err = r.Initialize([]string{data.ARCH_X64})
 	c.Assert(err, IsNil)
 
-	pkg := PackageFile{"0000000", "test-package-1.0.0-0.el7.x86_64.rpm", data.ARCH_FLAG_X64, data.ARCH_FLAG_X64}
+	pkg := PackageFile{"0000000", "test-package-1.0.0-0.el7.x86_64.rpm", uint64(1024), data.ARCH_FLAG_X64, data.ARCH_FLAG_X64}
 	c.Assert(r.Testing.GetFullPackagePath(pkg), Matches, `.*/testing/x86_64/test-package-1.0.0-0.el7.x86_64.rpm`)
 }
 
