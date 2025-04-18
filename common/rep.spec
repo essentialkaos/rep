@@ -110,6 +110,7 @@ rm -rf %{buildroot}
 
 %changelog
 * Thu Apr 17 2025 Anton Novojilov <andy@essentialkaos.com> - 3.5.3-0
+- Improved cleanup
 - Code refactoring
 - Dependencies update
 

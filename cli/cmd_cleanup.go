@@ -13,10 +13,8 @@ import (
 	"strings"
 
 	"github.com/essentialkaos/ek/v13/fmtc"
-	"github.com/essentialkaos/ek/v13/fmtutil"
 	"github.com/essentialkaos/ek/v13/options"
 	"github.com/essentialkaos/ek/v13/terminal"
-	"github.com/essentialkaos/ek/v13/terminal/input"
 
 	"github.com/essentialkaos/rep/v3/repo"
 )
@@ -63,7 +61,7 @@ func cmdCleanup(ctx *context, args options.Arguments) bool {
 		return true
 	}
 
-	return cleanupPackages(ctx, releaseStack, testingStack)
+	return removePackages(ctx, releaseStack, testingStack, "")
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -92,33 +90,6 @@ func getCleanupOptions(args options.Arguments) (int, string, error) {
 	filter := args.Get(1).String()
 
 	return keepNum, filter, nil
-}
-
-// cleanupPackages removes packages from both repositories
-func cleanupPackages(ctx *context, releaseStack, testingStack repo.PackageStack) bool {
-	if !options.GetB(OPT_FORCE) {
-		if !releaseStack.IsEmpty() {
-			printPackageList(ctx.Repo.Release, releaseStack, "")
-		}
-
-		if !testingStack.IsEmpty() {
-			printPackageList(ctx.Repo.Testing, testingStack, "")
-		}
-
-		fmtutil.Separator(true)
-		fmtc.NewLine()
-
-		ok, err := input.ReadAnswer("Do you really want to remove these packages?", "n")
-
-		if err != nil || !ok {
-			return false
-		}
-	}
-
-	testingFiles := testingStack.FlattenFiles()
-	releaseFiles := releaseStack.FlattenFiles()
-
-	return removePackagesFiles(ctx, releaseFiles, testingFiles)
 }
 
 // getStackToCleanup returns stack with packages to remove

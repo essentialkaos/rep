@@ -12,6 +12,7 @@ import (
 	"github.com/essentialkaos/ek/v13/fmtutil"
 	"github.com/essentialkaos/ek/v13/options"
 	"github.com/essentialkaos/ek/v13/path"
+	"github.com/essentialkaos/ek/v13/pluralize"
 	"github.com/essentialkaos/ek/v13/spinner"
 	"github.com/essentialkaos/ek/v13/terminal"
 	"github.com/essentialkaos/ek/v13/terminal/input"
@@ -56,6 +57,16 @@ func cmdRemove(ctx *context, args options.Arguments) bool {
 
 // removePackages removes packages from testing or all sub-repositories
 func removePackages(ctx *context, releaseStack, testingStack repo.PackageStack, filter string) bool {
+	var testingFiles, releaseFiles repo.PackageFiles
+
+	if !releaseStack.IsEmpty() {
+		releaseFiles = releaseStack.FlattenFiles()
+	}
+
+	if !testingStack.IsEmpty() {
+		testingFiles = testingStack.FlattenFiles()
+	}
+
 	if !options.GetB(OPT_FORCE) {
 		if !releaseStack.IsEmpty() {
 			printPackageList(ctx.Repo.Release, releaseStack, filter)
@@ -65,8 +76,25 @@ func removePackages(ctx *context, releaseStack, testingStack repo.PackageStack, 
 			printPackageList(ctx.Repo.Testing, testingStack, filter)
 		}
 
-		fmtutil.Separator(true)
-		fmtc.NewLine()
+		fmtutil.Separator(false)
+
+		if !releaseStack.IsEmpty() {
+			fmtc.Printfn(
+				" {s}{*}Release:{!*} -%s %s / -%s{!}", fmtutil.PrettyNum(len(testingFiles)),
+				pluralize.Pluralize(len(testingFiles), "package", "packages"),
+				fmtutil.PrettySize(testingFiles.Size()),
+			)
+		}
+
+		if !testingStack.IsEmpty() {
+			fmtc.Printfn(
+				" {s}{*}Testing:{!*} -%s %s / -%s{!}", fmtutil.PrettyNum(len(testingFiles)),
+				pluralize.Pluralize(len(testingFiles), "package", "packages"),
+				fmtutil.PrettySize(testingFiles.Size()),
+			)
+		}
+
+		fmtutil.Separator(false)
 
 		ok, err := input.ReadAnswer("Do you really want to remove these packages?", "n")
 
@@ -74,9 +102,6 @@ func removePackages(ctx *context, releaseStack, testingStack repo.PackageStack, 
 			return false
 		}
 	}
-
-	testingFiles := testingStack.FlattenFiles()
-	releaseFiles := releaseStack.FlattenFiles()
 
 	return removePackagesFiles(ctx, releaseFiles, testingFiles)
 }
