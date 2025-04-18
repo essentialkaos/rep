@@ -2,7 +2,7 @@ package cli
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2025 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -98,7 +98,7 @@ func unreleasePackagesFiles(ctx *context, files []repo.PackageFile) bool {
 
 	isCancelProtected = false
 
-	return hasErrors == false
+	return !hasErrors
 }
 
 // unreleasePackageFile removes package file from repository

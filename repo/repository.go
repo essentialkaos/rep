@@ -2,7 +2,7 @@ package repo
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2025 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -32,10 +32,10 @@ import (
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 const (
-	_SQL_LIST_ALL       = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages;`
-	_SQL_LIST_LATEST    = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages GROUP BY name HAVING MAX(pkgKey);`
-	_SQL_LIST_BY_NAME   = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages WHERE (name || "-" || version || "-" || release) LIKE @filter ORDER BY rpm_sourcerpm;`
-	_SQL_FIND_BY_KEYS   = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href FROM packages WHERE pkgKey in (%s);`
+	_SQL_LIST_ALL       = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href,size_package FROM packages;`
+	_SQL_LIST_LATEST    = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href,size_package FROM packages GROUP BY name HAVING MAX(pkgKey);`
+	_SQL_LIST_BY_NAME   = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href,size_package FROM packages WHERE (name || "-" || version || "-" || release) LIKE @filter ORDER BY rpm_sourcerpm;`
+	_SQL_FIND_BY_KEYS   = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href,size_package FROM packages WHERE pkgKey in (%s);`
 	_SQL_EXIST          = `SELECT time_file FROM packages WHERE name = @name AND version = @version AND release = @release AND epoch = @epoch;`
 	_SQL_STATS          = `SELECT SUM(size_package),COUNT(*) FROM packages;`
 	_SQL_INFO_BASE      = `SELECT pkgId,name,arch,version,release,epoch,rpm_sourcerpm,location_href,summary,description,url,time_file,time_build,rpm_license,rpm_vendor,rpm_group,size_package,size_installed FROM packages WHERE (name || "-" || version || "-" || release) LIKE @name GROUP BY name HAVING MAX(time_build) LIMIT 1;`
@@ -126,6 +126,7 @@ type PackageChangelog struct {
 type PackageFile struct {
 	CRC          string        // File checksum (first 7 symbols)
 	Path         string        // Path to file
+	Size         uint64        // Package size in bytes
 	ArchFlag     data.ArchFlag // Package arch flag
 	BaseArchFlag data.ArchFlag // Sub-repo (i.e. directory arch) flag
 }
@@ -236,6 +237,17 @@ func (p PackageFiles) HasArch(arch string) bool {
 	return false
 }
 
+// Size calculates total size of all packages in slice
+func (p PackageFiles) Size() uint64 {
+	var size uint64
+
+	for _, pkg := range p {
+		size += pkg.Size
+	}
+
+	return size
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // PackageBundle returns size of package bundle
@@ -260,10 +272,8 @@ func (s PackageStack) HasMultiBundles() bool {
 	}
 
 	for _, bundle := range s {
-		if bundle != nil {
-			if bundle.Size() > 1 {
-				return true
-			}
+		if bundle.Size() > 1 {
+			return true
 		}
 	}
 
@@ -279,11 +289,9 @@ func (s PackageStack) GetArchsFlag() data.ArchFlag {
 	var flag data.ArchFlag
 
 	for _, bundle := range s {
-		if bundle != nil {
-			for _, pkg := range bundle {
-				if pkg != nil {
-					flag |= pkg.ArchFlags
-				}
+		for _, pkg := range bundle {
+			if pkg != nil {
+				flag |= pkg.ArchFlags
 			}
 		}
 	}
@@ -319,13 +327,9 @@ func (s PackageStack) FlattenFiles() PackageFiles {
 	var result PackageFiles
 
 	for _, bundle := range s {
-		if bundle != nil {
-			for _, pkg := range bundle {
-				if pkg != nil {
-					for _, file := range pkg.Files {
-						result = append(result, file)
-					}
-				}
+		for _, pkg := range bundle {
+			if pkg != nil {
+				result = append(result, pkg.Files...)
 			}
 		}
 	}
@@ -830,10 +834,11 @@ func (r *SubRepository) listArchPackages(psb *packageStackBuilder, arch string, 
 
 	var sourceRPM string
 	var pkgID, pkgName, pkgArch, pkgVer, pkgRel, pkgEpc, pkgSrc, pkgHREF sql.NullString
+	var pkgSize sql.NullInt64
 
 ROWSLOOP:
 	for rows.Next() {
-		err = rows.Scan(&pkgID, &pkgName, &pkgArch, &pkgVer, &pkgRel, &pkgEpc, &pkgSrc, &pkgHREF)
+		err = rows.Scan(&pkgID, &pkgName, &pkgArch, &pkgVer, &pkgRel, &pkgEpc, &pkgSrc, &pkgHREF, &pkgSize)
 
 		if err != nil {
 			return fmt.Errorf("Error while scanning rows with info about arch packages list (%s): %w", arch, err)
@@ -859,9 +864,11 @@ ROWSLOOP:
 					pkg.Epoch == pkgEpc.String {
 					pkg.ArchFlags |= data.SupportedArchs[pkgArch.String].Flag
 					pkg.Files = append(pkg.Files, PackageFile{
-						strutil.Head(pkgID.String, 7), pkgHREF.String,
-						data.SupportedArchs[pkgArch.String].Flag,
-						data.SupportedArchs[arch].Flag,
+						CRC:          strutil.Head(pkgID.String, 7),
+						Path:         pkgHREF.String,
+						Size:         uint64(pkgSize.Int64),
+						ArchFlag:     data.SupportedArchs[pkgArch.String].Flag,
+						BaseArchFlag: data.SupportedArchs[arch].Flag,
 					})
 					continue ROWSLOOP
 				}
@@ -878,9 +885,11 @@ ROWSLOOP:
 				ArchFlags: data.SupportedArchs[pkgArch.String].Flag,
 				Src:       sourceRPM,
 				Files: PackageFiles{PackageFile{
-					strutil.Head(pkgID.String, 7), pkgHREF.String,
-					data.SupportedArchs[pkgArch.String].Flag,
-					data.SupportedArchs[arch].Flag,
+					CRC:          strutil.Head(pkgID.String, 7),
+					Path:         pkgHREF.String,
+					Size:         uint64(pkgSize.Int64),
+					ArchFlag:     data.SupportedArchs[pkgArch.String].Flag,
+					BaseArchFlag: data.SupportedArchs[arch].Flag,
 				}},
 			},
 		)
@@ -1084,9 +1093,11 @@ func (r *SubRepository) collectPackageBasicInfo(name, arch string) (*Package, st
 		ArchFlags: data.SupportedArchs[pkgArch.String].Flag,
 		Src:       pkgSrc.String,
 		Files: PackageFiles{PackageFile{
-			strutil.Head(pkgID.String, 7), pkgHREF.String,
-			data.SupportedArchs[pkgArch.String].Flag,
-			data.SupportedArchs[arch].Flag,
+			CRC:          strutil.Head(pkgID.String, 7),
+			Path:         pkgHREF.String,
+			Size:         uint64(pkgSize.Int64),
+			ArchFlag:     data.SupportedArchs[pkgArch.String].Flag,
+			BaseArchFlag: data.SupportedArchs[arch].Flag,
 		}},
 		Info: &PackageInfo{
 			Summary:       pkgSum.String,

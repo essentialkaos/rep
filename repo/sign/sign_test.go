@@ -2,7 +2,7 @@ package sign
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2025 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -167,16 +167,14 @@ func (s *SignSuite) TestErrors(c *C) {
 	c.Assert(err, NotNil)
 
 	hdr, _ := readHeader("../../testdata/test-package-1.0.0-0.el7.x86_64.rpm")
-	_, err = checkSignature(hdr, key.entity.PrivateKey)
+	_, err = checkSignature(hdr, key)
 	c.Assert(err, NotNil)
 
 	_, err = checkSignaturePacket([]byte("ABCD"), nil)
 	c.Assert(err, NotNil)
 
-	c.Assert(getSigV4KeyID(nil), Equals, uint64(0))
-
-	sig := &packet.SymmetricKeyEncrypted{}
-	c.Assert(getSigKeyID(sig), Equals, uint64(0))
+	_, err = isSignatureBaseOneKey(&packet.SymmetricKeyEncrypted{}, key)
+	c.Assert(err, NotNil)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

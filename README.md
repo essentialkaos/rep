@@ -2,15 +2,13 @@
 
 <p align="center">
   <a href="https://kaos.sh/r/rep"><img src="https://kaos.sh/r/rep.svg" alt="GoReportCard" /></a>
-  <a href="https://kaos.sh/l/rep"><img src="https://kaos.sh/l/5876fdc611100e9f8a83.svg" alt="Code Climate Maintainability" /></a>
   <a href="https://kaos.sh/y/ek"><img src="https://kaos.sh/y/ba1bd149e31f4a00abf72ac930aedac9.svg" alt="Codacy badge" /></a>
-  <br/>
   <a href="https://kaos.sh/w/rep/ci-push"><img src="https://kaos.sh/w/rep/ci-push.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/w/rep/codeql"><img src="https://kaos.sh/w/rep/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="#license"><img src=".github/images/license.svg"/></a>
 </p>
 
-<p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#ci-status">CI Status</a> • <a href="#license">License</a></p>
+<p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#ci-status">CI Status</a> • <a href="#contributing">Contributing</a> • <a href="#license">License</a></p>
 
 <br/>
 
@@ -62,6 +60,10 @@ Official Docker images with `rep`:
 |--------|--------|
 | `master` | [![CI](https://kaos.sh/w/rep/ci-push.svg?branch=master)](https://kaos.sh/w/rep/ci-push?query=branch:master) |
 | `develop` | [![CI](https://kaos.sh/w/rep/ci-push.svg?branch=develop)](https://kaos.sh/w/rep/ci-push?query=branch:develop) |
+
+### Contributing
+
+Before contributing to this project please read our [Contributing Guidelines](https://github.com/essentialkaos/.github/blob/master/CONTRIBUTING.md).
 
 ### License
 

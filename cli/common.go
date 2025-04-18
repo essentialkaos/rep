@@ -2,7 +2,7 @@ package cli
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2025 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -234,8 +234,8 @@ func checkCommand(cmdName string, args options.Arguments) bool {
 func warmUpCache(r *repo.Repository) {
 	var warmupTesting, warmupRelease bool
 
-	warmupTesting = r.Testing.IsCacheValid() == false
-	warmupRelease = r.Release.IsCacheValid() == false
+	warmupTesting = !r.Testing.IsCacheValid()
+	warmupRelease = !r.Release.IsCacheValid()
 
 	if !warmupRelease && !warmupTesting {
 		return
@@ -301,7 +301,7 @@ func getRepoContext(repoCfg *knf.Config) (*context, error) {
 	repo.FileFilter = repoCfg.GetS(REPOSITORY_FILE_FILTER)
 	repo.Replace = repoCfg.GetB(REPOSITORY_REPLACE, true)
 
-	if repoCfg.HasProp(SIGN_KEY) {
+	if repoCfg.Has(SIGN_KEY) {
 		err = repo.ReadSigningKey(repoCfg.GetS(SIGN_KEY))
 
 		if err != nil {
@@ -418,7 +418,7 @@ func checkRPMFiles(files []string) bool {
 		}
 	}
 
-	return hasErrors == false
+	return !hasErrors
 }
 
 // isSignRequired returns true if some of given files require signing

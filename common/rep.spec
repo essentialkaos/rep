@@ -15,7 +15,7 @@
 
 Summary:        DNF/YUM repository management utility
 Name:           rep
-Version:        3.5.2
+Version:        3.5.3
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache 2.0
@@ -27,7 +27,7 @@ Source100:      checksum.sha512
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  golang >= 1.22
+BuildRequires:  golang >= 1.23
 
 Requires:       createrepo_c
 
@@ -109,6 +109,11 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Thu Apr 17 2025 Anton Novojilov <andy@essentialkaos.com> - 3.5.3-0
+- Improved cleanup
+- Code refactoring
+- Dependencies update
+
 * Sat Dec 21 2024 Anton Novojilov <andy@essentialkaos.com> - 3.5.2-0
 - Downgraded go-crypto to 1.0.0 due to invalid signature with newer versions
 - Fixed formatting for warning about re-signing all packages

@@ -2,7 +2,7 @@ package cli
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2025 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -27,17 +27,13 @@ func cmdWhichSource(ctx *context, args options.Arguments) bool {
 	showAll := !options.GetB(OPT_RELEASE) && !options.GetB(OPT_TESTING)
 
 	if options.GetB(OPT_RELEASE) || showAll {
-		status := findSources(ctx.Repo.Release, args)
-
-		if status != true {
+		if !findSources(ctx.Repo.Release, args) {
 			return false
 		}
 	}
 
 	if options.GetB(OPT_TESTING) || showAll {
-		status := findSources(ctx.Repo.Testing, args)
-
-		if status != true {
+		if !findSources(ctx.Repo.Testing, args) {
 			return false
 		}
 	}

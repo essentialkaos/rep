@@ -2,7 +2,7 @@ package cli
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2025 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -106,7 +106,7 @@ func checkRepositoriesData(r *repo.Repository, releaseStack, testingStack repo.P
 		hasProblems = true
 	}
 
-	return hasProblems == false
+	return !hasProblems
 }
 
 // checkRepositoriesConsistency check consistency between release and testing repositories
@@ -149,11 +149,7 @@ func checkRepositoriesConsistency(releaseIndex, testingIndex map[string]*repo.Pa
 		}
 	}
 
-	if !printCheckErrorsInfo(errs) {
-		return false
-	}
-
-	return true
+	return printCheckErrorsInfo(errs)
 }
 
 // checkRepositoriesCRCInfo validates checksum info
@@ -176,11 +172,7 @@ func checkRepositoriesCRCInfo(r *repo.Repository, releaseIndex, testingIndex map
 
 	pb.Finish()
 
-	if !printCheckErrorsInfo(errs) {
-		return false
-	}
-
-	return true
+	return printCheckErrorsInfo(errs)
 }
 
 // checkRepositoryCRCInfo validates checksum for all repository files
@@ -226,11 +218,7 @@ func checkRepositoriesPermissions(r *repo.Repository, releaseIndex, testingIndex
 
 	pb.Finish()
 
-	if !printCheckErrorsInfo(errs) {
-		return false
-	}
-
-	return true
+	return printCheckErrorsInfo(errs)
 }
 
 // checkRepositoryPermissions checks packages permissions in given repository
@@ -363,11 +351,7 @@ func checkRepositoriesSignatures(r *repo.Repository, releaseIndex, testingIndex 
 
 	pb.Finish()
 
-	if !printCheckErrorsInfo(errs) {
-		return false
-	}
-
-	return true
+	return printCheckErrorsInfo(errs)
 }
 
 // checkRepositorySignatures checks packages signatures in given repository
