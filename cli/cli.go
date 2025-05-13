@@ -10,8 +10,6 @@ package cli
 import (
 	"fmt"
 	"os"
-	"os/exec"
-	"strings"
 
 	"github.com/essentialkaos/ek/v13/errors"
 	"github.com/essentialkaos/ek/v13/fmtc"
@@ -23,8 +21,8 @@ import (
 	"github.com/essentialkaos/ek/v13/progress"
 	"github.com/essentialkaos/ek/v13/signal"
 	"github.com/essentialkaos/ek/v13/sortutil"
-	"github.com/essentialkaos/ek/v13/strutil"
 	"github.com/essentialkaos/ek/v13/support"
+	"github.com/essentialkaos/ek/v13/support/apps"
 	"github.com/essentialkaos/ek/v13/support/deps"
 	"github.com/essentialkaos/ek/v13/system"
 	"github.com/essentialkaos/ek/v13/terminal"
@@ -50,7 +48,7 @@ import (
 // App info
 const (
 	APP  = "rep"
-	VER  = "3.5.3"
+	VER  = "3.5.4"
 	DESC = "DNF/YUM repository management utility"
 )
 
@@ -255,7 +253,7 @@ func Init(gitRev string, gomod []byte) {
 		support.Collect(APP, VER).
 			WithRevision(gitRev).
 			WithDeps(deps.Extract(gomod)).
-			WithApps(getCreaterepoVersion(false)).
+			WithApps(getCreaterepoVersion()).
 			Print()
 		os.Exit(0)
 	case options.GetB(OPT_HELP) || len(args) == 0:
@@ -549,27 +547,8 @@ func shutdown(ec int) {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // getCreaterepoVersion returns version of installed createrepo_c
-func getCreaterepoVersion(short bool) support.App {
-	cmd := exec.Command("createrepo_c", "--version")
-	out, err := cmd.Output()
-
-	if err != nil {
-		return support.App{"createrepo_c", ""}
-	}
-
-	crVer := strings.Trim(string(out), "\n\r")
-	crVer = strutil.Exclude(crVer, "Version: ")
-
-	if short {
-		return support.App{
-			"createrepo_c",
-			strutil.ReadField(crVer, 0, false, ' '),
-		}
-	}
-
-	crVer = strings.ReplaceAll(crVer, " )", ")")
-
-	return support.App{"createrepo_c", crVer}
+func getCreaterepoVersion() support.App {
+	return apps.ExtractVersion("createrepo_c --version", 0, 1)
 }
 
 // printCompletion prints completion for given shell
@@ -712,11 +691,10 @@ func genAbout(gitRev string) *usage.About {
 		about.VersionColorTag = "{#33}"
 	}
 
-	crInfo := getCreaterepoVersion(true)
+	crInfo := getCreaterepoVersion()
 
 	if crInfo.Version != "" {
-		about.Environment = append(
-			about.Environment,
+		about.Environment = append(about.Environment,
 			usage.EnvironmentInfo{crInfo.Name, crInfo.Version},
 		)
 	}
