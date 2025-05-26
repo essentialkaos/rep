@@ -8,6 +8,7 @@ package cli
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"strings"
 	"time"
@@ -15,7 +16,7 @@ import (
 	"github.com/essentialkaos/ek/v13/fmtc"
 	"github.com/essentialkaos/ek/v13/fmtutil"
 	"github.com/essentialkaos/ek/v13/fsutil"
-	"github.com/essentialkaos/ek/v13/hash"
+	"github.com/essentialkaos/ek/v13/hashutil"
 	"github.com/essentialkaos/ek/v13/lscolors"
 	"github.com/essentialkaos/ek/v13/options"
 	"github.com/essentialkaos/ek/v13/strutil"
@@ -336,7 +337,9 @@ func getPackageFileCRCWithMark(r *repo.Repository, pkgFile repo.PackageFile, isR
 		return fmtc.Sprintf("%s", pkgFile.Path)
 	}
 
-	testingHash := strutil.Head(hash.FileHash(testingFile), 7)
+	hasher := sha256.New()
+
+	testingHash := strutil.Head(hashutil.File(testingFile, hasher), 7)
 
 	if testingHash != pkgFile.CRC {
 		return fmtc.Sprintf("%s {r}✖ {!} {s-}(CRC mismatch in testing repository){!}", pkgFile.Path)
@@ -349,7 +352,7 @@ func getPackageFileCRCWithMark(r *repo.Repository, pkgFile repo.PackageFile, isR
 			return fmtc.Sprintf("%s", pkgFile.Path)
 		}
 
-		releaseHash := strutil.Head(hash.FileHash(releaseFile), 7)
+		releaseHash := strutil.Head(hashutil.File(releaseFile, hasher), 7)
 
 		if releaseHash != pkgFile.CRC {
 			return fmtc.Sprintf("%s {r}✖ {!} {s-}(CRC mismatch in release repository){!}", pkgFile.Path)
