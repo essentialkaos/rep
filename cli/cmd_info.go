@@ -339,7 +339,7 @@ func getPackageFileCRCWithMark(r *repo.Repository, pkgFile repo.PackageFile, isR
 
 	hasher := sha256.New()
 
-	testingHash := strutil.Head(hashutil.File(testingFile, hasher), 7)
+	testingHash := strutil.Head(hashutil.File(testingFile, hasher).String(), 7)
 
 	if testingHash != pkgFile.CRC {
 		return fmtc.Sprintf("%s {r}✖ {!} {s-}(CRC mismatch in testing repository){!}", pkgFile.Path)
@@ -352,7 +352,7 @@ func getPackageFileCRCWithMark(r *repo.Repository, pkgFile repo.PackageFile, isR
 			return fmtc.Sprintf("%s", pkgFile.Path)
 		}
 
-		releaseHash := strutil.Head(hashutil.File(releaseFile, hasher), 7)
+		releaseHash := strutil.Head(hashutil.File(releaseFile, hasher).String(), 7)
 
 		if releaseHash != pkgFile.CRC {
 			return fmtc.Sprintf("%s {r}✖ {!} {s-}(CRC mismatch in release repository){!}", pkgFile.Path)

@@ -183,7 +183,7 @@ func checkRepositoryCRCInfo(pb *progress.Bar, r *repo.SubRepository, index map[s
 	for _, pkgName := range getSortedPackageIndexKeys(index) {
 		for _, file := range index[pkgName].Files {
 			filePath := r.GetFullPackagePath(file)
-			fileCRC := strutil.Head(hashutil.File(filePath, sha256.New()), 7)
+			fileCRC := strutil.Head(hashutil.File(filePath, sha256.New()).String(), 7)
 
 			if fileCRC != file.CRC {
 				errs.Add(fmt.Errorf(
