@@ -209,8 +209,8 @@ func getPkgNameWithFilter(pkgName, filter string) string {
 
 // isFilterValueValid returns true if filter value is valid
 func isFilterValueValid(filter string) bool {
-	if filter != "" && len(filter) < 2 {
-		terminal.Error("Filter must be at least 2 symbols long")
+	if filter != "" && len(filter) < 3 {
+		terminal.Error("Filter must be at least 3 symbols long")
 		return false
 	}
 
