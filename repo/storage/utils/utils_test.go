@@ -9,9 +9,10 @@ package utils
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"testing"
 
-	"github.com/essentialkaos/ek/v13/hash"
+	"github.com/essentialkaos/ek/v13/hashutil"
 
 	. "github.com/essentialkaos/check"
 )
@@ -37,33 +38,34 @@ func (s *UtilsSuite) SetUpSuite(c *C) {
 func (s *UtilsSuite) TestUnpack(c *C) {
 	var err error
 
+	hasher := sha256.New()
 	dbFile := s.TmpDir + "/db.sqlite"
-	dbHash := hash.FileHash("../../../testdata/sqlite/db.sqlite")
+	dbHash := hashutil.File("../../../testdata/sqlite/db.sqlite", sha256.New())
 
 	err = UnpackDB("../../../testdata/sqlite/db.sqlite", dbFile)
 
 	c.Assert(err, IsNil)
-	c.Assert(hash.FileHash(dbFile), Equals, dbHash)
+	c.Assert(hashutil.File(dbFile, hasher).Equal(dbHash), Equals, true)
 
 	err = UnpackDB("../../../testdata/sqlite/db.sqlite.gz", dbFile)
 
 	c.Assert(err, IsNil)
-	c.Assert(hash.FileHash(dbFile), Equals, dbHash)
+	c.Assert(hashutil.File(dbFile, hasher).Equal(dbHash), Equals, true)
 
 	err = UnpackDB("../../../testdata/sqlite/db.sqlite.bz2", dbFile)
 
 	c.Assert(err, IsNil)
-	c.Assert(hash.FileHash(dbFile), Equals, dbHash)
+	c.Assert(hashutil.File(dbFile, hasher).Equal(dbHash), Equals, true)
 
 	err = UnpackDB("../../../testdata/sqlite/db.sqlite.xz", dbFile)
 
 	c.Assert(err, IsNil)
-	c.Assert(hash.FileHash(dbFile), Equals, dbHash)
+	c.Assert(hashutil.File(dbFile, hasher).Equal(dbHash), Equals, true)
 
 	err = UnpackDB("../../../testdata/sqlite/db.sqlite.zst", dbFile)
 
 	c.Assert(err, IsNil)
-	c.Assert(hash.FileHash(dbFile), Equals, dbHash)
+	c.Assert(hashutil.File(dbFile, hasher).Equal(dbHash), Equals, true)
 }
 
 func (s *UtilsSuite) TestUnpackErrors(c *C) {

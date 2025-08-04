@@ -8,13 +8,14 @@ package cli
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"crypto/sha256"
 	"fmt"
 
 	"github.com/essentialkaos/ek/v13/errors"
 	"github.com/essentialkaos/ek/v13/fmtc"
 	"github.com/essentialkaos/ek/v13/fmtutil"
 	"github.com/essentialkaos/ek/v13/fsutil"
-	"github.com/essentialkaos/ek/v13/hash"
+	"github.com/essentialkaos/ek/v13/hashutil"
 	"github.com/essentialkaos/ek/v13/mathutil"
 	"github.com/essentialkaos/ek/v13/options"
 	"github.com/essentialkaos/ek/v13/path"
@@ -182,7 +183,7 @@ func checkRepositoryCRCInfo(pb *progress.Bar, r *repo.SubRepository, index map[s
 	for _, pkgName := range getSortedPackageIndexKeys(index) {
 		for _, file := range index[pkgName].Files {
 			filePath := r.GetFullPackagePath(file)
-			fileCRC := strutil.Head(hash.FileHash(filePath), 7)
+			fileCRC := strutil.Head(hashutil.File(filePath, sha256.New()).String(), 7)
 
 			if fileCRC != file.CRC {
 				errs.Add(fmt.Errorf(
