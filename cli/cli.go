@@ -21,6 +21,7 @@ import (
 	"github.com/essentialkaos/ek/v13/progress"
 	"github.com/essentialkaos/ek/v13/signal"
 	"github.com/essentialkaos/ek/v13/sortutil"
+	"github.com/essentialkaos/ek/v13/spinner"
 	"github.com/essentialkaos/ek/v13/support"
 	"github.com/essentialkaos/ek/v13/support/apps"
 	"github.com/essentialkaos/ek/v13/support/deps"
@@ -307,6 +308,8 @@ func configureUI() {
 	progress.DefaultSettings.BarFgColorTag = "{c}"
 	progress.DefaultSettings.IsSize = false
 	progress.DefaultSettings.WindowSizeSec = 60.0
+
+	spinner.DurationFormat = spinner.DURATION_MINI
 
 	fmtc.AddColor("package", "{m}")
 	fmtc.AddColor("repo", "{c}")
