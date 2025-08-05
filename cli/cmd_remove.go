@@ -76,7 +76,8 @@ func removePackages(ctx *context, releaseStack, testingStack repo.PackageStack, 
 			printPackageList(ctx.Repo.Testing, testingStack, filter)
 		}
 
-		fmtutil.Separator(false)
+		fmtutil.Separator(true)
+		fmtc.NewLine()
 
 		if !releaseStack.IsEmpty() {
 			fmtc.Printfn(

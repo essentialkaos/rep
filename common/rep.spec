@@ -15,7 +15,7 @@
 
 Summary:        DNF/YUM repository management utility
 Name:           rep
-Version:        3.5.5
+Version:        3.5.6
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache 2.0
@@ -109,6 +109,9 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Tue Aug 05 2025 Anton Novojilov <andy@essentialkaos.com> - 3.5.6-0
+- Fixed minor UI bug with output of 'remove'/'unrelease' commands
+
 * Tue Jun 17 2025 Anton Novojilov <andy@essentialkaos.com> - 3.5.5-0
 - Minor UI improvements
 - Code refactoring
