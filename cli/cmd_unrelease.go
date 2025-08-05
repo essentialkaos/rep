@@ -12,6 +12,7 @@ import (
 	"github.com/essentialkaos/ek/v13/fmtutil"
 	"github.com/essentialkaos/ek/v13/options"
 	"github.com/essentialkaos/ek/v13/path"
+	"github.com/essentialkaos/ek/v13/pluralize"
 	"github.com/essentialkaos/ek/v13/spinner"
 	"github.com/essentialkaos/ek/v13/terminal"
 	"github.com/essentialkaos/ek/v13/terminal/input"
@@ -43,11 +44,21 @@ func cmdUnrelease(ctx *context, args options.Arguments) bool {
 
 // unreleasePackages removes packages from release sub-repository
 func unreleasePackages(ctx *context, stack repo.PackageStack, filter string) bool {
+	files := stack.FlattenFiles()
+
 	if !options.GetB(OPT_FORCE) {
 		printPackageList(ctx.Repo.Release, stack, filter)
 
 		fmtutil.Separator(true)
 		fmtc.NewLine()
+
+		fmtc.Printfn(
+			" {s}{*}Release:{!*} -%s %s / -%s{!}", fmtutil.PrettyNum(len(files)),
+			pluralize.Pluralize(len(files), "package", "packages"),
+			fmtutil.PrettySize(files.Size()),
+		)
+
+		fmtutil.Separator(false)
 
 		ok, err := input.ReadAnswer("Do you really want to unrelease these packages?", "n")
 
@@ -55,8 +66,6 @@ func unreleasePackages(ctx *context, stack repo.PackageStack, filter string) boo
 			return false
 		}
 	}
-
-	files := stack.FlattenFiles()
 
 	return unreleasePackagesFiles(ctx, files)
 }
