@@ -110,7 +110,8 @@ rm -rf %{buildroot}
 
 %changelog
 * Tue Aug 05 2025 Anton Novojilov <andy@essentialkaos.com> - 3.5.6-0
-- Fixed minor UI bug with output of 'remove'/'unrelease' commands
+- Improved output of 'unrelease' command
+- Fixed minor UI bug with output of 'remove' command
 
 * Tue Jun 17 2025 Anton Novojilov <andy@essentialkaos.com> - 3.5.5-0
 - Minor UI improvements
