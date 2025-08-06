@@ -430,7 +430,7 @@ func printCheckErrorsInfo(errs *errors.Bundle) bool {
 	}
 
 	errsList := errs.All()
-	maxErrs := mathutil.Min(errs.Num(), checkMaxErrNum)
+	maxErrs := min(errs.Num(), checkMaxErrNum)
 
 	terminal.Error(
 		"Found %s %s. First %s %s:\n",
