@@ -12,7 +12,6 @@ import (
 
 	"github.com/essentialkaos/ek/v13/fmtc"
 	"github.com/essentialkaos/ek/v13/fmtutil"
-	"github.com/essentialkaos/ek/v13/mathutil"
 	"github.com/essentialkaos/ek/v13/options"
 	"github.com/essentialkaos/ek/v13/terminal"
 
@@ -133,7 +132,7 @@ func getMaxSourceLengthInStack(stack repo.PackageStack) int {
 				continue
 			}
 
-			size = mathutil.Max(size, len(pkg.Src))
+			size = max(size, len(pkg.Src))
 		}
 	}
 

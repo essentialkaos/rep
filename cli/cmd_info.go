@@ -294,7 +294,7 @@ func getDaysSinceDate(d time.Time) string {
 		return "today"
 	}
 
-	return fmt.Sprintf("%s ago", timeutil.PrettyDurationInDays(dur))
+	return fmt.Sprintf("%s ago", timeutil.Pretty(dur).InDays())
 }
 
 // formatPayloadPath formats payload path

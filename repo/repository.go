@@ -17,6 +17,7 @@ import (
 
 	"github.com/essentialkaos/ek/v13/fsutil"
 	"github.com/essentialkaos/ek/v13/path"
+	"github.com/essentialkaos/ek/v13/sliceutil"
 	"github.com/essentialkaos/ek/v13/sortutil"
 	"github.com/essentialkaos/ek/v13/strutil"
 	"github.com/essentialkaos/ek/v13/version"
@@ -305,17 +306,11 @@ func (s PackageStack) GetArchs() []string {
 		return nil
 	}
 
-	var result []string
-
 	flag := s.GetArchsFlag()
 
-	for _, arch := range data.ArchList {
-		if flag.Has(data.SupportedArchs[arch].Flag) {
-			result = append(result, arch)
-		}
-	}
-
-	return result
+	return sliceutil.Filter(data.ArchList, func(arch string, _ int) bool {
+		return flag.Has(data.SupportedArchs[arch].Flag)
+	})
 }
 
 // FlattenFiles returns slice with all packages files in stack
