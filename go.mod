@@ -9,7 +9,7 @@ require (
 	github.com/klauspost/compress v1.18.0
 	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/sassoftware/go-rpmutils v0.4.0
-	github.com/ulikunitz/xz v0.5.14
+	github.com/ulikunitz/xz v0.5.15
 )
 
 require (
