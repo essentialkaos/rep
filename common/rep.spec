@@ -15,7 +15,7 @@
 
 Summary:        DNF/YUM repository management utility
 Name:           rep
-Version:        3.5.6
+Version:        3.5.7
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache 2.0
@@ -27,7 +27,7 @@ Source100:      checksum.sha512
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  golang >= 1.23
+BuildRequires:  golang >= 1.24
 
 Requires:       createrepo_c
 
@@ -109,6 +109,9 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Fri Aug 29 2025 Anton Novojilov <andy@essentialkaos.com> - 3.5.7-0
+- Dependencies update
+
 * Tue Aug 05 2025 Anton Novojilov <andy@essentialkaos.com> - 3.5.6-0
 - Improved output of 'unrelease' command
 - Fixed minor UI bug with output of 'remove' command
