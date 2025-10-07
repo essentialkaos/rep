@@ -31,7 +31,7 @@ func (s packageSlice) Less(i, j int) bool {
 	if s[i].Type == s[j].Type {
 		return sortutil.NaturalLess(s[i].Name, s[j].Name)
 	} else {
-		return packgageTypePriority[s[i].Type] > packgageTypePriority[s[j].Type]
+		return packageTypePriority[s[i].Type] > packageTypePriority[s[j].Type]
 	}
 }
 
@@ -97,8 +97,8 @@ func (s langpackSlice) Swap(i, j int) {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// packgageTypePriority contains priority for each package type
-var packgageTypePriority = map[uint8]int{
+// packageTypePriority contains priority for each package type
+var packageTypePriority = map[uint8]int{
 	PKG_TYPE_CONDITIONAL: 0,
 	PKG_TYPE_OPTIONAL:    1,
 	PKG_TYPE_DEFAULT:     2,

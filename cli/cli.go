@@ -354,7 +354,7 @@ func loadGlobalConfig() error {
 	err := knf.Global(CONFIG_FILE)
 
 	if err != nil {
-		return fmt.Errorf("Can't load global coniguration: %w", err)
+		return fmt.Errorf("Can't load global configuration: %w", err)
 	}
 
 	return nil
