@@ -49,8 +49,8 @@ import (
 // App info
 const (
 	APP  = "rep"
-	VER  = "3.5.7"
-	DESC = "DNF/YUM repository management utility"
+	VER  = "3.5.8"
+	DESC = "Package repository management tool"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -354,7 +354,7 @@ func loadGlobalConfig() error {
 	err := knf.Global(CONFIG_FILE)
 
 	if err != nil {
-		return fmt.Errorf("Can't load global coniguration: %w", err)
+		return fmt.Errorf("Can't load global configuration: %w", err)
 	}
 
 	return nil

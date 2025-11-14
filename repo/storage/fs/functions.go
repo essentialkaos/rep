@@ -18,7 +18,7 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// customFunc contains inforamation about custom function
+// customFunc contains information about custom function
 type customFunc struct {
 	Name   string
 	Impl   interface{}

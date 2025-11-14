@@ -1214,7 +1214,7 @@ func (r *SubRepository) collectPackageDepInfo(pkgID, arch, query string) ([]data
 			Flag:    data.ParseComp(pkgFlag.String),
 		}
 
-		// Replace unversioned dep deplicates
+		// Replace unversioned dep duplicates
 		if len(result) > 0 && result[len(result)-1].Name == pkgName.String {
 			prevRec := result[len(result)-1]
 

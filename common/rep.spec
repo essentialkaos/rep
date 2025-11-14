@@ -13,9 +13,9 @@
 
 ################################################################################
 
-Summary:        DNF/YUM repository management utility
+Summary:        Package repository management tool
 Name:           rep
-Version:        3.5.7
+Version:        3.5.8
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache 2.0
@@ -36,7 +36,7 @@ Provides:       %{name} = %{version}-%{release}
 ################################################################################
 
 %description
-DNF/YUM repository management utility.
+Package repository management tool.
 
 ################################################################################
 
@@ -109,6 +109,9 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Tue Oct 28 2025 Anton Novojilov <andy@essentialkaos.com> - 3.5.8-0
+- Dependencies update
+
 * Fri Aug 29 2025 Anton Novojilov <andy@essentialkaos.com> - 3.5.7-0
 - Dependencies update
 
