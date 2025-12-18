@@ -544,6 +544,10 @@ func sigHandler() {
 
 // shutdown cleans temporary data and exits from CLI
 func shutdown(ec int) {
+	fmtc.If(!rawOutput && isCanceled).Println(
+		"\n{r}Command execution is canceled by a signal{!}\n",
+	)
+
 	os.Exit(ec)
 }
 
