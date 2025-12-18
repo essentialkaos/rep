@@ -17,7 +17,8 @@ RUN <<EOF
       https://github.com/rpm-software-management/createrepo_c.git createrepo_c
   sed -i 's/CMAKE_MINIMUM_REQUIRED.*/CMAKE_MINIMUM_REQUIRED (VERSION 3.7)/' \
          createrepo_c/CMakeLists.txt
-  mkdir createrepo_c/build && cd createrepo_c/build
+  mkdir createrepo_c/build
+  cd createrepo_c/build || exit 1
   cmake .. -DWITH_ZCHUNK=NO -DWITH_LIBMODULEMD=NO -DENABLE_DRPM=OFF \
            -DBUILD_LIBCREATEREPO_C_SHARED=OFF
   make
