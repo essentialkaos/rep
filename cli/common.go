@@ -191,6 +191,10 @@ func runCommand(repoCfg *knf.Config, cmdName string, cmdArgs options.Arguments) 
 		warmUpCache(ctx.Repo)
 	}
 
+	if isCanceled {
+		return false
+	}
+
 	ok = cmd.Handler(ctx, cmdArgs)
 
 	fmtc.If(!rawOutput).NewLine()
@@ -249,9 +253,16 @@ func warmUpCache(r *repo.Repository) {
 		warmupRelease, warmupTesting = true, false
 	}
 
+	isCancelProtected = true
+
 	if warmupTesting {
 		fmtc.If(!rawOutput && !options.GetB(OPT_PAGER)).TPrintf("{s-}Warming up testing repository cache (it can take a while)…{!}")
 		r.Testing.WarmupCache()
+	}
+
+	if isCanceled {
+		fmtc.If(!rawOutput && !options.GetB(OPT_PAGER)).TPrintf("")
+		return
 	}
 
 	if warmupRelease {
