@@ -228,10 +228,11 @@ var repoNamePattern = `[0-9a-zA-Z_\-]+`
 // configs contains repositories configs
 var configs map[string]*knf.Config
 
-// isCanceled is a flag for marking that user want to cancel app execution
+// isCanceled is an atomic flag indicating the user canceled execution (SIGINT/SIGTERM)
 var isCanceled atomic.Bool
 
-// isCancelProtected is a flag for marking current execution from canceling
+// isCancelProtected is an atomic flag indicating critical sections that should not
+// be interrupted
 var isCancelProtected atomic.Bool
 
 // rawOutput is raw output flag
@@ -548,7 +549,7 @@ func sigHandler() {
 		shutdown(EC_ERROR)
 	}
 
-	isCanceled.CompareAndSwap(false, true)
+	isCanceled.Store(true)
 }
 
 // shutdown cleans temporary data and exits from CLI

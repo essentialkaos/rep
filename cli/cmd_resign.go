@@ -119,8 +119,10 @@ func resignRepoPackages(ctx *context, key *sign.Key, r *repo.SubRepository) bool
 	pb := progress.New(int64(len(files)), "Re-signing")
 	pb.Start()
 
+	isCancelProtected.Store(true)
+	defer isCancelProtected.Store(false)
+
 	for _, file := range files {
-		isCancelProtected.Store(true)
 
 		filePath := r.GetFullPackagePath(file)
 		fileName := path.Base(filePath)
@@ -148,8 +150,6 @@ func resignRepoPackages(ctx *context, key *sign.Key, r *repo.SubRepository) bool
 			pb.Finish()
 			return false
 		}
-
-		isCancelProtected.Store(false)
 	}
 
 	pb.Finish()

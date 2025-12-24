@@ -254,6 +254,7 @@ func warmUpCache(r *repo.Repository) {
 	}
 
 	isCancelProtected.Store(true)
+	defer isCancelProtected.Store(false)
 
 	if warmupTesting {
 		fmtc.If(!rawOutput && !options.GetB(OPT_PAGER)).TPrintf("{s-}Warming up testing repository cache (it can take a while)…{!}")
@@ -271,8 +272,6 @@ func warmUpCache(r *repo.Repository) {
 	}
 
 	fmtc.If(!rawOutput && !options.GetB(OPT_PAGER)).TPrintf("")
-
-	isCancelProtected.Store(false)
 }
 
 // checkForLock check for lock file
