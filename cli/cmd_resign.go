@@ -120,7 +120,7 @@ func resignRepoPackages(ctx *context, key *sign.Key, r *repo.SubRepository) bool
 	pb.Start()
 
 	for _, file := range files {
-		isCancelProtected = true
+		isCancelProtected.Store(true)
 
 		filePath := r.GetFullPackagePath(file)
 		fileName := path.Base(filePath)
@@ -144,12 +144,12 @@ func resignRepoPackages(ctx *context, key *sign.Key, r *repo.SubRepository) bool
 
 		pb.Add(1)
 
-		if isCanceled {
+		if isCanceled.Load() {
 			pb.Finish()
 			return false
 		}
 
-		isCancelProtected = false
+		isCancelProtected.Store(false)
 	}
 
 	pb.Finish()

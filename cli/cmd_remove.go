@@ -112,12 +112,12 @@ func removePackagesFiles(ctx *context, releaseFiles, testingFiles []repo.Package
 	var hasErrors, releaseRemoved, testingRemoved bool
 	var file repo.PackageFile
 
-	isCancelProtected = true
+	isCancelProtected.Store(true)
 
 	for _, file = range releaseFiles {
 		ok := removePackageFile(ctx, ctx.Repo.Release, file)
 
-		if isCanceled {
+		if isCanceled.Load() {
 			return false
 		}
 
@@ -137,14 +137,14 @@ func removePackagesFiles(ctx *context, releaseFiles, testingFiles []repo.Package
 			continue
 		}
 
-		if isCanceled {
+		if isCanceled.Load() {
 			return false
 		}
 
 		testingRemoved = true
 	}
 
-	isCancelProtected = false
+	isCancelProtected.Store(false)
 
 	if (releaseRemoved || testingRemoved) && !options.GetB(OPT_POSTPONE_INDEX) {
 		fmtc.NewLine()

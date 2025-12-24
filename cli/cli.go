@@ -10,6 +10,7 @@ package cli
 import (
 	"fmt"
 	"os"
+	"sync/atomic"
 
 	"github.com/essentialkaos/ek/v13/errors"
 	"github.com/essentialkaos/ek/v13/fmtc"
@@ -228,10 +229,10 @@ var repoNamePattern = `[0-9a-zA-Z_\-]+`
 var configs map[string]*knf.Config
 
 // isCanceled is a flag for marking that user want to cancel app execution
-var isCanceled = false
+var isCanceled atomic.Bool
 
 // isCancelProtected is a flag for marking current execution from canceling
-var isCancelProtected = false
+var isCancelProtected atomic.Bool
 
 // rawOutput is raw output flag
 var rawOutput = false
@@ -543,16 +544,16 @@ func process(args options.Arguments) bool {
 
 // sigHandler is handler for TERM, QUIT and INT signals
 func sigHandler() {
-	if !isCancelProtected {
+	if !isCancelProtected.Load() {
 		shutdown(EC_ERROR)
 	}
 
-	isCanceled = true
+	isCanceled.CompareAndSwap(false, true)
 }
 
 // shutdown cleans temporary data and exits from CLI
 func shutdown(exitCode int) {
-	fmtc.If(!rawOutput && isCanceled).Println(
+	fmtc.If(!rawOutput && isCanceled.Load()).Println(
 		"\n{r}Command execution is canceled by a signal{!}\n",
 	)
 
