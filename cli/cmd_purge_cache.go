@@ -17,11 +17,11 @@ import (
 
 // cmdPurgeCache is 'purge-cache' command handler
 func cmdPurgeCache(ctx *context, args options.Arguments) bool {
-	isCancelProtected = true
+	isCancelProtected.Store(true)
 
 	err := ctx.Repo.PurgeCache()
 
-	isCancelProtected = false
+	isCancelProtected.Store(false)
 
 	if err != nil {
 		terminal.Error("Can't clean cached data: %v", err)

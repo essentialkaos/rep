@@ -74,12 +74,12 @@ func unreleasePackages(ctx *context, stack repo.PackageStack, filter string) boo
 func unreleasePackagesFiles(ctx *context, files []repo.PackageFile) bool {
 	var hasErrors, unreleased, restored bool
 
-	isCancelProtected = true
+	isCancelProtected.Store(true)
 
 	for _, file := range files {
 		ok, testingRestored := unreleasePackageFile(ctx, file)
 
-		if isCanceled {
+		if isCanceled.Load() {
 			return false
 		}
 
@@ -105,7 +105,7 @@ func unreleasePackagesFiles(ctx *context, files []repo.PackageFile) bool {
 		}
 	}
 
-	isCancelProtected = false
+	isCancelProtected.Store(false)
 
 	return !hasErrors
 }

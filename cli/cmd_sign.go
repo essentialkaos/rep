@@ -56,14 +56,14 @@ func signRPMFiles(files []string, ctx *context, key *sign.Key) bool {
 		return false
 	}
 
-	isCancelProtected = true
+	isCancelProtected.Store(true)
 
 	var hasErrors bool
 
 	for _, file := range files {
 		ok := signRPMFile(file, tmpDir, ctx, key)
 
-		if isCanceled {
+		if isCanceled.Load() {
 			return false
 		}
 
@@ -72,7 +72,7 @@ func signRPMFiles(files []string, ctx *context, key *sign.Key) bool {
 		}
 	}
 
-	isCancelProtected = false
+	isCancelProtected.Store(false)
 
 	return !hasErrors
 }

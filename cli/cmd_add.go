@@ -83,14 +83,14 @@ func addRPMFiles(ctx *context, files []string, signingKey *sign.Key) bool {
 		return false
 	}
 
-	isCancelProtected = true
+	isCancelProtected.Store(true)
 
 	var hasErrors, hasAdded bool
 
 	for _, file := range files {
 		ok := addRPMFile(ctx, file, tmpDir, signingKey)
 
-		if isCanceled {
+		if isCanceled.Load() {
 			return false
 		}
 
@@ -107,7 +107,7 @@ func addRPMFiles(ctx *context, files []string, signingKey *sign.Key) bool {
 		reindexRepository(ctx, ctx.Repo.Testing, false)
 	}
 
-	isCancelProtected = false
+	isCancelProtected.Store(false)
 
 	return !hasErrors
 }

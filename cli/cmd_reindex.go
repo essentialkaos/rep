@@ -31,7 +31,7 @@ func cmdReindex(ctx *context, args options.Arguments) bool {
 		ctx.Logger.Get(data.REPO_RELEASE).Print("Repository reindexed (full: %t)", full)
 	}
 
-	if isCanceled {
+	if isCanceled.Load() {
 		return false
 	}
 
@@ -52,7 +52,7 @@ func cmdReindex(ctx *context, args options.Arguments) bool {
 func reindexRepository(ctx *context, r *repo.SubRepository, full bool) bool {
 	spinner.Show("Indexing {*}{?repo}%s{!} repository", r.Name)
 
-	isCancelProtected = true
+	isCancelProtected.Store(true)
 
 	ch := make(chan string, len(data.SupportedArchs))
 
@@ -68,7 +68,7 @@ func reindexRepository(ctx *context, r *repo.SubRepository, full bool) bool {
 
 	spinner.Done(err == nil)
 
-	isCancelProtected = false
+	isCancelProtected.Store(false)
 
 	if err != nil {
 		terminal.Error("   %v", err)
