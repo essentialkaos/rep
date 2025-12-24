@@ -49,7 +49,7 @@ import (
 // App info
 const (
 	APP  = "rep"
-	VER  = "3.5.8"
+	VER  = "3.5.9"
 	DESC = "Package repository management tool"
 )
 
@@ -176,6 +176,14 @@ const (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// Exit codes
+const (
+	EC_OK    = 0
+	EC_ERROR = 1
+)
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // Path to global configuration file
 const CONFIG_FILE = "/etc/rep.knf"
 
@@ -236,7 +244,7 @@ func Init(gitRev string, gomod []byte) {
 	if !errs.IsEmpty() {
 		terminal.Error("Options parsing errors:")
 		terminal.Error(errs.Error("- "))
-		os.Exit(1)
+		os.Exit(EC_ERROR)
 	}
 
 	configureUI()
@@ -246,20 +254,20 @@ func Init(gitRev string, gomod []byte) {
 		os.Exit(printCompletion())
 	case options.Has(OPT_GENERATE_MAN):
 		printMan()
-		os.Exit(0)
+		os.Exit(EC_OK)
 	case options.GetB(OPT_VER):
 		genAbout(gitRev).Print(options.GetS(OPT_VER))
-		os.Exit(0)
+		os.Exit(EC_OK)
 	case options.GetB(OPT_VERB_VER):
 		support.Collect(APP, VER).
 			WithRevision(gitRev).
 			WithDeps(deps.Extract(gomod)).
 			WithApps(getCreaterepoVersion()).
 			Print()
-		os.Exit(0)
+		os.Exit(EC_OK)
 	case options.GetB(OPT_HELP) || len(args) == 0:
 		genUsage().Print()
-		os.Exit(0)
+		os.Exit(EC_OK)
 	}
 
 	err := errors.Chain(
@@ -273,17 +281,17 @@ func Init(gitRev string, gomod []byte) {
 	)
 
 	if err != nil {
-		terminal.Error(err.Error())
-		shutdown(1)
+		terminal.Error(err)
+		shutdown(EC_ERROR)
 	}
 
 	ok := process(args)
 
 	if !ok {
-		shutdown(1)
+		shutdown(EC_ERROR)
 	}
 
-	shutdown(0)
+	shutdown(EC_OK)
 }
 
 // configureUI configure user interface
@@ -536,15 +544,19 @@ func process(args options.Arguments) bool {
 // sigHandler is handler for TERM, QUIT and INT signals
 func sigHandler() {
 	if !isCancelProtected {
-		shutdown(1)
+		shutdown(EC_ERROR)
 	}
 
 	isCanceled = true
 }
 
 // shutdown cleans temporary data and exits from CLI
-func shutdown(ec int) {
-	os.Exit(ec)
+func shutdown(exitCode int) {
+	fmtc.If(!rawOutput && isCanceled).Println(
+		"\n{r}Command execution is canceled by a signal{!}\n",
+	)
+
+	os.Exit(exitCode)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
