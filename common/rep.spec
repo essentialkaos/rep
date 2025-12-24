@@ -15,7 +15,7 @@
 
 Summary:        Package repository management tool
 Name:           rep
-Version:        3.5.9
+Version:        3.5.10
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache 2.0
@@ -109,6 +109,9 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Wed Dec 24 2025 Anton Novojilov <andy@essentialkaos.com> - 3.5.10-0
+- Code refactoring
+
 * Thu Dec 18 2025 Anton Novojilov <andy@essentialkaos.com> - 3.5.9-0
 - Added canceling protection for warming cache
 
