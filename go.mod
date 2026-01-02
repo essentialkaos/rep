@@ -7,7 +7,7 @@ require (
 	github.com/essentialkaos/check v1.4.1
 	github.com/essentialkaos/ek/v13 v13.37.5
 	github.com/klauspost/compress v1.18.2
-	github.com/mattn/go-sqlite3 v1.14.32
+	github.com/mattn/go-sqlite3 v1.14.33
 	github.com/sassoftware/go-rpmutils v0.4.0
 	github.com/ulikunitz/xz v0.5.15
 )
