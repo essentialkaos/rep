@@ -15,7 +15,7 @@
 
 Summary:        Package repository management tool
 Name:           rep
-Version:        3.5.10
+Version:        3.5.11
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache 2.0
@@ -109,6 +109,9 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Mon Jan 19 2026 Anton Novojilov <andy@essentialkaos.com> - 3.5.11-0
+- Dependencies update
+
 * Wed Dec 24 2025 Anton Novojilov <andy@essentialkaos.com> - 3.5.10-0
 - Code refactoring
 
