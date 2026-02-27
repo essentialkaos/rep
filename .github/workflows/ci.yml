@@ -60,7 +60,7 @@ jobs:
         run: createrepo_c --version
 
       - name: Upload built artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: createrepo_c
           path: ${{github.workspace}}/.local/bin/createrepo_c
