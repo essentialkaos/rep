@@ -12,35 +12,35 @@ import (
 	"os"
 	"sync/atomic"
 
-	"github.com/essentialkaos/ek/v13/errors"
-	"github.com/essentialkaos/ek/v13/fmtc"
-	"github.com/essentialkaos/ek/v13/fmtutil"
-	"github.com/essentialkaos/ek/v13/fsutil"
-	"github.com/essentialkaos/ek/v13/knf"
-	"github.com/essentialkaos/ek/v13/options"
-	"github.com/essentialkaos/ek/v13/pager"
-	"github.com/essentialkaos/ek/v13/progress"
-	"github.com/essentialkaos/ek/v13/signal"
-	"github.com/essentialkaos/ek/v13/sortutil"
-	"github.com/essentialkaos/ek/v13/spinner"
-	"github.com/essentialkaos/ek/v13/support"
-	"github.com/essentialkaos/ek/v13/support/apps"
-	"github.com/essentialkaos/ek/v13/support/deps"
-	"github.com/essentialkaos/ek/v13/system"
-	"github.com/essentialkaos/ek/v13/terminal"
-	"github.com/essentialkaos/ek/v13/terminal/input"
-	"github.com/essentialkaos/ek/v13/terminal/tty"
-	"github.com/essentialkaos/ek/v13/usage"
-	"github.com/essentialkaos/ek/v13/usage/completion/bash"
-	"github.com/essentialkaos/ek/v13/usage/completion/fish"
-	"github.com/essentialkaos/ek/v13/usage/completion/zsh"
-	"github.com/essentialkaos/ek/v13/usage/man"
-	"github.com/essentialkaos/ek/v13/usage/update"
+	"github.com/essentialkaos/ek/v14/errors"
+	"github.com/essentialkaos/ek/v14/fmtc"
+	"github.com/essentialkaos/ek/v14/fmtutil"
+	"github.com/essentialkaos/ek/v14/fsutil"
+	"github.com/essentialkaos/ek/v14/knf"
+	"github.com/essentialkaos/ek/v14/options"
+	"github.com/essentialkaos/ek/v14/pager"
+	"github.com/essentialkaos/ek/v14/progress"
+	"github.com/essentialkaos/ek/v14/signal"
+	"github.com/essentialkaos/ek/v14/sortutil"
+	"github.com/essentialkaos/ek/v14/spinner"
+	"github.com/essentialkaos/ek/v14/support"
+	"github.com/essentialkaos/ek/v14/support/apps"
+	"github.com/essentialkaos/ek/v14/support/deps"
+	"github.com/essentialkaos/ek/v14/system"
+	"github.com/essentialkaos/ek/v14/terminal"
+	"github.com/essentialkaos/ek/v14/terminal/input"
+	"github.com/essentialkaos/ek/v14/terminal/tty"
+	"github.com/essentialkaos/ek/v14/usage"
+	"github.com/essentialkaos/ek/v14/usage/completion/bash"
+	"github.com/essentialkaos/ek/v14/usage/completion/fish"
+	"github.com/essentialkaos/ek/v14/usage/completion/zsh"
+	"github.com/essentialkaos/ek/v14/usage/man"
+	"github.com/essentialkaos/ek/v14/usage/update"
 
-	knfv "github.com/essentialkaos/ek/v13/knf/validators"
-	knff "github.com/essentialkaos/ek/v13/knf/validators/fs"
-	knfr "github.com/essentialkaos/ek/v13/knf/validators/regexp"
-	knfs "github.com/essentialkaos/ek/v13/knf/validators/system"
+	knfv "github.com/essentialkaos/ek/v14/knf/validators"
+	knff "github.com/essentialkaos/ek/v14/knf/validators/fs"
+	knfr "github.com/essentialkaos/ek/v14/knf/validators/regexp"
+	knfs "github.com/essentialkaos/ek/v14/knf/validators/system"
 
 	"github.com/essentialkaos/rep/v3/repo/index"
 )
@@ -245,7 +245,7 @@ func Init(gitRev string, gomod []byte) {
 
 	if !errs.IsEmpty() {
 		terminal.Error("Options parsing errors:")
-		terminal.Error(errs.Error("- "))
+		terminal.Error(errs.ErrorWithPrefix(" - "))
 		os.Exit(EC_ERROR)
 	}
 

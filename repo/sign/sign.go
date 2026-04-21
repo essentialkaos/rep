@@ -12,8 +12,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/essentialkaos/ek/v13/directio"
-	"github.com/essentialkaos/ek/v13/secstr"
+	"github.com/essentialkaos/ek/v14/directio"
+	"github.com/essentialkaos/ek/v14/secstr"
 
 	"github.com/sassoftware/go-rpmutils"
 
@@ -175,7 +175,7 @@ func (k *ArmoredKey) Read(password *secstr.String) (*Key, error) {
 	}
 
 	if kr[0].PrivateKey.Encrypted && password != nil && !password.IsEmpty() {
-		err = kr[0].PrivateKey.Decrypt(password.Data)
+		err = kr[0].PrivateKey.Decrypt(password.Bytes())
 
 		if err != nil {
 			return nil, err

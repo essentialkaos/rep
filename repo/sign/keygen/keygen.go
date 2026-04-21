@@ -11,7 +11,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/essentialkaos/ek/v13/secstr"
+	"github.com/essentialkaos/ek/v14/secstr"
 
 	"github.com/ProtonMail/go-crypto/openpgp"
 	"github.com/ProtonMail/go-crypto/openpgp/armor"
@@ -71,7 +71,7 @@ func generateKey(name, email string, password *secstr.String) (*openpgp.Entity, 
 		}
 	}
 
-	e.PrivateKey.Encrypt(password.Data)
+	e.PrivateKey.Encrypt(password.Bytes())
 
 	return e, nil
 }
