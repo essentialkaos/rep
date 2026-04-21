@@ -50,7 +50,7 @@ import (
 // App info
 const (
 	APP  = "rep"
-	VER  = "3.5.11"
+	VER  = "3.6.0"
 	DESC = "Package repository management tool"
 )
 
