@@ -5,9 +5,9 @@ go 1.25.9
 require (
 	github.com/ProtonMail/go-crypto v1.0.0
 	github.com/essentialkaos/check v1.4.1
-	github.com/essentialkaos/ek/v14 v14.2.0
-	github.com/klauspost/compress v1.18.6
-	github.com/mattn/go-sqlite3 v1.14.45
+	github.com/essentialkaos/ek/v14 v14.2.1
+	github.com/klauspost/compress v1.18.7
+	github.com/mattn/go-sqlite3 v1.14.47
 	github.com/sassoftware/go-rpmutils v0.4.0
 	github.com/ulikunitz/xz v0.5.15
 )
@@ -21,6 +21,6 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
-	golang.org/x/crypto v0.52.0 // indirect
-	golang.org/x/sys v0.45.0 // indirect
+	golang.org/x/crypto v0.53.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
 )
