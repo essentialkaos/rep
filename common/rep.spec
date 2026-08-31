@@ -15,7 +15,7 @@
 
 Summary:        Package repository management tool
 Name:           rep
-Version:        3.5.11
+Version:        3.6.0
 Release:        0%{?dist}
 Group:          Applications/System
 License:        Apache 2.0
@@ -27,7 +27,7 @@ Source100:      checksum.sha512
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  golang >= 1.24
+BuildRequires:  golang >= 1.25
 
 Requires:       createrepo_c
 
@@ -109,6 +109,10 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Tue Apr 21 2026 Anton Novojilov <andy@essentialkaos.com> - 3.6.0-0
+- Migrated to ek.v14
+- Dependencies update
+
 * Mon Jan 19 2026 Anton Novojilov <andy@essentialkaos.com> - 3.5.11-0
 - Dependencies update
 

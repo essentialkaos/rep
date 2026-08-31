@@ -11,12 +11,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/essentialkaos/ek/v13/fmtc"
-	"github.com/essentialkaos/ek/v13/options"
-	"github.com/essentialkaos/ek/v13/path"
-	"github.com/essentialkaos/ek/v13/spinner"
-	"github.com/essentialkaos/ek/v13/terminal"
-	"github.com/essentialkaos/ek/v13/terminal/input"
+	"github.com/essentialkaos/ek/v14/fmtc"
+	"github.com/essentialkaos/ek/v14/options"
+	"github.com/essentialkaos/ek/v14/path"
+	"github.com/essentialkaos/ek/v14/spinner"
+	"github.com/essentialkaos/ek/v14/terminal"
+	"github.com/essentialkaos/ek/v14/terminal/input"
 
 	"github.com/essentialkaos/rep/v3/repo/data"
 	"github.com/essentialkaos/rep/v3/repo/rpm"
