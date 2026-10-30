@@ -13,10 +13,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/essentialkaos/ek/v13/fmtutil"
-	"github.com/essentialkaos/ek/v13/mathutil"
-	"github.com/essentialkaos/ek/v13/strutil"
-	"github.com/essentialkaos/ek/v13/timeutil"
+	"github.com/essentialkaos/ek/v14/fmtutil"
+	"github.com/essentialkaos/ek/v14/mathutil"
+	"github.com/essentialkaos/ek/v14/strutil"
+	"github.com/essentialkaos/ek/v14/timeutil"
 
 	"github.com/essentialkaos/rep/v3/repo/data"
 	"github.com/essentialkaos/rep/v3/repo/search"
@@ -319,29 +319,37 @@ func parseBoolTermValue(value string, isNegative bool) (bool, error) {
 
 // parseSizeTermValue parses size term value
 func parseSizeTermValue(value string, mod uint8) (*search.Term, error) {
-	var from, to uint64
+	var errFrom, errTo, errSize error
+	var from, to, size uint64
 
 	switch {
 	case strings.HasSuffix(value, "-"):
 		from = 0
-		to = fmtutil.ParseSize(strings.TrimRight(value, "-"))
+		to, errTo = fmtutil.ParseSize(strings.TrimRight(value, "-"))
 
 	case strings.HasSuffix(value, "+"):
-		from = fmtutil.ParseSize(strings.TrimRight(value, "+"))
+		from, errFrom = fmtutil.ParseSize(strings.TrimRight(value, "+"))
 		to = 1024 * 1024 * 1024
 
 	case strings.Contains(value, "-"):
-		from = fmtutil.ParseSize(strutil.ReadField(value, 0, false, '-'))
-		to = fmtutil.ParseSize(strutil.ReadField(value, 1, false, '-'))
+		from, errFrom = fmtutil.ParseSize(strutil.ReadField(value, 0, false, '-'))
+		to, errTo = fmtutil.ParseSize(strutil.ReadField(value, 1, false, '-'))
 
 	default:
-		size := fmtutil.ParseSize(value)
+		size, errSize = fmtutil.ParseSize(value)
 		diff := uint64(float64(size) * 0.2)
 		from = mathutil.Between(size-diff, 0, 1024*1024*1024)
 		to = mathutil.Between(size+diff, 0, 1024*1024*1024)
 	}
 
-	if from > to {
+	switch {
+	case errSize != nil:
+		return nil, fmt.Errorf("Invalid size value: %w", errSize)
+	case errFrom != nil:
+		return nil, fmt.Errorf("Invalid range start: %w", errFrom)
+	case errTo != nil:
+		return nil, fmt.Errorf("Invalid range end: %w", errTo)
+	case from > to:
 		return nil, fmt.Errorf("Range %d→%d is invalid", from, to)
 	}
 

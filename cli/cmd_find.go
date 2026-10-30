@@ -10,9 +10,9 @@ package cli
 import (
 	"fmt"
 
-	"github.com/essentialkaos/ek/v13/fmtutil"
-	"github.com/essentialkaos/ek/v13/options"
-	"github.com/essentialkaos/ek/v13/terminal"
+	"github.com/essentialkaos/ek/v14/fmtutil"
+	"github.com/essentialkaos/ek/v14/options"
+	"github.com/essentialkaos/ek/v14/terminal"
 
 	"github.com/essentialkaos/rep/v3/cli/query"
 	"github.com/essentialkaos/rep/v3/repo"
