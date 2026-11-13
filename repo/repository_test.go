@@ -394,7 +394,7 @@ func (s *RepoSuite) TestSubRepositoryAddPackage(c *C) {
 
 	err = r.Testing.AddPackage("test.rpm")
 	c.Assert(err, NotNil)
-	c.Assert(err, ErrorMatches, `Can't add package to repository: File test.rpm doesn't exist or not accessible`)
+	c.Assert(err, ErrorMatches, `Can't add package to repository: file test.rpm doesn't exist or not accessible`)
 
 	err = r.Testing.AddPackage("../testdata/comps.xml")
 	c.Assert(err, NotNil)

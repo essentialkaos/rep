@@ -15,7 +15,7 @@ jobs:
 
     env:
       CR_REPO: rpm-software-management/createrepo_c
-      CR_VERSION: 1.2.1
+      CR_VERSION: 1.2.6
 
     steps:
       - name: Install build dependencies
@@ -31,6 +31,7 @@ jobs:
                               librpm-dev \
                               libzstd-dev \
                               python3-dev \
+                              doxygen \
                               cmake
 
       - name: Build createrepo_c binary
@@ -60,7 +61,7 @@ jobs:
         run: createrepo_c --version
 
       - name: Upload built artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: createrepo_c
           path: ${{github.workspace}}/.local/bin/createrepo_c
@@ -79,16 +80,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version: ${{ matrix.go }}
           cache: false
 
       - name: Download pre-built artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: createrepo_c
           path: ${{github.workspace}}/.local/bin
@@ -165,10 +166,10 @@ jobs:
 
     steps:
       - name: Code checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4.8.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -187,7 +188,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Check scripts with Shellcheck
         uses: essentialkaos/shellcheck-action@v1
@@ -202,7 +203,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Check dockerfiles with Hadolint
         uses: essentialkaos/hadolint-action@v1
@@ -217,7 +218,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Check spelling
         uses: crate-ci/typos@master

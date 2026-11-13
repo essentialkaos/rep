@@ -12,7 +12,7 @@ import (
 	"crypto/sha256"
 	"testing"
 
-	"github.com/essentialkaos/ek/v13/hashutil"
+	"github.com/essentialkaos/ek/v14/hashutil"
 
 	. "github.com/essentialkaos/check"
 )

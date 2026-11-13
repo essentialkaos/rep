@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/essentialkaos/ek/v13/fsutil"
+	"github.com/essentialkaos/ek/v14/fsutil"
 
 	"github.com/essentialkaos/rep/v3/repo/data"
 	"github.com/essentialkaos/rep/v3/repo/index"
@@ -108,7 +108,7 @@ func (s *StorageSuite) TestNewStorageErrors(c *C) {
 	c.Assert(err, ErrorMatches, `Can't create storage: Path to cache directory can't be empty`)
 
 	_, err = NewStorage(&Options{dopts.DataDir, "/unknown", false, "", "", 0, 0}, index.DefaultOptions)
-	c.Assert(err, ErrorMatches, `Can't create storage: Directory /unknown doesn't exist or not accessible`)
+	c.Assert(err, ErrorMatches, `Can't create storage: directory /unknown doesn't exist or not accessible`)
 
 	_, err = NewStorage(dopts, nil)
 	c.Assert(err, ErrorMatches, `Can't create storage: Index options cannot be nil`)
@@ -246,20 +246,20 @@ func (s *StorageSuite) TestAddPackage(c *C) {
 	c.Assert(fs.AddPackage("", "/path/to/file"), ErrorMatches, `Can't add package to storage: Repository name can't be empty`)
 	c.Assert(fs.AddPackage(data.REPO_TESTING, ""), ErrorMatches, `Can't add package to storage: Path to file can't be empty`)
 	c.Assert(fs.AddPackage("unknown", "/pkgs/test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't add package to storage: Repository "unknown" doesn't exist`)
-	c.Assert(fs.AddPackage(data.REPO_RELEASE, "/pkgs/test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't add package to storage: File /pkgs/test-package-1.0.0-0.el7.x86_64.rpm doesn't exist or not accessible`)
+	c.Assert(fs.AddPackage(data.REPO_RELEASE, "/pkgs/test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't add package to storage: file /pkgs/test-package-1.0.0-0.el7.x86_64.rpm doesn't exist or not accessible`)
 	c.Assert(fs.AddPackage(data.REPO_RELEASE, tempDir+"/test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't add file to storage: .* is not an RPM package`)
 
 	dp := fs.GetDepot(data.REPO_RELEASE, data.ARCH_X64)
 
 	c.Assert(dp.AddPackage(""), ErrorMatches, `Can't add package to storage depot: Path to file can't be empty`)
-	c.Assert(dp.AddPackage("/pkgs/test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't add package to storage depot: File .*.rpm doesn't exist or not accessible`)
+	c.Assert(dp.AddPackage("/pkgs/test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't add package to storage depot: file .*.rpm doesn't exist or not accessible`)
 	c.Assert(dp.AddPackage(tempDir+"/test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't add file to storage depot: .*.rpm is not an RPM package`)
 
 	origDataDir := dp.dataDir
 	dp.dataDir = "/unknown"
 	c.Assert(dp.AddPackage("../../../testdata/test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't add package to storage depot: mkdir /unknown/t: no such file or directory`)
 	opts.SplitFiles = false
-	c.Assert(dp.AddPackage("../../../testdata/test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't copy package to storage depot: Can't copy file: Directory "/" is not writable`)
+	c.Assert(dp.AddPackage("../../../testdata/test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't copy package to storage depot: can't copy file: directory "/" is not writable`)
 	dp.dataDir = origDataDir
 
 	opts.SplitFiles = true
@@ -272,7 +272,7 @@ func (s *StorageSuite) TestAddPackage(c *C) {
 	c.Assert(fs.AddPackage(data.REPO_RELEASE, "../../../testdata/git-all-2.27.0-0.el7.noarch.rpm"), IsNil)
 	c.Assert(fsutil.IsExist(dp.dataDir+"/g/git-all-2.27.0-0.el7.noarch.rpm"), Equals, true)
 
-	c.Assert(fs.AddPackage(data.REPO_RELEASE, "unknown-package-1.0.0-0.el7.noarch.rpm"), ErrorMatches, `Can't add package to storage: File unknown-package-1.0.0-0.el7.noarch.rpm doesn't exist or not accessible`)
+	c.Assert(fs.AddPackage(data.REPO_RELEASE, "unknown-package-1.0.0-0.el7.noarch.rpm"), ErrorMatches, `Can't add package to storage: file unknown-package-1.0.0-0.el7.noarch.rpm doesn't exist or not accessible`)
 
 	_, err = dp.makePackageDir("пакет.x86_64.rpm")
 	c.Assert(err, ErrorMatches, `Can't create directory for package: Can't use name "п" for directory`)
@@ -314,7 +314,7 @@ func (s *StorageSuite) TestRemovePackage(c *C) {
 	dp := fs.GetDepot(data.REPO_RELEASE, data.ARCH_X64)
 
 	c.Assert(dp.RemovePackage(""), ErrorMatches, `Can't remove package from storage depot: Path to file can't be empty`)
-	c.Assert(dp.RemovePackage("test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't remove package from storage depot: File .*.rpm doesn't exist or not accessible`)
+	c.Assert(dp.RemovePackage("test-package-1.0.0-0.el7.x86_64.rpm"), ErrorMatches, `Can't remove package from storage depot: file .*.rpm doesn't exist or not accessible`)
 
 	fsutil.TouchFile(dp.dataDir+"/test-package-1.0.0-0.el7.x86_64.rpm", 0644)
 
@@ -326,7 +326,7 @@ func (s *StorageSuite) TestRemovePackage(c *C) {
 	c.Assert(fs.RemovePackage(data.REPO_RELEASE, data.ARCH_X64, "test-package-1.0.0-0.el7.noarch.rpm"), IsNil)
 	c.Assert(fsutil.IsExist(dp.dataDir+"/test-package-1.0.0-0.el7.noarch.rpm"), Equals, false)
 
-	c.Assert(fs.RemovePackage(data.REPO_RELEASE, data.ARCH_X64, "test-package-1.0.1-0.el7.noarch.rpm"), ErrorMatches, `Can't remove package from storage depot: File .*.rpm doesn't exist or not accessible`)
+	c.Assert(fs.RemovePackage(data.REPO_RELEASE, data.ARCH_X64, "test-package-1.0.1-0.el7.noarch.rpm"), ErrorMatches, `Can't remove package from storage depot: file .*.rpm doesn't exist or not accessible`)
 
 	opts.SplitFiles = true
 
@@ -717,7 +717,7 @@ func (s *StorageSuite) TestStorageGetModTime(c *C) {
 	modTime, err = fs.GetModTime(data.REPO_RELEASE, data.ARCH_X64)
 
 	c.Assert(modTime.IsZero(), Equals, true)
-	c.Assert(err, ErrorMatches, `Can't check repository index modification date: Can't get file info for .*`)
+	c.Assert(err, ErrorMatches, `Can't check repository index modification date: can't get file info for .*`)
 }
 
 func (s *StorageSuite) TestStorageWarmupCache(c *C) {

@@ -8,9 +8,9 @@ package cli
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
-	"github.com/essentialkaos/ek/v13/options"
-	"github.com/essentialkaos/ek/v13/spinner"
-	"github.com/essentialkaos/ek/v13/terminal"
+	"github.com/essentialkaos/ek/v14/options"
+	"github.com/essentialkaos/ek/v14/spinner"
+	"github.com/essentialkaos/ek/v14/terminal"
 
 	"github.com/essentialkaos/rep/v3/repo"
 	"github.com/essentialkaos/rep/v3/repo/data"
