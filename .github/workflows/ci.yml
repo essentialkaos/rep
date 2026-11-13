@@ -31,7 +31,7 @@ jobs:
                               librpm-dev \
                               libzstd-dev \
                               python3-dev \
-                              doxygen-dev \
+                              doxygen \
                               cmake
 
       - name: Build createrepo_c binary
