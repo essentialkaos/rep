@@ -27,7 +27,7 @@ Source100:      checksum.sha512
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  golang >= 1.25
+BuildRequires:  golang >= 1.26
 
 Requires:       createrepo_c
 
@@ -109,7 +109,7 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
-* Tue Apr 21 2026 Anton Novojilov <andy@essentialkaos.com> - 3.6.0-0
+* Fri Nov 13 2026 Anton Novojilov <andy@essentialkaos.com> - 3.6.0-0
 - Migrated to ek.v14
 - Dependencies update
 
